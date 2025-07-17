@@ -93,3 +93,72 @@ export interface NavItem {
   href: string;
   isActive?: boolean;
 }
+
+export interface Robot {
+  id: string;
+  name: string;
+  manufacturer: string;
+  imageUrl?: string;
+  description: string;
+  specifications: {
+    height: string;
+    weight: string;
+    batteryLife?: string;
+    speed?: string;
+    payload?: string;
+  };
+  features: string[];
+  developmentStatus: RobotStatus;
+  category: RobotCategory;
+  releaseYear?: number;
+  price?: {
+    amount: number;
+    currency: string;
+    availability: string;
+  };
+  applications: string[];
+  technicalSpecs?: {
+    sensors?: string[];
+    actuators?: string[];
+    connectivity?: string[];
+    operatingSystem?: string;
+  };
+}
+
+export type RobotStatus = 
+  | 'concept'
+  | 'prototype'
+  | 'development'
+  | 'testing'
+  | 'production'
+  | 'commercial'
+  | 'discontinued';
+
+export type RobotCategory = 
+  | 'industrial'
+  | 'domestic'
+  | 'research'
+  | 'military'
+  | 'healthcare'
+  | 'entertainment'
+  | 'service';
+
+export interface RobotFilterOptions {
+  manufacturer?: string;
+  category?: RobotCategory;
+  status?: RobotStatus;
+  priceRange?: {
+    min?: number;
+    max?: number;
+  };
+  features?: string[];
+  sortBy: RobotSortOption;
+}
+
+export type RobotSortOption = 
+  | 'name'
+  | 'manufacturer'
+  | 'releaseYear'
+  | 'price'
+  | 'height'
+  | 'weight';
