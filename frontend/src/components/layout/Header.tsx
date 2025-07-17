@@ -2,16 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { NavItem } from '@/lib/types';
 
 const navigationItems: NavItem[] = [
-  { label: '홈', href: '/', isActive: true },
+  { label: '홈', href: '/' },
   { label: '로봇 정보', href: '/robots' },
   { label: '커뮤니티', href: '/community' },
   { label: '기업 & 주가', href: '/companies' },
 ];
 
 export default function Header() {
+  const pathname = usePathname();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,32 +23,34 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* 로고 */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <div className="text-2xl font-bold text-blue-600">🤖</div>
             <span className="text-xl font-bold text-gray-900">Robovers</span>
           </Link>
 
           {/* 데스크톱 내비게이션 */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-sm font-medium transition-colors hover:text-blue-600 ${
-                  item.isActive 
-                    ? 'text-blue-600 border-b-2 border-blue-600 pb-1' 
-                    : 'text-gray-700'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="hidden md:flex flex-1 items-center justify-center mx-4 lg:mx-8">
+            <div className="flex items-center gap-2 md:gap-4 lg:gap-8 xl:gap-10">
+              {navigationItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors hover:text-blue-600 px-3 lg:px-4 py-2 whitespace-nowrap ${
+                    pathname === item.href 
+                      ? 'text-blue-600 border-b-2 border-blue-600' 
+                      : 'text-gray-700'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           </nav>
 
           {/* 검색바 */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center gap-2 lg:gap-4 flex-shrink-0">
             <div className={`relative transition-all duration-200 ${
-              isSearchFocused ? 'w-80' : 'w-64'
+              isSearchFocused ? 'w-64 lg:w-80' : 'w-48 lg:w-64'
             }`}>
               <input
                 type="text"
@@ -75,11 +79,11 @@ export default function Header() {
             </div>
 
             {/* 로그인/회원가입 버튼 */}
-            <div className="flex items-center space-x-2">
-              <button className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors">
+            <div className="flex items-center gap-2">
+              <button className="px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap">
                 로그인
               </button>
-              <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors">
+              <button className="px-3 lg:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors whitespace-nowrap">
                 회원가입
               </button>
             </div>
@@ -152,7 +156,7 @@ export default function Header() {
                     key={item.href}
                     href={item.href}
                     className={`block px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      item.isActive
+                      pathname === item.href
                         ? 'text-blue-600 bg-blue-50'
                         : 'text-gray-700 hover:bg-gray-50'
                     }`}
