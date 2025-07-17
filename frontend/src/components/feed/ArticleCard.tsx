@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Article } from '@/lib/types';
@@ -14,6 +14,11 @@ interface ArticleCardProps {
 export default function ArticleCard({ article, onLike, onBookmark }: ArticleCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const getCategoryLabel = (category: string) => {
     const labels = {
@@ -157,7 +162,11 @@ export default function ArticleCard({ article, onLike, onBookmark }: ArticleCard
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center space-x-4">
             <span className="font-medium">{article.source}</span>
-            <span>{formatPublishedDate(article.publishedAt)}</span>
+            {isClient ? (
+              <span>{formatPublishedDate(article.publishedAt)}</span>
+            ) : (
+              <span suppressHydrationWarning>{article.publishedAt.toLocaleDateString('ko-KR')}</span>
+            )}
             <span>조회 {formatCount(article.viewCount)}</span>
           </div>
 
