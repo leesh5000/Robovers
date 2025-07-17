@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:15-alpine
+    container_name: robovers_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: robovers
+      POSTGRES_USER: robovers
+      POSTGRES_PASSWORD: robovers123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - robovers_network
+
+  # Redis 캐시
+  redis:
+    image: redis:7-alpine
+    container_name: robovers_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - robovers_network
+
+  # 개발 환경용 pgAdmin (옵션)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: robovers_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@robovers.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - robovers_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+  redis_data:
+  pgadmin_data:
+
+networks:
+  robovers_network:
+    driver: bridge
