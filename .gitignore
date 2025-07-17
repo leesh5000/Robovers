@@ -2,6 +2,7 @@
 node_modules/
 .pnp
 .pnp.js
+pnpm-lock.yaml
 
 # Testing
 coverage/
@@ -12,11 +13,19 @@ coverage/
 dist/
 build/
 out/
+.output/
+
+# Cache
+.cache/
+.parcel-cache/
+.turbo/
+.vite/
 
 # Misc
-.DS_Store
 *.pem
 *.log
+*.pid
+*.seed
 
 # Debug
 npm-debug.log*
@@ -27,10 +36,8 @@ lerna-debug.log*
 
 # Local env files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*.local
+*.local
 
 # IDE
 .vscode/
@@ -45,10 +52,14 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+tsconfig.tsbuildinfo
 
 # Next.js
 .next/
-out/
+next-env.d.ts
+
+# Vercel
+.vercel/
 
 # Prisma
 *.db
