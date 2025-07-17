@@ -1,0 +1,217 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 사용자 관련 모델
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  username        String   @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  profileImageUrl String?
+  bio             String?
+  role            UserRole @default(USER)
+  isActive        Boolean  @default(true)
+  emailVerified   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  posts         Post[]
+  comments      Comment[]
+  robotRatings  RobotRating[]
+  watchlist     CompanyWatchlist[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+// 로봇 정보 모델
+model Robot {
+  id              String       @id @default(uuid())
+  name            String       @unique
+  manufacturer    String
+  modelNumber     String?
+  category        RobotCategory
+  status          DevelopmentStatus
+  releaseDate     DateTime?
+  price           Float?
+  description     String
+  imageUrl        String?
+  specifications  Json         // 상세 사양을 JSON으로 저장
+  features        String[]     // 주요 기능 목록
+  applications    String[]     // 활용 분야
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // 관계
+  ratings         RobotRating[]
+  posts           Post[]       @relation("RobotPosts")
+
+  @@map("robots")
+}
+
+enum RobotCategory {
+  HUMANOID
+  SERVICE
+  INDUSTRIAL
+  MEDICAL
+  EDUCATIONAL
+  ENTERTAINMENT
+  RESEARCH
+}
+
+enum DevelopmentStatus {
+  CONCEPT
+  PROTOTYPE
+  TESTING
+  PRODUCTION
+  COMMERCIAL
+  DISCONTINUED
+}
+
+// 로봇 평가 모델
+model RobotRating {
+  id        String   @id @default(uuid())
+  rating    Int      // 1-5
+  review    String?
+  userId    String
+  robotId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 관계
+  user      User     @relation(fields: [userId], references: [id])
+  robot     Robot    @relation(fields: [robotId], references: [id])
+
+  @@unique([userId, robotId])
+  @@map("robot_ratings")
+}
+
+// 커뮤니티 게시글 모델
+model Post {
+  id            String       @id @default(uuid())
+  title         String
+  content       String
+  category      PostCategory
+  viewCount     Int          @default(0)
+  likeCount     Int          @default(0)
+  isPublished   Boolean      @default(true)
+  isPinned      Boolean      @default(false)
+  authorId      String
+  robotId       String?      // 관련 로봇 (선택)
+  tags          String[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // 관계
+  author        User         @relation(fields: [authorId], references: [id])
+  robot         Robot?       @relation("RobotPosts", fields: [robotId], references: [id])
+  comments      Comment[]
+
+  @@map("posts")
+}
+
+enum PostCategory {
+  NEWS
+  DISCUSSION
+  QUESTION
+  TUTORIAL
+  REVIEW
+  ANALYSIS
+}
+
+// 댓글 모델
+model Comment {
+  id        String   @id @default(uuid())
+  content   String
+  postId    String
+  authorId  String
+  parentId  String?  // 대댓글을 위한 부모 댓글 ID
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 관계
+  post      Post     @relation(fields: [postId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+// 기업 정보 모델
+model Company {
+  id              String   @id @default(uuid())
+  name            String   @unique
+  symbol          String   @unique // 주식 심볼
+  description     String
+  website         String?
+  foundedYear     Int?
+  headquarters    String?
+  employeeCount   Int?
+  marketCap       Float?
+  logoUrl         String?
+  industry        String
+  sector          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // 관계
+  stockPrices     StockPrice[]
+  watchlists      CompanyWatchlist[]
+
+  @@map("companies")
+}
+
+// 주가 정보 모델
+model StockPrice {
+  id          String   @id @default(uuid())
+  companyId   String
+  date        DateTime
+  open        Float
+  high        Float
+  low         Float
+  close       Float
+  volume      BigInt
+  change      Float    // 변동률
+  changePercent Float  // 변동 퍼센트
+  createdAt   DateTime @default(now())
+
+  // 관계
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, date])
+  @@map("stock_prices")
+}
+
+// 사용자 관심 기업 목록
+model CompanyWatchlist {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String
+  createdAt DateTime @default(now())
+
+  // 관계
+  user      User     @relation(fields: [userId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  @@unique([userId, companyId])
+  @@map("company_watchlists")
+}
