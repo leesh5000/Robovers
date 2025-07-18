@@ -1,13 +1,9 @@
-import Header from '@/components/layout/Header';
 import MainFeed from '@/components/feed/MainFeed';
 import Sidebar from '@/components/layout/Sidebar';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <Header />
-      
+    <>
       {/* 메인 콘텐츠 */}
       <main className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -83,6 +79,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </div>
+    </>
   )
 }
