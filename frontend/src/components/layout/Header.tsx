@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { NavItem } from '@/lib/types';
 
 const navigationItems: NavItem[] = [
@@ -14,6 +15,7 @@ const navigationItems: NavItem[] = [
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -37,7 +39,7 @@ export default function Header() {
                   href={item.href}
                   className={`text-sm font-medium transition-colors hover:text-blue-600 px-3 lg:px-4 py-2 whitespace-nowrap ${
                     pathname === item.href 
-                      ? 'text-blue-600 border-b-2 border-blue-600' 
+                      ? 'text-blue-600 border-b-[3px] border-blue-600' 
                       : 'text-gray-700'
                   }`}
                 >
@@ -80,10 +82,14 @@ export default function Header() {
 
             {/* 로그인/회원가입 버튼 */}
             <div className="flex items-center gap-2">
-              <button className="px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap">
+              <button 
+                onClick={() => router.push('/login')}
+                className="px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap">
                 로그인
               </button>
-              <button className="px-3 lg:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors whitespace-nowrap">
+              <button 
+                onClick={() => router.push('/signup')}
+                className="px-3 lg:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors whitespace-nowrap">
                 회원가입
               </button>
             </div>
@@ -169,10 +175,20 @@ export default function Header() {
 
               {/* 모바일 로그인/회원가입 */}
               <div className="flex space-x-2 px-4">
-                <button className="flex-1 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <button 
+                  onClick={() => {
+                    router.push('/login');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex-1 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                   로그인
                 </button>
-                <button className="flex-1 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                <button 
+                  onClick={() => {
+                    router.push('/signup');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex-1 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
                   회원가입
                 </button>
               </div>
