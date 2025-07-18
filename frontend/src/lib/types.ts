@@ -60,6 +60,47 @@ export interface Company {
   changeAmount: number;
   logoUrl?: string;
   marketCap?: number;
+  description?: string;
+  foundedYear?: number;
+  country?: string;
+  employeeCount?: number;
+  isPublic: boolean;
+  mainProducts?: string[];
+  robotProjects?: string[];
+  website?: string;
+  sector?: CompanySector;
+}
+
+export interface StockPriceHistory {
+  date: Date;
+  price: number;
+  volume?: number;
+}
+
+export type CompanySector = 
+  | 'robotics'
+  | 'automotive'
+  | 'technology'
+  | 'defense'
+  | 'research'
+  | 'consumer';
+
+export type CompanySortOption = 
+  | 'name'
+  | 'marketCap'
+  | 'changePercent'
+  | 'country'
+  | 'employeeCount';
+
+export interface CompanyFilterOptions {
+  sector?: CompanySector;
+  country?: string;
+  isPublic?: boolean;
+  marketCapRange?: {
+    min?: number;
+    max?: number;
+  };
+  sortBy: CompanySortOption;
 }
 
 export type ArticleCategory = 
