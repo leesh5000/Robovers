@@ -32,9 +32,9 @@ export default function LoginForm() {
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-8" onSubmit={handleSubmit(onSubmit)}>
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="email" className="block text-base font-medium text-gray-700">
           이메일
         </label>
         <input
@@ -47,7 +47,7 @@ export default function LoginForm() {
           })}
           type="email"
           autoComplete="email"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+          className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -55,7 +55,7 @@ export default function LoginForm() {
       </div>
 
       <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="password" className="block text-base font-medium text-gray-700">
           비밀번호
         </label>
         <div className="mt-1 relative">
@@ -65,7 +65,7 @@ export default function LoginForm() {
             })}
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm pr-10"
+            className="block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:shadow-lg text-base py-3 px-4 pr-12 transition-all duration-200"
           />
           <button
             type="button"
@@ -113,7 +113,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? '처리 중...' : '로그인'}
         </button>

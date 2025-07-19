@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { NavItem } from '@/lib/types';
+import { useAuthStore } from '@/stores/authStore';
 
 const navigationItems: NavItem[] = [
   { label: '홈', href: '/' },
@@ -16,6 +17,7 @@ const navigationItems: NavItem[] = [
 export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user, isAuthenticated, logout } = useAuthStore();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -82,16 +84,36 @@ export default function Header() {
 
             {/* 로그인/회원가입 버튼 */}
             <div className="flex items-center gap-2">
-              <button 
-                onClick={() => router.push('/login')}
-                className="px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap">
-                로그인
-              </button>
-              <button 
-                onClick={() => router.push('/signup')}
-                className="px-3 lg:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors whitespace-nowrap">
-                회원가입
-              </button>
+              {isAuthenticated && user ? (
+                <>
+                  <button
+                    onClick={() => router.push('/profile')}
+                    className="px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap">
+                    {user.nickname}님
+                  </button>
+                  <button 
+                    onClick={() => {
+                      logout();
+                      router.push('/');
+                    }}
+                    className="px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap">
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => router.push('/login')}
+                    className="px-3 lg:px-4 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors whitespace-nowrap">
+                    로그인
+                  </button>
+                  <button 
+                    onClick={() => router.push('/signup')}
+                    className="px-3 lg:px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 transition-colors whitespace-nowrap">
+                    회원가입
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -174,23 +196,47 @@ export default function Header() {
               </nav>
 
               {/* 모바일 로그인/회원가입 */}
-              <div className="flex space-x-2 px-4">
-                <button 
-                  onClick={() => {
-                    router.push('/login');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex-1 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                  로그인
-                </button>
-                <button 
-                  onClick={() => {
-                    router.push('/signup');
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex-1 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
-                  회원가입
-                </button>
+              <div className="space-y-2 px-4">
+                {isAuthenticated && user ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        router.push('/profile');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                      {user.nickname}님 - 내 정보
+                    </button>
+                    <button 
+                      onClick={() => {
+                        logout();
+                        router.push('/');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="w-full py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                      로그아웃
+                    </button>
+                  </>
+                ) : (
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => {
+                        router.push('/login');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex-1 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                      로그인
+                    </button>
+                    <button 
+                      onClick={() => {
+                        router.push('/signup');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex-1 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                      회원가입
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

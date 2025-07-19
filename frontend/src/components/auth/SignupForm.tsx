@@ -64,7 +64,7 @@ export default function SignupForm() {
           })}
           type="text"
           autoComplete="nickname"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base py-3 px-4"
+          className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"
         />
         {errors.nickname && (
           <p className="mt-1 text-sm text-red-600">{errors.nickname.message}</p>
@@ -88,7 +88,7 @@ export default function SignupForm() {
           })}
           type="email"
           autoComplete="email"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base py-3 px-4"
+          className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -119,7 +119,7 @@ export default function SignupForm() {
             })}
             type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base py-3 px-4 pr-12"
+            className="block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:shadow-lg text-base py-3 px-4 pr-12 transition-all duration-200"
           />
           <button
             type="button"
@@ -156,7 +156,7 @@ export default function SignupForm() {
           })}
           type={showPassword ? 'text' : 'password'}
           autoComplete="new-password"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base py-3 px-4"
+          className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"
         />
         {errors.confirmPassword && (
           <p className="mt-1 text-sm text-red-600">{errors.confirmPassword.message}</p>
