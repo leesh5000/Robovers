@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import RobotGrid from '@/components/robot/RobotGrid';
 import { Robot } from '@/lib/types';
 
@@ -228,9 +229,10 @@ const mockRobots: Robot[] = [
 ];
 
 export default function RobotsPage() {
+  const router = useRouter();
+
   const handleRobotClick = (robot: Robot) => {
-    console.log('Robot clicked:', robot);
-    // 추후 로봇 상세 페이지로 이동하는 로직 구현
+    router.push(`/robots/${robot.id}`);
   };
 
   return (

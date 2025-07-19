@@ -1,4 +1,4 @@
-import { CommunityPost, User, Company } from './types';
+import { CommunityPost, User, Company, Comment } from './types';
 
 // 더미 사용자 데이터
 const dummyUsers: User[] = [
@@ -440,4 +440,99 @@ export function getDummyCompanies(): Company[] {
 
 export function getDummyCompanyById(id: string): Company | undefined {
   return dummyCompanies.find(company => company.id === id);
+}
+
+// 더미 댓글 데이터
+const generateDummyComments = (postId: string): Comment[] => {
+  const baseComments: Omit<Comment, 'id' | 'createdAt'>[] = [
+    {
+      content: '정말 흥미로운 내용이네요! Tesla의 Optimus가 실제로 상용화되면 우리 생활이 많이 바뀔 것 같아요.',
+      author: dummyUsers[1],
+      likeCount: 12,
+      isLiked: false,
+    },
+    {
+      content: '기술적으로 아직 해결해야 할 과제들이 많을 것 같은데, 특히 배터리 지속시간과 안전성 부분이 중요할 것 같습니다.',
+      author: dummyUsers[2],
+      likeCount: 8,
+      isLiked: true,
+    },
+    {
+      content: '가격이 정말 중요한 요소인 것 같아요. 2만 달러면 일반 가정에서도 구매할 수 있는 수준이네요.',
+      author: dummyUsers[3],
+      likeCount: 15,
+      isLiked: false,
+    },
+    {
+      content: '보스턴 다이나믹스의 Atlas와 비교했을 때 어떤 장단점이 있을까요?',
+      author: dummyUsers[4],
+      likeCount: 5,
+      isLiked: false,
+    },
+    {
+      content: '휴머노이드 로봇의 윤리적 문제도 함께 논의되어야 할 것 같습니다. 일자리 대체 문제 등...',
+      author: dummyUsers[0],
+      likeCount: 23,
+      isLiked: true,
+    },
+  ];
+
+  const replies: Omit<Comment, 'id' | 'createdAt'>[] = [
+    {
+      content: '맞습니다! 특히 제조업에서의 활용도가 높을 것 같아요.',
+      author: dummyUsers[0],
+      likeCount: 3,
+      isLiked: false,
+    },
+    {
+      content: '안전성 문제는 정말 중요하죠. ISO 표준 같은 것들이 필요할 것 같아요.',
+      author: dummyUsers[1],
+      likeCount: 7,
+      isLiked: false,
+    },
+    {
+      content: 'Atlas는 운동성능이, Optimus는 실용성이 더 좋은 것 같아요.',
+      author: dummyUsers[2],
+      likeCount: 4,
+      isLiked: true,
+    },
+  ];
+
+  // 메인 댓글들 생성
+  const comments: Comment[] = baseComments.map((comment, index) => ({
+    ...comment,
+    id: `comment-${postId}-${index + 1}`,
+    createdAt: new Date(Date.now() - (index + 1) * 2 * 60 * 60 * 1000), // 2시간씩 차이
+  }));
+
+  // 첫 번째와 세 번째 댓글에 답글 추가
+  comments[0].replies = [
+    {
+      ...replies[0],
+      id: `reply-${postId}-1-1`,
+      createdAt: new Date(Date.now() - 1.5 * 60 * 60 * 1000),
+      parentId: comments[0].id,
+    },
+  ];
+
+  comments[2].replies = [
+    {
+      ...replies[1],
+      id: `reply-${postId}-3-1`,
+      createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+      parentId: comments[2].id,
+    },
+    {
+      ...replies[2],
+      id: `reply-${postId}-3-2`,
+      createdAt: new Date(Date.now() - 2.5 * 60 * 60 * 1000),
+      parentId: comments[2].id,
+    },
+  ];
+
+  return comments;
+};
+
+export function getDummyComments(postId: string): Comment[] {
+  return generateDummyComments(postId);
 }
