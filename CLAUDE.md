@@ -32,8 +32,13 @@ docker-compose up -d
 ### Testing
 
 ```bash
-# Run all tests
+# Run all tests (unit + integration)
 pnpm test
+
+# Run specific test types
+pnpm --filter @robovers/backend test:int        # Integration tests only
+pnpm --filter @robovers/backend test:all        # Unit + Integration tests
+pnpm --filter @robovers/backend test:e2e        # E2E tests (in test/e2e/)
 
 # Run tests in watch mode
 pnpm --filter @robovers/backend test:watch
@@ -41,9 +46,14 @@ pnpm --filter @robovers/frontend test:watch
 
 # Run tests with coverage
 pnpm --filter @robovers/backend test:cov
+pnpm --filter @robovers/frontend test:coverage
 
-# Run E2E tests
-pnpm --filter @robovers/backend test:e2e
+# Run single test file
+pnpm --filter @robovers/backend test -- user.entity.spec.ts
+pnpm --filter @robovers/frontend test -- ArticleCard.test.tsx
+
+# Debug tests
+pnpm --filter @robovers/backend test:debug
 ```
 
 ### Database Management
@@ -97,45 +107,102 @@ pnpm --filter @robovers/frontend start
 
 ### Backend - Hexagonal Architecture
 
-The backend follows hexagonal architecture with clear separation of concerns:
+The backend follows hexagonal architecture with Domain-Driven Design (DDD) patterns:
 
 ```text
 backend/src/
 ├── modules/                 # Feature modules
 │   ├── user/
-│   │   ├── domain/         # Domain entities, value objects
-│   │   ├── application/    # Use cases, DTOs
-│   │   ├── infrastructure/ # Repository implementations, external services
-│   │   └── presentation/   # Controllers, request/response DTOs
-│   ├── robot/
-│   ├── community/
-│   └── stock/
-├── common/                 # Shared utilities, guards, filters
-└── config/                # Configuration modules
+│   │   ├── domain/
+│   │   │   ├── entities/           # Domain entities (User, EmailVerification)
+│   │   │   ├── value-objects/      # Value objects (Email, Password, Nickname)
+│   │   │   ├── repositories/       # Repository interfaces (ports)
+│   │   │   ├── factories/          # Entity factories
+│   │   │   └── exceptions/         # Domain-specific exceptions
+│   │   ├── application/
+│   │   │   ├── use-cases/          # Business use cases
+│   │   │   └── services/           # Application service interfaces
+│   │   ├── infrastructure/
+│   │   │   ├── persistence/
+│   │   │   │   ├── prisma/         # Prisma repository implementations
+│   │   │   │   └── mappers/        # Domain-DB mapping
+│   │   │   ├── services/           # External service implementations
+│   │   │   ├── auth/               # JWT strategy, guards
+│   │   │   └── config/             # Module configuration
+│   │   ├── presentation/
+│   │   │   ├── controllers/        # REST controllers
+│   │   │   ├── dtos/               # Request/response DTOs
+│   │   │   ├── decorators/         # Custom decorators
+│   │   │   └── validators/         # Input validation
+│   │   └── test/
+│   │       ├── unit/               # Domain & application layer tests
+│   │       ├── integration/        # Infrastructure layer tests
+│   │       ├── e2e/                # End-to-end tests
+│   │       └── fakes/              # Test doubles & fake implementations
+├── common/                         # Shared utilities (Prisma, Snowflake ID)
+└── main.ts                        # Application bootstrap
 ```
 
-Key principles:
+**Key DDD Patterns Implemented:**
 
-- Domain logic is isolated from infrastructure
-- Dependencies point inward (infrastructure → application → domain)
-- Use ports (interfaces) and adapters pattern
-- Each module is self-contained with its own layers
+- **Entities**: Rich domain objects with business logic and invariants
+- **Value Objects**: Immutable objects representing descriptive aspects (Email, Password)
+- **Factories**: Object creation with complex business rules
+- **Repositories**: Data access abstraction with mapper pattern
+- **Use Cases**: Application-specific business rules
+- **Domain Exceptions**: Business rule violations expressed as exceptions
+
+**Dependency Direction:**
+- Infrastructure → Application → Domain
+- All dependencies point inward
+- Domain layer has no external dependencies
+- Infrastructure implements domain interfaces
 
 ### Frontend - Component Architecture
 
-The frontend uses Next.js 14 App Router with component-based architecture:
+The frontend uses Next.js 14 App Router with feature-based component organization:
 
 ```text
 frontend/src/
-├── app/                    # Next.js app directory (pages, layouts)
-├── components/            
-│   ├── ui/                # Reusable UI components
-│   ├── features/          # Feature-specific components
-│   └── layout/           # Layout components
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utilities, types, API clients
-└── services/             # API service layer
+├── app/                            # Next.js app directory
+│   ├── (routes)/                   # Route groups
+│   ├── admin/                      # Admin panel routes
+│   ├── community/[id]/             # Dynamic community post routes
+│   ├── robots/[id]/                # Dynamic robot detail routes
+│   └── globals.css                 # Global styles
+├── components/
+│   ├── ui/                         # Reusable UI components
+│   │   ├── Dropdown.tsx            # Custom dropdown with keyboard nav
+│   │   └── Pagination.tsx          # Reusable pagination
+│   ├── auth/                       # Authentication components
+│   ├── community/                  # Community feature components
+│   │   ├── PostDetail.tsx          # Post detail with comments
+│   │   ├── CommentList.tsx         # Comment system with replies
+│   │   └── CategoryFilter.tsx      # Category filtering
+│   ├── robot/                      # Robot information components
+│   │   ├── RobotDetail.tsx         # Detailed robot specifications
+│   │   └── RobotGrid.tsx           # Robot listing with filters
+│   ├── feed/                       # News feed components
+│   ├── layout/                     # Layout and navigation
+│   └── admin/                      # Admin panel components
+├── hooks/                          # Custom React hooks
+│   └── useInfiniteScroll.ts        # Infinite scroll implementation
+├── lib/
+│   ├── api/                        # API client functions
+│   ├── types.ts                    # TypeScript type definitions
+│   ├── dummy-data.ts               # Mock data for development
+│   └── validation.ts               # Form validation utilities
+├── stores/                         # Zustand state management
+└── middleware.ts                   # Next.js middleware
 ```
+
+**Key Frontend Patterns:**
+
+- **Custom UI Components**: Consistent design system with Dropdown, Pagination
+- **Feature-Based Organization**: Components grouped by business domain
+- **Mock Data Strategy**: Comprehensive dummy data for offline development
+- **State Management**: Zustand for global state, TanStack Query for server state
+- **Type Safety**: Comprehensive TypeScript interfaces for all data structures
 
 ## Development Methodology
 
@@ -225,15 +292,144 @@ Required environment variables:
 - `JWT_SECRET`: JWT token secret
 - `FRONTEND_URL`: Frontend URL for CORS
 
-## Docker Environment
+## Development Workflow
 
-Services available via Docker Compose:
+### Service Ports & URLs
 
-- PostgreSQL (port 5432)
-- Redis (port 6379)
-- pgAdmin (port 8080)
+**Development Services:**
+- Frontend: `http://localhost:4000` (Next.js)
+- Backend API: `http://localhost:4010/api` (NestJS)
+- API Documentation: `http://localhost:4010/api/docs` (Swagger)
 
-Always ensure Docker services are running during development.
+**Infrastructure Services:**
+- PostgreSQL: `localhost:5432`
+- Redis: `localhost:6379` 
+- pgAdmin: `http://localhost:8080`
+
+### Docker Environment
+
+```bash
+# Start all infrastructure services
+docker-compose up -d
+
+# Check service status
+docker-compose ps
+
+# View logs
+docker-compose logs postgres
+docker-compose logs redis
+
+# Stop services
+docker-compose down
+```
+
+**Default Database Credentials:**
+- Database: `robovers`
+- Username: `robovers`
+- Password: `robovers123`
+
+**pgAdmin Access:**
+- Email: `admin@robovers.com`
+- Password: `admin123`
+
+### Development Prerequisites
+
+1. **Start Infrastructure:**
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Install Dependencies:**
+   ```bash
+   pnpm install
+   ```
+
+3. **Database Setup:**
+   ```bash
+   pnpm --filter @robovers/backend prisma:generate
+   pnpm --filter @robovers/backend prisma:migrate:dev
+   ```
+
+4. **Start Development Servers:**
+   ```bash
+   pnpm dev  # Both frontend and backend
+   # OR separately:
+   pnpm --filter @robovers/backend dev
+   pnpm --filter @robovers/frontend dev
+   ```
+
+## TypeScript Configuration & Path Mapping
+
+### Backend Path Mapping
+```typescript
+// Backend imports use @ prefixes (configured in tsconfig.json)
+import { UserEntity } from '@/modules/user/domain/entities/user.entity';
+import { EmailService } from '@/modules/user/application/services/email.service.interface';
+```
+
+### Frontend Path Mapping
+```typescript
+// Frontend imports use @ prefix for src directory
+import { Button } from '@/components/ui/Button';
+import { PostDetail } from '@/components/community/PostDetail';
+import { UserType } from '@/lib/types';
+```
+
+### Mock Data Development
+
+The frontend includes comprehensive mock data for offline development:
+
+```typescript
+// Use dummy data functions for development
+import { getDummyPosts, getDummyComments } from '@/lib/dummy-data';
+
+// Mock data includes:
+// - Community posts with realistic content
+// - User profiles with Korean names
+// - Robot specifications and features
+// - Company information and stock data
+// - Comment threads with nested replies
+```
+
+## Debugging & Troubleshooting
+
+### Common Development Issues
+
+**Port Conflicts:**
+- Frontend default port changed to 4000 (not 3000)
+- Backend API runs on 4010 with `/api` prefix
+- Always check `docker-compose ps` for service status
+
+**Database Connection Issues:**
+```bash
+# Restart database container
+docker-compose restart postgres
+
+# Check database logs
+docker-compose logs postgres
+
+# Reset database (development only)
+docker-compose down -v
+docker-compose up -d
+pnpm --filter @robovers/backend prisma:migrate:dev
+```
+
+**Testing Issues:**
+```bash
+# Integration tests require TestContainers
+# Ensure Docker is running before running integration tests
+pnpm --filter @robovers/backend test:int
+
+# For debugging failing tests
+pnpm --filter @robovers/backend test:debug
+```
+
+### Korean Development Context
+
+- **Commit Messages**: Use Korean for commit messages following the template
+- **UI Text**: All user-facing text is in Korean
+- **Error Messages**: Provide Korean error messages for user-facing errors
+- **Data Modeling**: Consider Korean text encoding in database fields
 
 ## Code Quality Standards
 
@@ -243,6 +439,7 @@ Always ensure Docker services are running during development.
 4. **Type safety**: Leverage TypeScript for type safety
 5. **Error handling**: Always handle errors appropriately
 6. **Performance**: Consider performance implications, especially for lists and real-time features
+7. **Consistent UI**: Use custom Dropdown and UI components instead of native HTML elements
 
 ## Feedback Loop
 
