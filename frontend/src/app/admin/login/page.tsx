@@ -37,6 +37,7 @@ export default function AdminLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login attempt with:', { email: formData.email });
     
     // 유효성 검사
     const newErrors: Record<string, string> = {};
@@ -52,20 +53,27 @@ export default function AdminLoginPage() {
     }
     
     if (Object.keys(newErrors).length > 0) {
+      console.log('Validation errors:', newErrors);
       setErrors(newErrors);
       return;
     }
     
     setIsLoading(true);
+    setErrors({}); // Clear previous errors
+    console.log('Starting login process...');
     
     // 임시 관리자 로그인 처리
     setTimeout(() => {
       // 테스트용 관리자 계정
       if (formData.email === 'admin@robovers.com' && formData.password === 'Admin1234!') {
+        console.log('Login successful! Redirecting to admin page...');
         // 쿠키에 임시 토큰 설정
         document.cookie = 'admin-token=temp-admin-token; path=/';
+        // 성공 메시지 표시
+        alert('로그인 성공! 관리자 페이지로 이동합니다.');
         router.push('/admin');
       } else {
+        console.log('Login failed: Invalid credentials');
         setErrors({ email: '이메일 또는 비밀번호가 올바르지 않습니다' });
         setIsLoading(false);
       }
@@ -73,17 +81,17 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2">
             <div className="text-4xl font-bold text-blue-500">🤖</div>
-            <span className="text-3xl font-bold text-white">Robovers</span>
+            <span className="text-3xl font-bold text-gray-900">Robovers</span>
           </Link>
-          <h2 className="mt-6 text-3xl font-extrabold text-white">
+          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             관리자 로그인
           </h2>
-          <p className="mt-2 text-sm text-gray-400">
+          <p className="mt-2 text-sm text-gray-600">
             관리자 권한이 있는 계정으로 로그인하세요
           </p>
         </div>
@@ -92,7 +100,7 @@ export default function AdminLoginPage() {
           <div className="rounded-md shadow-sm space-y-4">
             {/* 이메일 */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 이메일
               </label>
               <input
@@ -104,8 +112,8 @@ export default function AdminLoginPage() {
                 value={formData.email}
                 onChange={handleChange}
                 className={`appearance-none relative block w-full px-3 py-2 border ${
-                  errors.email ? 'border-red-500' : 'border-gray-600'
-                } placeholder-gray-500 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                  errors.email ? 'border-red-500' : 'border-gray-300'
+                } placeholder-gray-400 text-gray-900 bg-white rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                 placeholder="admin@robovers.com"
               />
               {errors.email && (
@@ -115,7 +123,7 @@ export default function AdminLoginPage() {
 
             {/* 비밀번호 */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 비밀번호
               </label>
               <div className="relative">
@@ -128,8 +136,8 @@ export default function AdminLoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${
-                    errors.password ? 'border-red-500' : 'border-gray-600'
-                  } placeholder-gray-500 text-white bg-gray-800 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
+                    errors.password ? 'border-red-500' : 'border-gray-300'
+                  } placeholder-gray-400 text-gray-900 bg-white rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm`}
                   placeholder="비밀번호"
                 />
                 <button
@@ -137,7 +145,7 @@ export default function AdminLoginPage() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     {showPassword ? (
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     ) : (
@@ -163,9 +171,9 @@ export default function AdminLoginPage() {
           </div>
 
           {/* 테스트 계정 안내 */}
-          <div className="mt-6 p-4 bg-gray-800 rounded-lg border border-gray-700">
-            <p className="text-sm text-gray-300">
-              <strong className="text-white">테스트 관리자 계정:</strong><br />
+          <div className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
+            <p className="text-sm text-gray-600">
+              <strong className="text-gray-900">테스트 관리자 계정:</strong><br />
               이메일: admin@robovers.com<br />
               비밀번호: Admin1234!
             </p>
@@ -174,7 +182,7 @@ export default function AdminLoginPage() {
           <div className="text-center">
             <Link
               href="/"
-              className="text-sm text-gray-400 hover:text-gray-300"
+              className="text-sm text-gray-600 hover:text-gray-900"
             >
               ← 메인 사이트로 돌아가기
             </Link>
