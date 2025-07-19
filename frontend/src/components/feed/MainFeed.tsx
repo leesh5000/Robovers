@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Article, FilterOptions, SortOption } from '@/lib/types';
 import ArticleCard from './ArticleCard';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 interface MainFeedProps {
   initialArticles?: Article[];
@@ -15,78 +18,96 @@ interface MainFeedProps {
 const mockArticles: Article[] = [
   {
     id: '1',
-    title: 'OpenAI의 새로운 휴머노이드 로봇 "Figure-01" 공개',
-    content: '인공지능 선도기업 OpenAI가 휴머노이드 로봇 Figure-01을 공개했습니다...',
-    excerpt: 'OpenAI가 Figure AI와 협력하여 개발한 휴머노이드 로봇이 일반 작업 환경에서 자연스럽게 대화하며 작업을 수행하는 모습을 선보였습니다.',
-    imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&h=400&fit=crop',
-    author: '로봇 뉴스팀',
-    source: 'TechCrunch',
+    title: '엔비디아, 휴머노이드 로봇 전용 AI 칩 "Thor" 공개... 연산 성능 800% 향상',
+    content: '엔비디아가 CES 2025에서 휴머노이드 로봇 전용으로 설계된 새로운 AI 칩 "Thor"를 공개했습니다. 이 칩은 기존 제품 대비 8배 향상된 연산 성능을 자랑하며, 실시간 환경 인식과 자연스러운 움직임 생성을 동시에 처리할 수 있습니다...',
+    excerpt: '엔비디아가 휴머노이드 로봇의 두뇌 역할을 할 차세대 AI 칩을 발표했습니다. Figure, Tesla, Agility Robotics 등 주요 로봇 기업들이 이미 채택을 확정했습니다.',
+    imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&h=400&fit=crop',
+    author: '이준호 기자',
+    source: 'Reuters',
     publishedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
     category: 'news',
-    tags: ['OpenAI', 'Figure AI', '휴머노이드', '인공지능'],
-    viewCount: 1250,
-    likeCount: 89,
-    commentCount: 23,
+    tags: ['엔비디아', 'AI칩', 'Thor', '휴머노이드', 'CES2025'],
+    viewCount: 15420,
+    likeCount: 892,
+    commentCount: 234,
     isBookmarked: false
   },
   {
     id: '2',
-    title: '테슬라 옵티머스, 공장 자동화에서 첫 실전 투입',
-    content: '테슬라의 휴머노이드 로봇 옵티머스가 실제 생산 공장에서...',
-    excerpt: '테슬라가 자사 공장에서 옵티머스 로봇을 활용한 자동화 시스템을 본격 가동하기 시작했다고 발표했습니다.',
-    imageUrl: 'https://images.unsplash.com/photo-1527515862127-a4fc05baf7a5?w=600&h=400&fit=crop',
-    author: '김테크',
-    source: 'Tesla Blog',
+    title: '현대차-보스턴다이나믹스, 아마존 물류센터에 로봇 1만대 공급 계약',
+    content: '현대자동차그룹이 인수한 보스턴다이나믹스가 아마존과 대규모 로봇 공급 계약을 체결했습니다. 이번 계약은 총 1만대의 물류 로봇을 3년에 걸쳐 공급하는 내용으로, 계약 규모는 약 2조원에 달합니다...',
+    excerpt: '보스턴다이나믹스의 4족 보행 로봇 "Spot"과 물류 전용 로봇 "Stretch"가 아마존의 글로벌 물류센터에 대규모로 도입됩니다.',
+    imageUrl: 'https://images.unsplash.com/photo-1563207153-f403bf289096?w=800&h=400&fit=crop',
+    author: '김민수 기자',
+    source: 'Bloomberg',
     publishedAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5시간 전
     category: 'company-update',
-    tags: ['테슬라', '옵티머스', '공장 자동화', '생산성'],
-    viewCount: 890,
-    likeCount: 67,
-    commentCount: 15,
+    tags: ['현대차', '보스턴다이나믹스', '아마존', '물류로봇', 'Spot'],
+    viewCount: 8920,
+    likeCount: 567,
+    commentCount: 145,
     isBookmarked: true
   },
   {
     id: '3',
-    title: '보스턴 다이나믹스 아틀라스, 역대급 파쿠르 영상 공개',
-    content: '보스턴 다이나믹스의 휴머노이드 로봇 아틀라스가...',
-    excerpt: '최신 버전의 아틀라스가 복잡한 장애물 코스를 뛰어넘고, 백플립까지 선보이는 놀라운 영상이 공개되었습니다.',
-    imageUrl: 'https://images.unsplash.com/photo-1516192518150-0d8fee5425e3?w=600&h=400&fit=crop',
-    author: '로봇공학연구소',
-    source: 'Boston Dynamics',
+    title: '중국 유니트리, 휴머노이드 로봇 "H1" 가격 파괴... 3천만원대 출시',
+    content: '중국의 로봇 기업 유니트리(Unitree)가 휴머노이드 로봇 H1을 3천만원대의 파격적인 가격에 출시한다고 발표했습니다. 이는 기존 휴머노이드 로봇 가격의 1/10 수준으로, 업계에 큰 충격을 주고 있습니다...',
+    excerpt: '시속 12km 달리기, 360도 비전 시스템, 자율 내비게이션 기능을 갖춘 H1이 파격적인 가격으로 시장에 진입합니다.',
+    imageUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop',
+    author: 'Sarah Chen',
+    source: 'TechCrunch',
     publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1일 전
     category: 'tech-review',
-    tags: ['보스턴다이나믹스', '아틀라스', '파쿠르', '모빌리티'],
-    viewCount: 2100,
-    likeCount: 156,
-    commentCount: 34,
+    tags: ['유니트리', 'H1', '휴머노이드', '가격파괴', '중국'],
+    viewCount: 21050,
+    likeCount: 1567,
+    commentCount: 342,
     isBookmarked: false
   },
   {
     id: '4',
-    title: 'MIT 연구진, 소프트 로보틱스 분야 획기적 발견',
-    content: 'MIT 연구팀이 새로운 소재를 활용한 소프트 로봇...',
-    excerpt: '기존 경직된 로봇과 달리 인간의 근육과 유사한 움직임을 구현할 수 있는 새로운 소프트 로보틱스 기술이 개발되었습니다.',
-    author: '과학기술부',
-    source: 'MIT News',
+    title: 'MIT-하버드 공동연구팀, 인공 근육 소재로 90% 에너지 효율 달성',
+    content: 'MIT와 하버드 대학의 공동 연구팀이 생체모방 인공 근육 소재를 개발하여 기존 모터 대비 90% 높은 에너지 효율을 달성했다고 발표했습니다. 이 기술은 차세대 휴머노이드 로봇의 핵심 부품이 될 것으로 기대됩니다...',
+    excerpt: '전기활성 폴리머를 활용한 새로운 인공 근육은 인간 근육과 유사한 수축-이완 패턴을 구현하며, 무게는 기존 모터의 1/5 수준입니다.',
+    imageUrl: 'https://images.unsplash.com/photo-1567427018141-0584cfcbf1b8?w=800&h=400&fit=crop',
+    author: 'Dr. James Wilson',
+    source: 'Nature Robotics',
     publishedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
     category: 'research',
-    tags: ['MIT', '소프트로보틱스', '생체모방', '연구'],
-    viewCount: 745,
-    likeCount: 42,
-    commentCount: 8,
+    tags: ['MIT', '하버드', '인공근육', '소프트로보틱스', '에너지효율'],
+    viewCount: 7456,
+    likeCount: 423,
+    commentCount: 89,
     isBookmarked: false
   }
 ];
 
 export default function MainFeed({ 
-  initialArticles = mockArticles, 
+  initialArticles, 
   onLoadMore, 
   isLoading = false, 
   hasMore = true 
 }: MainFeedProps) {
-  const [articles, setArticles] = useState<Article[]>(initialArticles);
+  const router = useRouter();
+  const [articles, setArticles] = useState<Article[]>(initialArticles || mockArticles);
   const [filters, setFilters] = useState<FilterOptions>({
     sortBy: 'latest'
+  });
+
+  // initialArticles가 변경될 때 articles 상태 업데이트
+  useEffect(() => {
+    if (initialArticles && initialArticles.length > 0) {
+      setArticles(initialArticles);
+    }
+  }, [initialArticles]);
+
+  // 무한 스크롤 훅 사용
+  const loadMoreRef = useInfiniteScroll({
+    onLoadMore: onLoadMore || (() => {}),
+    hasMore,
+    isLoading,
+    threshold: 0.1,
+    rootMargin: '100px',
   });
 
   const handleLike = (articleId: string) => {
@@ -103,6 +124,10 @@ export default function MainFeed({
         ? { ...article, isBookmarked: !article.isBookmarked }
         : article
     ));
+  };
+
+  const handleCardClick = (articleId: string) => {
+    router.push(`/articles/${articleId}`);
   };
 
   const handleSortChange = (sortBy: SortOption) => {
@@ -137,6 +162,14 @@ export default function MainFeed({
     return labels[sortBy];
   };
 
+  // 정렬 옵션을 드롭다운용으로 변환
+  const sortOptions: DropdownOption[] = [
+    { value: 'latest', label: '최신순' },
+    { value: 'popular', label: '인기순' },
+    { value: 'trending', label: '트렌딩' },
+    { value: 'commented', label: '댓글순' }
+  ];
+
   return (
     <div className="space-y-6">
       {/* 필터 및 정렬 헤더 */}
@@ -153,16 +186,13 @@ export default function MainFeed({
         {/* 정렬 옵션 */}
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-600">정렬:</span>
-          <select
+          <Dropdown
+            options={sortOptions}
             value={filters.sortBy}
-            onChange={(e) => handleSortChange(e.target.value as SortOption)}
-            className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="latest">최신순</option>
-            <option value="popular">인기순</option>
-            <option value="trending">트렌딩</option>
-            <option value="commented">댓글순</option>
-          </select>
+            onChange={(value) => handleSortChange(value as SortOption)}
+            size="sm"
+            className="w-32"
+          />
         </div>
       </div>
 
@@ -174,6 +204,7 @@ export default function MainFeed({
             article={article}
             onLike={handleLike}
             onBookmark={handleBookmark}
+            onClick={handleCardClick}
           />
         ))}
       </div>
@@ -204,15 +235,23 @@ export default function MainFeed({
         </div>
       )}
 
-      {/* 더 보기 버튼 */}
-      {hasMore && !isLoading && (
-        <div className="flex justify-center pt-8">
-          <button
-            onClick={onLoadMore}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            더 많은 게시물 보기
-          </button>
+      {/* 무한 스크롤 트리거 요소 */}
+      {hasMore && (
+        <div 
+          ref={loadMoreRef}
+          className="flex justify-center pt-8 pb-4"
+        >
+          {!isLoading ? (
+            <div className="text-gray-500 text-sm">
+              스크롤하여 더 많은 게시물 보기
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          )}
         </div>
       )}
 

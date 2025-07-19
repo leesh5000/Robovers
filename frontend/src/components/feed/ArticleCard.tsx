@@ -43,6 +43,52 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
     return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
+  const getCategoryGradient = (category: string) => {
+    const gradients = {
+      'news': 'from-blue-400 to-blue-600',
+      'tech-review': 'from-green-400 to-green-600',
+      'company-update': 'from-purple-400 to-purple-600',
+      'research': 'from-orange-400 to-orange-600',
+      'innovation': 'from-red-400 to-red-600'
+    };
+    return gradients[category as keyof typeof gradients] || 'from-gray-400 to-gray-600';
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch(category) {
+      case 'news':
+        return (
+          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+          </svg>
+        );
+      case 'tech-review':
+        return (
+          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        );
+      case 'company-update':
+        return (
+          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        );
+      case 'research':
+        return (
+          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+        );
+      default:
+        return (
+          <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        );
+    }
+  };
+
   const formatPublishedDate = (date: Date) => {
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
@@ -81,8 +127,8 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
       onClick={handleCardClick}
     >
       {/* 썸네일 이미지 */}
-      {article.imageUrl && !imageError && (
-        <div className="relative h-48 w-full overflow-hidden">
+      <div className="relative h-48 w-full overflow-hidden">
+        {article.imageUrl && !imageError ? (
           <Link href={`/articles/${article.id}`}>
             <Image
               src={article.imageUrl}
@@ -98,50 +144,64 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
               }}
             />
           </Link>
-          
-          {/* 카테고리 배지 */}
-          <div className="absolute top-3 left-3">
-            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(article.category)}`}>
-              {getCategoryLabel(article.category)}
-            </span>
-          </div>
-
-          {/* 북마크 버튼 */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onBookmark?.(article.id);
-            }}
-            className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
-            aria-label="북마크"
-          >
-            <svg
-              className={`h-4 w-4 ${article.isBookmarked ? 'text-yellow-500 fill-current' : 'text-gray-600'}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-              />
-            </svg>
-          </button>
+        ) : (
+          /* 기본 이미지 */
+          <Link href={`/articles/${article.id}`}>
+            <div className={`relative h-full w-full bg-gradient-to-br ${getCategoryGradient(article.category)} hover:opacity-90 transition-opacity`}>
+              {/* 패턴 오버레이 */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="h-full w-full" style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                }}></div>
+              </div>
+              
+              {/* 아이콘과 텍스트 */}
+              <div className="relative h-full flex flex-col items-center justify-center text-white">
+                <div className="opacity-90">
+                  {getCategoryIcon(article.category)}
+                </div>
+                <p className="mt-3 text-sm font-semibold uppercase tracking-wide opacity-90">
+                  {getCategoryLabel(article.category)}
+                </p>
+              </div>
+            </div>
+          </Link>
+        )}
+        
+        {/* 카테고리 배지 */}
+        <div className="absolute top-3 left-3">
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(article.category)}`}>
+            {getCategoryLabel(article.category)}
+          </span>
         </div>
-      )}
+
+        {/* 북마크 버튼 */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onBookmark?.(article.id);
+          }}
+          className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+          aria-label="북마크"
+        >
+          <svg
+            className={`h-4 w-4 ${article.isBookmarked ? 'text-yellow-500 fill-current' : 'text-gray-600'}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+            />
+          </svg>
+        </button>
+      </div>
 
       {/* 콘텐츠 */}
       <div className="p-6">
-        {/* 카테고리 (이미지가 없는 경우) */}
-        {(!article.imageUrl || imageError) && (
-          <div className="mb-3">
-            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(article.category)}`}>
-              {getCategoryLabel(article.category)}
-            </span>
-          </div>
-        )}
 
         {/* 제목 */}
         <Link href={`/articles/${article.id}`}>

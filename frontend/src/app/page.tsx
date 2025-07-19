@@ -1,7 +1,146 @@
+'use client';
+
+import { useState, useCallback, useEffect } from 'react';
 import MainFeed from '@/components/feed/MainFeed';
 import Sidebar from '@/components/layout/Sidebar';
+import { Article } from '@/lib/types';
+
+// 현실적인 로봇 관련 데이터 풀
+const robotNewsData = {
+  titles: [
+    '삼성전자, AI 가정용 로봇 "봇 핸디" CES 2025 공개 예정',
+    '테슬라 옵티머스 Gen 2, 달걀 집기 성공... 섬세한 작업 가능',
+    '아마존, 창고 로봇 "디지트" 100만대 도입 계획 발표',
+    'Figure AI, OpenAI와 협력으로 대화형 휴머노이드 로봇 개발',
+    '소프트뱅크, 감정 인식 로봇 "페퍼" 차세대 모델 출시',
+    '구글 딥마인드, 로봇 학습용 AI 모델 "RT-2" 오픈소스 공개',
+    '현대로보틱스, 협동로봇 시장 점유율 국내 1위 달성',
+    '중국 샤오미, 휴머노이드 로봇 "사이버원" 양산 체제 돌입',
+    'LG전자, 양족 보행 로봇 "클로이" 호텔 서비스 시작',
+    '메타, VR 연동 원격 로봇 제어 기술 시연',
+    'ABB, 산업용 로봇 AI 비전 시스템 업그레이드',
+    '한국로봇산업진흥원, 2025년 로봇 산업 투자 5조원 목표',
+    '일본 혼다, ASIMO 후속 모델 개발 중단... 산업용 로봇 집중',
+    'OpenAI, 로봇 스타트업 1X에 1억 달러 추가 투자',
+    '네이버랩스, 실내 자율주행 로봇 "어라운드" 상용화',
+    '카이스트, 4족 보행 로봇 "라이보" 국제 대회 우승',
+    '우리로봇, 교육용 로봇 "알파미니" 글로벌 수출 확대',
+    '두산로보틱스, 협동로봇 누적 판매 1만대 돌파',
+    'BMW, 휴머노이드 로봇 도입으로 생산성 40% 향상',
+    '애플, 로봇 청소기 시장 진출 루머... 다이슨과 경쟁 예고'
+  ],
+  excerpts: [
+    '차세대 AI 기술을 탑재한 로봇이 일상생활에 더욱 가까워지고 있습니다.',
+    '정밀한 모터 제어와 센서 기술의 발전으로 로봇의 작업 능력이 크게 향상되었습니다.',
+    '대규모 투자와 기술 혁신으로 로봇 산업이 새로운 전환점을 맞이하고 있습니다.',
+    '인간-로봇 협업의 새로운 패러다임이 제시되며 산업 현장이 변화하고 있습니다.',
+    '최신 AI 모델의 적용으로 로봇의 학습 능력과 적응력이 획기적으로 개선되었습니다.',
+    '글로벌 기업들의 로봇 기술 경쟁이 치열해지며 혁신의 속도가 가속화되고 있습니다.',
+    '로봇 기술의 상용화가 본격화되며 일상생활 속 로봇의 역할이 확대되고 있습니다.',
+    '차세대 센서와 액추에이터 기술로 로봇의 물리적 능력이 인간 수준에 근접하고 있습니다.',
+    '로봇 산업의 생태계가 확장되며 새로운 비즈니스 모델이 등장하고 있습니다.',
+    '인공지능과 로봇 기술의 융합으로 전례 없는 혁신이 이루어지고 있습니다.'
+  ],
+  authors: [
+    '김준호 기자', '이서연 기자', '박민수 기자', '최지원 기자', '정태영 기자',
+    'Sarah Johnson', 'Michael Chen', 'Dr. Robert Kim', 'Emma Williams', 'David Park',
+    '한국로봇신문', '테크리뷰팀', 'AI 전문기자', '산업부', '국제부'
+  ],
+  sources: [
+    'Reuters', 'Bloomberg', 'TechCrunch', 'IEEE Spectrum', 'MIT Technology Review',
+    'The Verge', 'Wired', 'Forbes', 'Financial Times', 'Wall Street Journal',
+    '조선일보', '한국경제', '전자신문', 'ZDNet Korea', 'Robotics Business Review'
+  ],
+  imageUrls: [
+    'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1561144257-e32e8efc6c4f?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1546776310-eef45dd6d63c?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1555255707-c07966088b7b?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1563207153-f403bf289096?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1518314916381-77a37c2a49ae?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1516192518150-0d8fee5425e3?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1567427018141-0584cfcbf1b8?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop'
+  ],
+  tags: {
+    news: ['속보', '신제품', '투자', '인수합병', '신기술', '발표'],
+    'tech-review': ['리뷰', '성능분석', '비교', '테스트', '벤치마크'],
+    'company-update': ['실적발표', '신규사업', '파트너십', '확장', '전략'],
+    research: ['논문', '연구개발', '특허', '학술', '혁신기술']
+  }
+};
+
+// 추가 목 데이터 생성 함수
+const generateMockArticles = (page: number): Article[] => {
+  const baseId = page * 10;
+  return Array.from({ length: 10 }, (_, index) => {
+    const id = baseId + index;
+    const category = ['news', 'tech-review', 'company-update', 'research'][index % 4] as any;
+    const titleIndex = id % robotNewsData.titles.length;
+    const timeDiff = id < 20 ? id * 3 : id * 12; // 초반엔 시간 간격 짧게, 후반엔 길게
+    
+    return {
+      id: `${id}`,
+      title: robotNewsData.titles[titleIndex],
+      content: `${robotNewsData.titles[titleIndex]}에 대한 상세한 내용입니다. ${robotNewsData.excerpts[index % robotNewsData.excerpts.length]}...`,
+      excerpt: robotNewsData.excerpts[index % robotNewsData.excerpts.length],
+      imageUrl: robotNewsData.imageUrls[index % robotNewsData.imageUrls.length],
+      author: robotNewsData.authors[id % robotNewsData.authors.length],
+      source: robotNewsData.sources[id % robotNewsData.sources.length],
+      publishedAt: new Date(Date.now() - timeDiff * 60 * 60 * 1000),
+      category,
+      tags: [
+        ...robotNewsData.tags[category].slice(0, 2),
+        '로봇',
+        robotNewsData.titles[titleIndex].split(' ')[0].replace(',', '')
+      ],
+      viewCount: Math.floor(Math.random() * 15000) + 500,
+      likeCount: Math.floor(Math.random() * 1000) + 50,
+      commentCount: Math.floor(Math.random() * 200) + 5,
+      isBookmarked: Math.random() > 0.85,
+    };
+  });
+};
 
 export default function Home() {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [page, setPage] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  const loadMoreArticles = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+
+    setIsLoading(true);
+    
+    // API 호출 시뮬레이션
+    setTimeout(() => {
+      const newArticles = generateMockArticles(page);
+      
+      setArticles(prev => [...prev, ...newArticles]);
+      setPage(prev => prev + 1);
+      
+      // 5페이지 이후로는 더 이상 로드하지 않음
+      if (page >= 4) {
+        setHasMore(false);
+      }
+      
+      setIsLoading(false);
+      if (isInitialLoading) {
+        setIsInitialLoading(false);
+      }
+    }, 1000); // 1초 지연으로 로딩 시뮬레이션
+  }, [page, isLoading, hasMore, isInitialLoading]);
+
+  // 컴포넌트 마운트 시 초기 데이터 로드
+  useEffect(() => {
+    loadMoreArticles();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <>
       {/* 메인 콘텐츠 */}
@@ -9,7 +148,38 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* 메인 피드 */}
           <div className="lg:col-span-3">
-            <MainFeed />
+            {isInitialLoading ? (
+              // 초기 로딩 상태
+              <div className="space-y-6">
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                  <div className="animate-pulse">
+                    <div className="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[...Array(4)].map((_, index) => (
+                    <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                      <div className="h-48 bg-gray-200 animate-pulse" />
+                      <div className="p-6 space-y-4">
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+                        <div className="space-y-2">
+                          <div className="h-3 bg-gray-200 rounded animate-pulse" />
+                          <div className="h-3 bg-gray-200 rounded animate-pulse w-5/6" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <MainFeed 
+                initialArticles={articles}
+                onLoadMore={loadMoreArticles}
+                isLoading={isLoading}
+                hasMore={hasMore}
+              />
+            )}
           </div>
           
           {/* 사이드바 */}
