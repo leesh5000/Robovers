@@ -55,9 +55,16 @@ export class RegisterUserUseCase {
     // Send verification email
     try {
       await this.sendVerificationEmailUseCase.execute(emailVO.value);
+      console.log(`✅ Verification email sent successfully to: ${emailVO.value}`);
     } catch (error) {
-      // Log error but don't fail registration if email service is not configured
-      console.warn('Failed to send verification email:', error.message);
+      // Log detailed error but don't fail registration if email service is not configured
+      console.error('❌ Failed to send verification email:', {
+        email: emailVO.value,
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
+      console.warn('⚠️  Registration completed but verification email was not sent. Please check email service configuration.');
     }
 
     return savedUser;

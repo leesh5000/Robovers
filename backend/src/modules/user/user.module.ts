@@ -31,6 +31,7 @@ import { EmailVerificationMapper } from './infrastructure/persistence/mappers/em
 import { BcryptPasswordService } from './infrastructure/services/bcrypt-password.service';
 import { JwtAuthService } from './infrastructure/services/jwt-auth.service';
 import { NodemailerEmailService } from './infrastructure/services/nodemailer-email.service';
+import { MockEmailService } from './infrastructure/services/mock-email.service';
 import { JwtStrategy } from './infrastructure/auth/jwt.strategy';
 import { JwtAuthGuard } from './infrastructure/auth/jwt-auth.guard';
 import { RolesGuard } from './infrastructure/auth/roles.guard';
@@ -89,7 +90,23 @@ import { SnowflakeModule } from '@/common/snowflake/snowflake.module';
     },
     {
       provide: EMAIL_SERVICE_TOKEN,
-      useClass: NodemailerEmailService,
+      useFactory: (configService: ConfigService) => {
+        const isProduction = configService.get('NODE_ENV') === 'production';
+        const hasSmtpConfig = !!(
+          configService.get('SMTP_HOST') &&
+          configService.get('SMTP_USER') &&
+          configService.get('SMTP_PASS')
+        );
+        
+        if (isProduction && hasSmtpConfig) {
+          console.log('📧 Using NodemailerEmailService for production');
+          return new NodemailerEmailService(configService);
+        } else {
+          console.log('🎭 Using MockEmailService for development');
+          return new MockEmailService();
+        }
+      },
+      inject: [ConfigService],
     },
     // Infrastructure
     UserMapper,

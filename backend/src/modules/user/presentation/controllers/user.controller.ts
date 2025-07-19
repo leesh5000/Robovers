@@ -21,7 +21,7 @@ import { UserNotFoundException } from '../../domain/exceptions/user-not-found.ex
 import { Nickname } from '../../domain/value-objects/nickname.vo';
 
 @ApiTags('Users')
-@Controller('api/users')
+@Controller('users')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class UserController {
