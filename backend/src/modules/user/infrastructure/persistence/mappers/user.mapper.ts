@@ -1,18 +1,18 @@
+import { Injectable } from '@nestjs/common';
 import { User as PrismaUser } from '@prisma/client';
 import { User, UserRole } from '../../../domain/entities/user.entity';
-import { Email } from '../../../domain/value-objects/email.vo';
-import { Username } from '../../../domain/value-objects/username.vo';
-import { Password } from '../../../domain/value-objects/password.vo';
+import { UserFactory } from '../../../domain/factories/user.factory';
 
+@Injectable()
 export class UserMapper {
-  static toDomain(prismaUser: PrismaUser): User {
-    return User.create({
+  constructor(private readonly userFactory: UserFactory) {}
+
+  toDomain(prismaUser: PrismaUser): User {
+    return this.userFactory.reconstitute({
       id: prismaUser.id,
-      email: Email.create(prismaUser.email),
-      username: Username.create(prismaUser.username),
-      password: Password.fromHash(prismaUser.password),
-      firstName: prismaUser.firstName || undefined,
-      lastName: prismaUser.lastName || undefined,
+      email: prismaUser.email,
+      password: prismaUser.password,
+      nickname: prismaUser.nickname,
       profileImageUrl: prismaUser.profileImageUrl || undefined,
       bio: prismaUser.bio || undefined,
       role: prismaUser.role as UserRole,
@@ -27,10 +27,8 @@ export class UserMapper {
     return {
       id: user.id,
       email: user.email.value,
-      username: user.username.value,
       password: user.password.value,
-      firstName: user.firstName || null,
-      lastName: user.lastName || null,
+      nickname: user.nickname.getValue,
       profileImageUrl: user.profileImageUrl || null,
       bio: user.bio || null,
       role: user.role,

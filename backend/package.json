@@ -38,6 +38,7 @@
     "@nestjs/swagger": "^7.2.0",
     "@nestjs/websockets": "^10.3.0",
     "@prisma/client": "^5.8.1",
+    "@types/nodemailer": "^6.4.17",
     "bcrypt": "^5.1.1",
     "bull": "^4.12.0",
     "cache-manager": "^5.3.2",
@@ -45,6 +46,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "helmet": "^7.1.0",
+    "nodemailer": "^7.0.5",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
@@ -100,6 +102,13 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/$1",
+      "^@domain/(.*)$": "<rootDir>/domain/$1",
+      "^@application/(.*)$": "<rootDir>/application/$1",
+      "^@adapter/(.*)$": "<rootDir>/adapter/$1",
+      "^@shared/(.*)$": "<rootDir>/shared/$1"
+    }
   }
 }

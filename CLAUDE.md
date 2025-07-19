@@ -192,8 +192,8 @@ Always ensure:
 
 ### Backend API Structure
 
-- Base URL: `http://localhost:4000/api`
-- Swagger Docs: `http://localhost:4000/api/docs`
+- Base URL: `http://localhost:4010/api`
+- Swagger Docs: `http://localhost:4010/api/docs`
 - All endpoints require `/api` prefix
 - Use DTOs for request/response validation
 - Implement proper error handling with consistent error responses

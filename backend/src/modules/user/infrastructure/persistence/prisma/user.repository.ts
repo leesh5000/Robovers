@@ -6,7 +6,10 @@ import { UserMapper } from '../mappers/user.mapper';
 
 @Injectable()
 export class UserRepository implements UserRepositoryInterface {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userMapper: UserMapper,
+  ) {}
 
   async save(user: User): Promise<User> {
     const data = UserMapper.toPersistence(user);
@@ -17,7 +20,7 @@ export class UserRepository implements UserRepositoryInterface {
       create: data,
     });
 
-    return UserMapper.toDomain(savedUser);
+    return this.userMapper.toDomain(savedUser);
   }
 
   async findById(id: string): Promise<User | null> {
@@ -25,7 +28,7 @@ export class UserRepository implements UserRepositoryInterface {
       where: { id },
     });
 
-    return user ? UserMapper.toDomain(user) : null;
+    return user ? this.userMapper.toDomain(user) : null;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -33,16 +36,9 @@ export class UserRepository implements UserRepositoryInterface {
       where: { email },
     });
 
-    return user ? UserMapper.toDomain(user) : null;
+    return user ? this.userMapper.toDomain(user) : null;
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { username },
-    });
-
-    return user ? UserMapper.toDomain(user) : null;
-  }
 
   async findAll(options?: {
     skip?: number;
@@ -59,7 +55,7 @@ export class UserRepository implements UserRepositoryInterface {
     ]);
 
     return {
-      users: users.map(UserMapper.toDomain),
+      users: users.map(user => this.userMapper.toDomain(user)),
       total,
     };
   }

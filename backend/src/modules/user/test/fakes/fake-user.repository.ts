@@ -1,23 +1,22 @@
 import { User } from '../../domain/entities/user.entity';
 import { UserRepositoryInterface } from '../../domain/repositories/user.repository.interface';
 
+let idCounter = 1;
+
 export class FakeUserRepository implements UserRepositoryInterface {
   private users: Map<string, User> = new Map();
   private emailIndex: Map<string, string> = new Map();
-  private usernameIndex: Map<string, string> = new Map();
 
   async save(user: User): Promise<User> {
     // Remove old indexes if updating
     const existingUser = this.users.get(user.id);
     if (existingUser) {
       this.emailIndex.delete(existingUser.email.value);
-      this.usernameIndex.delete(existingUser.username.value);
     }
 
     // Save user and update indexes
     this.users.set(user.id, user);
     this.emailIndex.set(user.email.value, user.id);
-    this.usernameIndex.set(user.username.value, user.id);
     
     return user;
   }
@@ -31,10 +30,6 @@ export class FakeUserRepository implements UserRepositoryInterface {
     return id ? this.users.get(id) || null : null;
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    const id = this.usernameIndex.get(username);
-    return id ? this.users.get(id) || null : null;
-  }
 
   async findAll(options?: {
     skip?: number;
@@ -76,7 +71,6 @@ export class FakeUserRepository implements UserRepositoryInterface {
     if (user) {
       this.users.delete(id);
       this.emailIndex.delete(user.email.value);
-      this.usernameIndex.delete(user.username.value);
     }
   }
 
@@ -84,7 +78,6 @@ export class FakeUserRepository implements UserRepositoryInterface {
   clear(): void {
     this.users.clear();
     this.emailIndex.clear();
-    this.usernameIndex.clear();
   }
 
   getAll(): User[] {
@@ -99,8 +92,8 @@ export class FakeUserRepository implements UserRepositoryInterface {
     switch (field) {
       case 'email':
         return user.email.value;
-      case 'username':
-        return user.username.value;
+      case 'nickname':
+        return user.nickname.getValue;
       case 'createdAt':
         return user.createdAt;
       case 'updatedAt':

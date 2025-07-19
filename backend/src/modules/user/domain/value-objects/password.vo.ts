@@ -1,5 +1,6 @@
 export class Password {
   private static readonly MIN_LENGTH = 8;
+  private static readonly MAX_LENGTH = 30;
   private static readonly BCRYPT_REGEX = /^\$2[aby]?\$\d{1,2}\$/;
   
   private constructor(
@@ -10,6 +11,10 @@ export class Password {
   static create(password: string): Password {
     if (password.length < this.MIN_LENGTH) {
       throw new Error('Password must be at least 8 characters long');
+    }
+
+    if (password.length > this.MAX_LENGTH) {
+      throw new Error('Password must be no more than 30 characters long');
     }
 
     if (!/[A-Z]/.test(password)) {

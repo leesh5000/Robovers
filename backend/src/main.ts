@@ -12,7 +12,7 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:4000',
     credentials: true,
   });
 
@@ -38,7 +38,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT || 4000;
+  const port = process.env.PORT || 4010;
   await app.listen(port);
   console.log(`🚀 Application is running on: http://localhost:${port}/api`);
   console.log(`📚 API documentation available at: http://localhost:${port}/api/docs`);

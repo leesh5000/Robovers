@@ -12,12 +12,10 @@ datasource db {
 
 // 사용자 관련 모델
 model User {
-  id              String   @id @default(uuid())
+  id              String   @id
   email           String   @unique
-  username        String   @unique
   password        String
-  firstName       String?
-  lastName        String?
+  nickname        String
   profileImageUrl String?
   bio             String?
   role            UserRole @default(USER)
@@ -41,9 +39,21 @@ enum UserRole {
   ADMIN
 }
 
+// 이메일 인증 모델
+model EmailVerification {
+  id         String   @id
+  email      String   @unique
+  code       String
+  expiresAt  DateTime
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+  
+  @@map("email_verifications")
+}
+
 // 로봇 정보 모델
 model Robot {
-  id              String       @id @default(uuid())
+  id              String       @id
   name            String       @unique
   manufacturer    String
   modelNumber     String?
@@ -87,7 +97,7 @@ enum DevelopmentStatus {
 
 // 로봇 평가 모델
 model RobotRating {
-  id        String   @id @default(uuid())
+  id        String   @id
   rating    Int      // 1-5
   review    String?
   userId    String
@@ -105,7 +115,7 @@ model RobotRating {
 
 // 커뮤니티 게시글 모델
 model Post {
-  id            String       @id @default(uuid())
+  id            String       @id
   title         String
   content       String
   category      PostCategory
@@ -138,7 +148,7 @@ enum PostCategory {
 
 // 댓글 모델
 model Comment {
-  id        String   @id @default(uuid())
+  id        String   @id
   content   String
   postId    String
   authorId  String
@@ -158,7 +168,7 @@ model Comment {
 
 // 기업 정보 모델
 model Company {
-  id              String   @id @default(uuid())
+  id              String   @id
   name            String   @unique
   symbol          String   @unique // 주식 심볼
   description     String
@@ -182,7 +192,7 @@ model Company {
 
 // 주가 정보 모델
 model StockPrice {
-  id          String   @id @default(uuid())
+  id          String   @id
   companyId   String
   date        DateTime
   open        Float
@@ -203,7 +213,7 @@ model StockPrice {
 
 // 사용자 관심 기업 목록
 model CompanyWatchlist {
-  id        String   @id @default(uuid())
+  id        String   @id
   userId    String
   companyId String
   createdAt DateTime @default(now())

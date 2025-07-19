@@ -21,7 +21,7 @@ export class JwtAuthService implements AuthServiceInterface {
     const payload: TokenPayload = {
       sub: user.id,
       email: user.email.value,
-      username: user.username.value,
+      nickname: user.nickname.getValue,
       role: user.role,
     };
 

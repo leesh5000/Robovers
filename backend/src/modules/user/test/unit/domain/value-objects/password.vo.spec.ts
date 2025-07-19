@@ -12,6 +12,17 @@ describe('Password Value Object', () => {
     expect(() => Password.create('Test1!')).toThrow('Password must be at least 8 characters long');
   });
 
+  it('should throw error for password longer than 30 characters', () => {
+    const longPassword = 'Test123!@#' + 'a'.repeat(21); // 31 characters
+    expect(() => Password.create(longPassword)).toThrow('Password must be no more than 30 characters long');
+  });
+
+  it('should accept password exactly 30 characters long', () => {
+    const maxLengthPassword = 'Test123!@#' + 'a'.repeat(20); // exactly 30 characters
+    const password = Password.create(maxLengthPassword);
+    expect(password.value).toBe(maxLengthPassword);
+  });
+
   it('should throw error for password without uppercase letter', () => {
     expect(() => Password.create('test123!@#')).toThrow('Password must contain at least one uppercase letter');
   });

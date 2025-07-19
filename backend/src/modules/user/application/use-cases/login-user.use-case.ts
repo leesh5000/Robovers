@@ -37,6 +37,11 @@ export class LoginUserUseCase {
       throw new UnauthorizedException('Account is deactivated');
     }
 
+    // Check if email is verified
+    if (!user.emailVerified) {
+      throw new UnauthorizedException('Please verify your email before logging in');
+    }
+
     // Verify password
     const isPasswordValid = await this.passwordService.compare(
       password,

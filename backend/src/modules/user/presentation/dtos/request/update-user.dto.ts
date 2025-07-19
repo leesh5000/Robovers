@@ -1,16 +1,16 @@
-import { IsString, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsUrl, MinLength, MaxLength, Matches } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateUserDto {
-  @ApiPropertyOptional({ example: 'John' })
+  @ApiPropertyOptional({ example: 'john_doe' })
   @IsOptional()
   @IsString()
-  firstName?: string;
-
-  @ApiPropertyOptional({ example: 'Doe' })
-  @IsOptional()
-  @IsString()
-  lastName?: string;
+  @MinLength(2)
+  @MaxLength(20)
+  @Matches(/^[a-zA-Z0-9_-]{2,20}$/, {
+    message: 'Nickname can only contain letters, numbers, hyphens, and underscores',
+  })
+  nickname?: string;
 
   @ApiPropertyOptional({ example: 'Software engineer passionate about robotics' })
   @IsOptional()

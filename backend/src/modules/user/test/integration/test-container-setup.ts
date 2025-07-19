@@ -1,10 +1,10 @@
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
-import { RedisContainer } from '@testcontainers/redis';
+import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 import { execSync } from 'child_process';
 
 export class TestContainerSetup {
-  private static postgresContainer: PostgreSqlContainer;
-  private static redisContainer: RedisContainer;
+  private static postgresContainer: StartedPostgreSqlContainer;
+  private static redisContainer: StartedRedisContainer;
 
   static async setupContainers() {
     // PostgreSQL 컨테이너 시작

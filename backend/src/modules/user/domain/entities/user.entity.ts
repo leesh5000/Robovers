@@ -1,7 +1,6 @@
-import { randomUUID } from 'crypto';
 import { Email } from '../value-objects/email.vo';
-import { Username } from '../value-objects/username.vo';
 import { Password } from '../value-objects/password.vo';
+import { Nickname } from '../value-objects/nickname.vo';
 
 export enum UserRole {
   USER = 'USER',
@@ -10,12 +9,10 @@ export enum UserRole {
 }
 
 interface UserProps {
-  id?: string;
+  id: string; // Now required
   email: Email;
-  username: Username;
   password: Password;
-  firstName?: string;
-  lastName?: string;
+  nickname: Nickname;
   profileImageUrl?: string;
   bio?: string;
   role?: UserRole;
@@ -26,8 +23,7 @@ interface UserProps {
 }
 
 interface UpdateProfileProps {
-  firstName?: string;
-  lastName?: string;
+  nickname?: Nickname;
   bio?: string;
   profileImageUrl?: string;
 }
@@ -35,10 +31,8 @@ interface UpdateProfileProps {
 export class User {
   private _id: string;
   private _email: Email;
-  private _username: Username;
   private _password: Password;
-  private _firstName?: string;
-  private _lastName?: string;
+  private _nickname: Nickname;
   private _profileImageUrl?: string;
   private _bio?: string;
   private _role: UserRole;
@@ -48,12 +42,10 @@ export class User {
   private _updatedAt: Date;
 
   private constructor(props: UserProps) {
-    this._id = props.id || randomUUID();
+    this._id = props.id;
     this._email = props.email;
-    this._username = props.username;
     this._password = props.password;
-    this._firstName = props.firstName;
-    this._lastName = props.lastName;
+    this._nickname = props.nickname;
     this._profileImageUrl = props.profileImageUrl;
     this._bio = props.bio;
     this._role = props.role || UserRole.USER;
@@ -68,8 +60,7 @@ export class User {
   }
 
   updateProfile(props: UpdateProfileProps): void {
-    if (props.firstName !== undefined) this._firstName = props.firstName;
-    if (props.lastName !== undefined) this._lastName = props.lastName;
+    if (props.nickname !== undefined) this._nickname = props.nickname;
     if (props.bio !== undefined) this._bio = props.bio;
     if (props.profileImageUrl !== undefined) this._profileImageUrl = props.profileImageUrl;
     
@@ -101,20 +92,15 @@ export class User {
     this._updatedAt = new Date();
   }
 
-  getFullName(): string {
-    const parts = [];
-    if (this._firstName) parts.push(this._firstName);
-    if (this._lastName) parts.push(this._lastName);
-    return parts.join(' ');
+  getDisplayName(): string {
+    return this._nickname.getValue;
   }
 
   // Getters
   get id(): string { return this._id; }
   get email(): Email { return this._email; }
-  get username(): Username { return this._username; }
   get password(): Password { return this._password; }
-  get firstName(): string | undefined { return this._firstName; }
-  get lastName(): string | undefined { return this._lastName; }
+  get nickname(): Nickname { return this._nickname; }
   get profileImageUrl(): string | undefined { return this._profileImageUrl; }
   get bio(): string | undefined { return this._bio; }
   get role(): UserRole { return this._role; }

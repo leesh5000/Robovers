@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import { Toaster } from 'react-hot-toast';
 import Header from '@/components/layout/Header';
 
 export default function ClientLayout({
@@ -15,6 +16,7 @@ export default function ClientLayout({
     <div className="min-h-screen">
       {!isAdminPage && <Header />}
       {children}
+      <Toaster position="top-right" />
     </div>
   );
 }

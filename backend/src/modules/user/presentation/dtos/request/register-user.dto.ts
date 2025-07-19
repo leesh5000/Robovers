@@ -6,18 +6,10 @@ export class RegisterUserDto {
   @IsEmail({}, { message: 'Invalid email format' })
   email: string;
 
-  @ApiProperty({ example: 'testuser' })
-  @IsString()
-  @MinLength(3)
-  @MaxLength(20)
-  @Matches(/^[a-zA-Z0-9_]+$/, {
-    message: 'Username can only contain letters, numbers, and underscores',
-  })
-  username: string;
-
   @ApiProperty({ example: 'Test123!@#' })
   @IsString()
   @MinLength(8)
+  @MaxLength(30)
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
     {
@@ -26,13 +18,12 @@ export class RegisterUserDto {
   )
   password: string;
 
-  @ApiPropertyOptional({ example: 'John' })
-  @IsOptional()
+  @ApiProperty({ example: 'john_doe' })
   @IsString()
-  firstName?: string;
-
-  @ApiPropertyOptional({ example: 'Doe' })
-  @IsOptional()
-  @IsString()
-  lastName?: string;
+  @MinLength(2)
+  @MaxLength(20)
+  @Matches(/^[a-zA-Z0-9_-]{2,20}$/, {
+    message: 'Nickname can only contain letters, numbers, hyphens, and underscores',
+  })
+  nickname: string;
 }

@@ -1,51 +1,49 @@
 import { User, UserRole } from '../../../../domain/entities/user.entity';
 import { Email } from '../../../../domain/value-objects/email.vo';
-import { Username } from '../../../../domain/value-objects/username.vo';
 import { Password } from '../../../../domain/value-objects/password.vo';
+import { Nickname } from '../../../../domain/value-objects/nickname.vo';
 
 describe('User Entity', () => {
   const createValidUser = () => {
     return User.create({
+      id: '123',
       email: Email.create('test@example.com'),
-      username: Username.create('testuser'),
       password: Password.create('Test123!@#'),
-      firstName: 'John',
-      lastName: 'Doe',
+      nickname: Nickname.create('test_user'),
     });
   };
 
   describe('create', () => {
     it('should create a user with required fields', () => {
       const user = User.create({
+        id: '456',
         email: Email.create('test@example.com'),
-        username: Username.create('testuser'),
         password: Password.create('Test123!@#'),
+        nickname: Nickname.create('test_user'),
       });
 
+      expect(user.id).toBe('456');
       expect(user.email.value).toBe('test@example.com');
-      expect(user.username.value).toBe('testuser');
       expect(user.password.value).toBe('Test123!@#');
+      expect(user.nickname.getValue).toBe('test_user');
       expect(user.role).toBe(UserRole.USER);
       expect(user.isActive).toBe(true);
       expect(user.emailVerified).toBe(false);
-      expect(user.id).toBeDefined();
       expect(user.createdAt).toBeDefined();
       expect(user.updatedAt).toBeDefined();
     });
 
     it('should create a user with optional fields', () => {
       const user = User.create({
+        id: '789',
         email: Email.create('test@example.com'),
-        username: Username.create('testuser'),
         password: Password.create('Test123!@#'),
-        firstName: 'John',
-        lastName: 'Doe',
+        nickname: Nickname.create('test_user'),
         bio: 'Test bio',
         profileImageUrl: 'https://example.com/avatar.jpg',
       });
 
-      expect(user.firstName).toBe('John');
-      expect(user.lastName).toBe('Doe');
+      expect(user.nickname.getValue).toBe('test_user');
       expect(user.bio).toBe('Test bio');
       expect(user.profileImageUrl).toBe('https://example.com/avatar.jpg');
     });
@@ -56,14 +54,12 @@ describe('User Entity', () => {
       const user = createValidUser();
 
       user.updateProfile({
-        firstName: 'Jane',
-        lastName: 'Smith',
+        nickname: Nickname.create('new_nickname'),
         bio: 'Updated bio',
         profileImageUrl: 'https://example.com/new-avatar.jpg',
       });
 
-      expect(user.firstName).toBe('Jane');
-      expect(user.lastName).toBe('Smith');
+      expect(user.nickname.getValue).toBe('new_nickname');
       expect(user.bio).toBe('Updated bio');
       expect(user.profileImageUrl).toBe('https://example.com/new-avatar.jpg');
       expect(user.updatedAt).toBeDefined();
@@ -71,13 +67,14 @@ describe('User Entity', () => {
 
     it('should allow partial updates', () => {
       const user = createValidUser();
+      const originalNickname = user.nickname.getValue;
       
       user.updateProfile({
-        firstName: 'Jane',
+        bio: 'Updated bio only',
       });
 
-      expect(user.firstName).toBe('Jane');
-      expect(user.lastName).toBe('Doe'); // unchanged
+      expect(user.nickname.getValue).toBe(originalNickname); // unchanged
+      expect(user.bio).toBe('Updated bio only');
     });
   });
 
@@ -133,42 +130,19 @@ describe('User Entity', () => {
     });
   });
 
-  describe('getFullName', () => {
-    it('should return full name when both first and last name exist', () => {
+  describe('getDisplayName', () => {
+    it('should return nickname as display name', () => {
       const user = createValidUser();
-      expect(user.getFullName()).toBe('John Doe');
+      expect(user.getDisplayName()).toBe('test_user');
     });
 
-    it('should return only first name when last name is missing', () => {
-      const user = User.create({
-        email: Email.create('test@example.com'),
-        username: Username.create('testuser'),
-        password: Password.create('Test123!@#'),
-        firstName: 'John',
+    it('should return different nickname when updated', () => {
+      const user = createValidUser();
+      user.updateProfile({
+        nickname: Nickname.create('updated_nick'),
       });
       
-      expect(user.getFullName()).toBe('John');
-    });
-
-    it('should return only last name when first name is missing', () => {
-      const user = User.create({
-        email: Email.create('test@example.com'),
-        username: Username.create('testuser'),
-        password: Password.create('Test123!@#'),
-        lastName: 'Doe',
-      });
-      
-      expect(user.getFullName()).toBe('Doe');
-    });
-
-    it('should return empty string when both names are missing', () => {
-      const user = User.create({
-        email: Email.create('test@example.com'),
-        username: Username.create('testuser'),
-        password: Password.create('Test123!@#'),
-      });
-      
-      expect(user.getFullName()).toBe('');
+      expect(user.getDisplayName()).toBe('updated_nick');
     });
   });
 });

@@ -18,6 +18,7 @@ import { UserResponseDto } from '../dtos/response/user-response.dto';
 import { UpdateUserDto } from '../dtos/request/update-user.dto';
 import { UserRepositoryInterface, USER_REPOSITORY_TOKEN } from '../../domain/repositories/user.repository.interface';
 import { UserNotFoundException } from '../../domain/exceptions/user-not-found.exception';
+import { Nickname } from '../../domain/value-objects/nickname.vo';
 
 @ApiTags('Users')
 @Controller('api/users')
@@ -53,8 +54,7 @@ export class UserController {
     }
 
     user.updateProfile({
-      firstName: dto.firstName,
-      lastName: dto.lastName,
+      nickname: dto.nickname ? Nickname.create(dto.nickname) : undefined,
       bio: dto.bio,
       profileImageUrl: dto.profileImageUrl,
     });

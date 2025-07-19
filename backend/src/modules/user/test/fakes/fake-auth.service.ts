@@ -3,7 +3,7 @@ import { User } from '../../domain/entities/user.entity';
 export interface TokenPayload {
   sub: string;
   email: string;
-  username: string;
+  nickname: string;
   role: string;
 }
 
@@ -17,7 +17,7 @@ export class FakeAuthService {
     const payload: TokenPayload = {
       sub: user.id,
       email: user.email.value,
-      username: user.username.value,
+      nickname: user.nickname.getValue,
       role: user.role,
     };
 

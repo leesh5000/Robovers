@@ -4,8 +4,8 @@ import { FakePasswordService } from '../../../fakes/fake-password.service';
 import { FakeAuthService } from '../../../fakes/fake-auth.service';
 import { User } from '../../../../domain/entities/user.entity';
 import { Email } from '../../../../domain/value-objects/email.vo';
-import { Username } from '../../../../domain/value-objects/username.vo';
 import { Password } from '../../../../domain/value-objects/password.vo';
+import { Nickname } from '../../../../domain/value-objects/nickname.vo';
 
 describe('LoginUserUseCase', () => {
   let useCase: LoginUserUseCase;
@@ -15,11 +15,11 @@ describe('LoginUserUseCase', () => {
 
   const createTestUser = async () => {
     const user = User.create({
+      id: '1',
       email: Email.create('test@example.com'),
-      username: Username.create('testuser'),
       password: Password.fromHash('hashed_Test123!@#'),
-      firstName: 'John',
-      lastName: 'Doe',
+      nickname: Nickname.create('test_user'),
+      emailVerified: true,
     });
     await userRepository.save(user);
     return user;

@@ -3,7 +3,7 @@ import { User } from '../../domain/entities/user.entity';
 export interface TokenPayload {
   sub: string;
   email: string;
-  username: string;
+  nickname: string;
   role: string;
 }
 

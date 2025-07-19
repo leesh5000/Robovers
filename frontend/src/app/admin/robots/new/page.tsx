@@ -51,6 +51,7 @@ export default function NewRobotPage() {
     { value: 'concept', label: '컨셉' },
     { value: 'prototype', label: '프로토타입' },
     { value: 'development', label: '개발중' },
+    { value: 'research', label: '연구중' },
     { value: 'testing', label: '테스트' },
     { value: 'production', label: '생산' },
     { value: 'commercial', label: '상용화' },

@@ -9,13 +9,7 @@ export class UserResponseDto {
   email: string;
 
   @ApiProperty()
-  username: string;
-
-  @ApiPropertyOptional()
-  firstName?: string;
-
-  @ApiPropertyOptional()
-  lastName?: string;
+  nickname: string;
 
   @ApiPropertyOptional()
   profileImageUrl?: string;
@@ -41,9 +35,7 @@ export class UserResponseDto {
   constructor(user: User) {
     this.id = user.id;
     this.email = user.email.value;
-    this.username = user.username.value;
-    this.firstName = user.firstName;
-    this.lastName = user.lastName;
+    this.nickname = user.nickname.getValue;
     this.profileImageUrl = user.profileImageUrl;
     this.bio = user.bio;
     this.role = user.role;

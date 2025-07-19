@@ -5,6 +5,9 @@ import { User, UserRole } from '../../../domain/entities/user.entity';
 import { Email } from '../../../domain/value-objects/email.vo';
 import { Username } from '../../../domain/value-objects/username.vo';
 import { Password } from '../../../domain/value-objects/password.vo';
+import { UserMapper } from '../../../infrastructure/persistence/mappers/user.mapper';
+import { UserFactory } from '../../../domain/factories/user.factory';
+import { SnowflakeIdService } from '@/common/snowflake/snowflake-id.service';
 import { TestContainerSetup } from '../test-container-setup';
 
 describe('UserRepository (Integration)', () => {
@@ -15,7 +18,13 @@ describe('UserRepository (Integration)', () => {
     await TestContainerSetup.setupContainers();
     
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserRepository, PrismaService],
+      providers: [
+        UserRepository,
+        PrismaService,
+        UserMapper,
+        UserFactory,
+        SnowflakeIdService,
+      ],
     }).compile();
 
     repository = module.get<UserRepository>(UserRepository);
@@ -33,6 +42,7 @@ describe('UserRepository (Integration)', () => {
 
   const createTestUser = () => {
     return User.create({
+      id: '1',
       email: Email.create('test@example.com'),
       username: Username.create('testuser'),
       password: Password.fromHash('$2b$10$hashedpassword'),
@@ -143,6 +153,7 @@ describe('UserRepository (Integration)', () => {
       const users = [];
       for (let i = 0; i < 5; i++) {
         const user = User.create({
+          id: String(i + 1),
           email: Email.create(`test${i}@example.com`),
           username: Username.create(`testuser${i}`),
           password: Password.fromHash('$2b$10$hashedpassword'),
@@ -168,6 +179,7 @@ describe('UserRepository (Integration)', () => {
     it('should order users by specified field', async () => {
       // 사용자들을 다른 시간에 생성
       const user1 = User.create({
+        id: '101',
         email: Email.create('alice@example.com'),
         username: Username.create('alice'),
         password: Password.fromHash('$2b$10$hashedpassword'),
@@ -178,6 +190,7 @@ describe('UserRepository (Integration)', () => {
       await new Promise(resolve => setTimeout(resolve, 10));
 
       const user2 = User.create({
+        id: '102',
         email: Email.create('bob@example.com'),
         username: Username.create('bob'),
         password: Password.fromHash('$2b$10$hashedpassword'),

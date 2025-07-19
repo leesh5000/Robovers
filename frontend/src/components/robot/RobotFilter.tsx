@@ -51,6 +51,7 @@ export default function RobotFilter({
       concept: '컨셉',
       prototype: '프로토타입',
       development: '개발중',
+      research: '연구중',
       testing: '테스트',
       production: '생산중',
       commercial: '상용화',
@@ -77,7 +78,7 @@ export default function RobotFilter({
   ];
 
   const statuses: RobotStatus[] = [
-    'concept', 'prototype', 'development', 'testing', 
+    'concept', 'prototype', 'development', 'research', 'testing', 
     'production', 'commercial', 'discontinued'
   ];
 
