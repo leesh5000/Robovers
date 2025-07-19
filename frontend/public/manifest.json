@@ -1,0 +1,26 @@
+{
+  "name": "Robovers - 휴머노이드 로봇 정보 플랫폼",
+  "short_name": "Robovers",
+  "description": "휴머노이드 로봇에 대한 지식을 공유하고, 발전 현황과 관련 기업 정보를 확인하세요",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
