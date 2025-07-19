@@ -9,9 +9,10 @@ interface ArticleCardProps {
   article: Article;
   onLike?: (articleId: string) => void;
   onBookmark?: (articleId: string) => void;
+  onClick?: (articleId: string) => void;
 }
 
-export default function ArticleCard({ article, onLike, onBookmark }: ArticleCardProps) {
+export default function ArticleCard({ article, onLike, onBookmark, onClick }: ArticleCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -66,8 +67,19 @@ export default function ArticleCard({ article, onLike, onBookmark }: ArticleCard
     return count.toString();
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // 버튼이나 링크 클릭이 아닌 경우에만 onClick 호출
+    if ((e.target as HTMLElement).closest('button, a')) {
+      return;
+    }
+    onClick?.(article.id);
+  };
+
   return (
-    <article className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <article 
+      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* 썸네일 이미지 */}
       {article.imageUrl && !imageError && (
         <div className="relative h-48 w-full overflow-hidden">
@@ -96,8 +108,12 @@ export default function ArticleCard({ article, onLike, onBookmark }: ArticleCard
 
           {/* 북마크 버튼 */}
           <button
-            onClick={() => onBookmark?.(article.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onBookmark?.(article.id);
+            }}
             className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
+            aria-label="북마크"
           >
             <svg
               className={`h-4 w-4 ${article.isBookmarked ? 'text-yellow-500 fill-current' : 'text-gray-600'}`}
@@ -161,20 +177,23 @@ export default function ArticleCard({ article, onLike, onBookmark }: ArticleCard
         {/* 메타 정보 */}
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center space-x-4">
-            <span className="font-medium">{article.source}</span>
+            <span className="font-medium">{article.author}{article.source && ` · ${article.source}`}</span>
             {isClient ? (
               <span>{formatPublishedDate(article.publishedAt)}</span>
             ) : (
               <span suppressHydrationWarning>{article.publishedAt.toLocaleDateString('ko-KR')}</span>
             )}
-            <span>조회 {formatCount(article.viewCount)}</span>
+            <span>조회 {article.viewCount.toLocaleString()}</span>
           </div>
 
           {/* 액션 버튼들 */}
           <div className="flex items-center space-x-3">
             {/* 좋아요 버튼 */}
             <button
-              onClick={() => onLike?.(article.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLike?.(article.id);
+              }}
               className="flex items-center space-x-1 hover:text-red-500 transition-colors"
             >
               <svg
@@ -190,7 +209,7 @@ export default function ArticleCard({ article, onLike, onBookmark }: ArticleCard
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
               </svg>
-              <span>{formatCount(article.likeCount)}</span>
+              <span>{article.likeCount}</span>
             </button>
 
             {/* 댓글 버튼 */}
@@ -211,7 +230,7 @@ export default function ArticleCard({ article, onLike, onBookmark }: ArticleCard
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <span>{formatCount(article.commentCount)}</span>
+              <span>{article.commentCount}</span>
             </Link>
 
             {/* 공유 버튼 */}

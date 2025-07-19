@@ -1,5 +1,8 @@
 // 이메일 유효성 검사
 export const validateEmail = (email: string): boolean => {
+  if (!email || typeof email !== 'string') {
+    return false;
+  }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
@@ -9,14 +12,22 @@ export const validatePassword = (password: string): {
   isValid: boolean;
   errors: string[];
 } => {
+  if (!password || typeof password !== 'string') {
+    return { isValid: false, errors: ['유효한 비밀번호를 입력해주세요'] };
+  }
+  
   const errors: string[] = [];
   
   if (password.length < 8) {
     errors.push('비밀번호는 8자 이상이어야 합니다');
   }
   
-  if (!/[a-zA-Z]/.test(password)) {
-    errors.push('영문자를 포함해야 합니다');
+  if (!/[a-z]/.test(password)) {
+    errors.push('소문자를 포함해야 합니다');
+  }
+  
+  if (!/[A-Z]/.test(password)) {
+    errors.push('대문자를 포함해야 합니다');
   }
   
   if (!/[0-9]/.test(password)) {
@@ -61,16 +72,20 @@ export const validateUsername = (username: string): {
   isValid: boolean;
   error?: string;
 } => {
-  if (username.length < 2) {
-    return { isValid: false, error: '사용자명은 2자 이상이어야 합니다' };
+  if (!username || typeof username !== 'string') {
+    return { isValid: false, error: '유효한 사용자명을 입력해주세요' };
+  }
+  
+  if (username.length < 3) {
+    return { isValid: false, error: '사용자명은 3자 이상이어야 합니다' };
   }
   
   if (username.length > 20) {
     return { isValid: false, error: '사용자명은 20자 이하여야 합니다' };
   }
   
-  if (!/^[a-zA-Z0-9가-힣_]+$/.test(username)) {
-    return { isValid: false, error: '사용자명은 영문, 한글, 숫자, 언더스코어만 사용 가능합니다' };
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    return { isValid: false, error: '사용자명은 영문자, 숫자, 언더스코어만 사용 가능합니다' };
   }
   
   return { isValid: true };
