@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { logoutAdmin } from '@/lib/auth';
 
 interface AdminNavItem {
   label: string;
@@ -93,6 +94,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const toggleExpanded = (label: string) => {
     setExpandedItems(prev =>
@@ -100,6 +102,16 @@ export default function AdminLayout({
         ? prev.filter(item => item !== label)
         : [...prev, label]
     );
+  };
+
+  const handleLogout = () => {
+    if (window.confirm('정말 로그아웃 하시겠습니까?')) {
+      setIsLoggingOut(true);
+      // 약간의 지연을 주어 UI 피드백 제공
+      setTimeout(() => {
+        logoutAdmin();
+      }, 300);
+    }
   };
 
   const isActive = (href: string) => {
@@ -142,10 +154,19 @@ export default function AdminLayout({
             </Link>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-700">관리자</span>
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+              <button 
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="로그아웃"
+              >
+                {isLoggingOut ? (
+                  <div className="w-5 h-5 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin"></div>
+                ) : (
+                  <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                )}
               </button>
             </div>
           </div>
