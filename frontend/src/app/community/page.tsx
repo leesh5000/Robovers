@@ -4,12 +4,20 @@ import { useState } from 'react';
 import PostList from '@/components/community/PostList';
 import CategoryFilter from '@/components/community/CategoryFilter';
 import CreatePostButton from '@/components/community/CreatePostButton';
+import Dropdown from '@/components/ui/Dropdown';
 import { CommunityCategory, SortOption } from '@/lib/types';
 
 export default function CommunityPage() {
   const [selectedCategory, setSelectedCategory] = useState<CommunityCategory | 'all'>('all');
   const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const sortOptions = [
+    { value: 'latest', label: '최신순' },
+    { value: 'popular', label: '인기순' },
+    { value: 'trending', label: '트렌딩' },
+    { value: 'commented', label: '댓글 많은 순' },
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -59,16 +67,13 @@ export default function CommunityPage() {
               </div>
 
               {/* 정렬 옵션 */}
-              <select
+              <Dropdown
+                options={sortOptions}
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                <option value="latest">최신순</option>
-                <option value="popular">인기순</option>
-                <option value="trending">트렌딩</option>
-                <option value="commented">댓글 많은 순</option>
-              </select>
+                onChange={(value) => setSortBy(value as SortOption)}
+                placeholder="정렬 방식"
+                className="w-40"
+              />
             </div>
           </div>
         </div>

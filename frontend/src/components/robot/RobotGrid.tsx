@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Robot, RobotFilterOptions } from '@/lib/types';
 import RobotCard from './RobotCard';
 import RobotFilter from './RobotFilter';
+import Pagination from '@/components/ui/Pagination';
 
 interface RobotGridProps {
   robots: Robot[];
@@ -20,6 +21,10 @@ export default function RobotGrid({
   const [filters, setFilters] = useState<RobotFilterOptions>({
     sortBy: 'name'
   });
+  
+  // 페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // 페이지당 6개 (3x2 그리드)
 
   // 제조사 목록 추출
   const manufacturers = Array.from(new Set(robots.map(robot => robot.manufacturer))).sort();
@@ -101,8 +106,22 @@ export default function RobotGrid({
     setFilteredRobots(filtered);
   }, [robots, filters]);
 
+  // 페이지네이션 계산
+  const totalPages = Math.ceil(filteredRobots.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedRobots = filteredRobots.slice(startIndex, endIndex);
+
+  // 필터 변경 시 첫 페이지로 리셋
   const handleFiltersChange = (newFilters: RobotFilterOptions) => {
     setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // 페이지 변경 시 스크롤을 상단으로
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleRobotClick = (robot: Robot) => {
@@ -125,15 +144,26 @@ export default function RobotGrid({
 
       {/* 로봇 그리드 */}
       {filteredRobots.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRobots.map((robot) => (
-            <RobotCard
-              key={robot.id}
-              robot={robot}
-              onClick={handleRobotClick}
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {paginatedRobots.map((robot) => (
+              <RobotCard
+                key={robot.id}
+                robot={robot}
+                onClick={handleRobotClick}
+              />
+            ))}
+          </div>
+          
+          {/* 페이지네이션 */}
+          <div className="mt-8">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
             />
-          ))}
-        </div>
+          </div>
+        </>
       ) : (
         <EmptyState />
       )}

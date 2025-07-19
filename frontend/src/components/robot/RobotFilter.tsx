@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { RobotFilterOptions, RobotCategory, RobotStatus, RobotSortOption } from '@/lib/types';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 interface RobotFilterProps {
   filters: RobotFilterOptions;
@@ -86,6 +87,37 @@ export default function RobotFilter({
     'name', 'manufacturer', 'releaseYear', 'price', 'height', 'weight'
   ];
 
+  // 드롭다운 옵션 변환 함수들
+  const getSortDropdownOptions = (): DropdownOption[] => 
+    sortOptions.map(option => ({
+      value: option,
+      label: getSortLabel(option)
+    }));
+
+  const getManufacturerDropdownOptions = (): DropdownOption[] => [
+    { value: '', label: '전체' },
+    ...manufacturers.map(manufacturer => ({
+      value: manufacturer,
+      label: manufacturer
+    }))
+  ];
+
+  const getCategoryDropdownOptions = (): DropdownOption[] => [
+    { value: '', label: '전체' },
+    ...categories.map(category => ({
+      value: category,
+      label: getCategoryLabel(category)
+    }))
+  ];
+
+  const getStatusDropdownOptions = (): DropdownOption[] => [
+    { value: '', label: '전체' },
+    ...statuses.map(status => ({
+      value: status,
+      label: getStatusLabel(status)
+    }))
+  ];
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* 기본 필터 헤더 */}
@@ -114,17 +146,13 @@ export default function RobotFilter({
             </div>
 
             {/* 정렬 */}
-            <select
+            <Dropdown
+              options={getSortDropdownOptions()}
               value={filters.sortBy}
-              onChange={(e) => handleFilterChange('sortBy', e.target.value as RobotSortOption)}
-              className="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {sortOptions.map(option => (
-                <option key={option} value={option}>
-                  {getSortLabel(option)}
-                </option>
-              ))}
-            </select>
+              onChange={(value) => handleFilterChange('sortBy', value as RobotSortOption)}
+              size="sm"
+              className="w-32"
+            />
 
             {/* 필터 토글 */}
             <button
@@ -146,52 +174,37 @@ export default function RobotFilter({
             {/* 제조사 필터 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">제조사</label>
-              <select
+              <Dropdown
+                options={getManufacturerDropdownOptions()}
                 value={filters.manufacturer || ''}
-                onChange={(e) => handleFilterChange('manufacturer', e.target.value || undefined)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">전체</option>
-                {manufacturers.map(manufacturer => (
-                  <option key={manufacturer} value={manufacturer}>
-                    {manufacturer}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleFilterChange('manufacturer', value || undefined)}
+                placeholder="제조사 선택"
+                className="w-full"
+              />
             </div>
 
             {/* 카테고리 필터 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
-              <select
+              <Dropdown
+                options={getCategoryDropdownOptions()}
                 value={filters.category || ''}
-                onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">전체</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>
-                    {getCategoryLabel(category)}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleFilterChange('category', value || undefined)}
+                placeholder="카테고리 선택"
+                className="w-full"
+              />
             </div>
 
             {/* 상태 필터 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">개발 상태</label>
-              <select
+              <Dropdown
+                options={getStatusDropdownOptions()}
                 value={filters.status || ''}
-                onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">전체</option>
-                {statuses.map(status => (
-                  <option key={status} value={status}>
-                    {getStatusLabel(status)}
-                  </option>
-                ))}
-              </select>
+                onChange={(value) => handleFilterChange('status', value || undefined)}
+                placeholder="상태 선택"
+                className="w-full"
+              />
             </div>
 
             {/* 가격 범위 필터 */}

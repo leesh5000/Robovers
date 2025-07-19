@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { CommunityPost } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -25,10 +26,18 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function PostCard({ post }: PostCardProps) {
+  const router = useRouter();
   const categoryStyle = categoryColors[post.category] || categoryColors.general;
 
+  const handleCardClick = () => {
+    router.push(`/community/${post.id}`);
+  };
+
   return (
-    <article className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer">
+    <article 
+      onClick={handleCardClick}
+      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 cursor-pointer"
+    >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           {/* 카테고리 태그 */}
