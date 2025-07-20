@@ -1,6 +1,7 @@
 'use client';
 
 import { CompanySector, CompanySortOption } from '@/lib/types';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 interface CompanyFilterProps {
   sector?: CompanySector;
@@ -32,7 +33,7 @@ const countries = [
   { value: '노르웨이', label: '노르웨이' },
 ];
 
-const publicOptions = [
+const publicOptionsData = [
   { value: undefined, label: '전체' },
   { value: true, label: '상장' },
   { value: false, label: '비상장' },
@@ -48,73 +49,84 @@ export default function CompanyFilter({
   onPublicChange,
   onSortChange,
 }: CompanyFilterProps) {
+  // 드롭다운 옵션 변환
+  const sectorOptions: DropdownOption[] = sectors.map(s => ({
+    value: s.value || '',
+    label: s.label
+  }));
+
+  const countryOptions: DropdownOption[] = countries.map(c => ({
+    value: c.value || '',
+    label: c.label
+  }));
+
+  const publicOptions: DropdownOption[] = publicOptionsData.map(p => ({
+    value: p.value === undefined ? '' : p.value.toString(),
+    label: p.label
+  }));
+
+  const sortOptions: DropdownOption[] = [
+    { value: 'marketCap', label: '시가총액순' },
+    { value: 'changePercent', label: '변동률순' },
+    { value: 'name', label: '이름순' },
+    { value: 'country', label: '국가순' },
+    { value: 'employeeCount', label: '직원수순' },
+  ];
+
   return (
     <div className="flex flex-wrap gap-4 items-center">
       {/* 섹터 필터 */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-700">섹터:</label>
-        <select
+        <Dropdown
+          options={sectorOptions}
           value={sector || ''}
-          onChange={(e) => onSectorChange(e.target.value as CompanySector || undefined)}
-          className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-        >
-          {sectors.map((s) => (
-            <option key={s.label} value={s.value || ''}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onSectorChange(value as CompanySector || undefined)}
+          placeholder="섹터 선택"
+          size="sm"
+          className="w-32"
+        />
       </div>
 
       {/* 국가 필터 */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-700">국가:</label>
-        <select
+        <Dropdown
+          options={countryOptions}
           value={country || ''}
-          onChange={(e) => onCountryChange(e.target.value || undefined)}
-          className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-        >
-          {countries.map((c) => (
-            <option key={c.label} value={c.value || ''}>
-              {c.label}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => onCountryChange(value || undefined)}
+          placeholder="국가 선택"
+          size="sm"
+          className="w-32"
+        />
       </div>
 
       {/* 상장 여부 필터 */}
       <div className="flex items-center gap-2">
         <label className="text-sm font-medium text-gray-700">상장:</label>
-        <select
+        <Dropdown
+          options={publicOptions}
           value={isPublic === undefined ? '' : isPublic.toString()}
-          onChange={(e) => {
-            const value = e.target.value;
+          onChange={(value) => {
             onPublicChange(value === '' ? undefined : value === 'true');
           }}
-          className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-        >
-          {publicOptions.map((p) => (
-            <option key={p.label} value={p.value === undefined ? '' : p.value.toString()}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+          placeholder="상장 여부"
+          size="sm"
+          className="w-32"
+        />
       </div>
 
       {/* 정렬 옵션 */}
       <div className="flex items-center gap-2 ml-auto">
         <label className="text-sm font-medium text-gray-700">정렬:</label>
-        <select
+        <Dropdown
+          options={sortOptions}
           value={sortBy}
-          onChange={(e) => onSortChange(e.target.value as CompanySortOption)}
-          className="px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-        >
-          <option value="marketCap">시가총액순</option>
-          <option value="changePercent">변동률순</option>
-          <option value="name">이름순</option>
-          <option value="country">국가순</option>
-          <option value="employeeCount">직원수순</option>
-        </select>
+          onChange={(value) => onSortChange(value as CompanySortOption)}
+          placeholder="정렬 방식"
+          size="sm"
+          className="w-40"
+        />
       </div>
     </div>
   );
