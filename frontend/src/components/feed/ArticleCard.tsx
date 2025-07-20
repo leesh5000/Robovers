@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Article } from '@/lib/types';
@@ -12,7 +12,7 @@ interface ArticleCardProps {
   onClick?: (articleId: string) => void;
 }
 
-export default function ArticleCard({ article, onLike, onBookmark, onClick }: ArticleCardProps) {
+const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onClick }: ArticleCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -21,7 +21,7 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
     setIsClient(true);
   }, []);
 
-  const getCategoryLabel = (category: string) => {
+  const categoryConfig = useMemo(() => {
     const labels = {
       'news': '뉴스',
       'tech-review': '기술 리뷰',
@@ -29,10 +29,6 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
       'research': '연구',
       'innovation': '혁신'
     };
-    return labels[category as keyof typeof labels] || '기타';
-  };
-
-  const getCategoryColor = (category: string) => {
     const colors = {
       'news': 'bg-blue-100 text-blue-800',
       'tech-review': 'bg-green-100 text-green-800',
@@ -40,10 +36,6 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
       'research': 'bg-orange-100 text-orange-800',
       'innovation': 'bg-red-100 text-red-800'
     };
-    return colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800';
-  };
-
-  const getCategoryGradient = (category: string) => {
     const gradients = {
       'news': 'from-blue-400 to-blue-600',
       'tech-review': 'from-green-400 to-green-600',
@@ -51,8 +43,13 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
       'research': 'from-orange-400 to-orange-600',
       'innovation': 'from-red-400 to-red-600'
     };
-    return gradients[category as keyof typeof gradients] || 'from-gray-400 to-gray-600';
-  };
+    
+    return {
+      label: labels[article.category as keyof typeof labels] || '기타',
+      color: colors[article.category as keyof typeof colors] || 'bg-gray-100 text-gray-800',
+      gradient: gradients[article.category as keyof typeof gradients] || 'from-gray-400 to-gray-600'
+    };
+  }, [article.category]);
 
   const getCategoryIcon = (category: string) => {
     switch(category) {
@@ -113,13 +110,23 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
     return count.toString();
   };
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = useCallback((e: React.MouseEvent) => {
     // 버튼이나 링크 클릭이 아닌 경우에만 onClick 호출
     if ((e.target as HTMLElement).closest('button, a')) {
       return;
     }
     onClick?.(article.id);
-  };
+  }, [onClick, article.id]);
+
+  const handleLike = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onLike?.(article.id);
+  }, [onLike, article.id]);
+
+  const handleBookmark = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onBookmark?.(article.id);
+  }, [onBookmark, article.id]);
 
   return (
     <article 
@@ -147,7 +154,7 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
         ) : (
           /* 기본 이미지 */
           <Link href={`/articles/${article.id}`}>
-            <div className={`relative h-full w-full bg-gradient-to-br ${getCategoryGradient(article.category)} hover:opacity-90 transition-opacity`}>
+            <div className={`relative h-full w-full bg-gradient-to-br ${categoryConfig.gradient} hover:opacity-90 transition-opacity`}>
               {/* 패턴 오버레이 */}
               <div className="absolute inset-0 opacity-10">
                 <div className="h-full w-full" style={{
@@ -161,7 +168,7 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
                   {getCategoryIcon(article.category)}
                 </div>
                 <p className="mt-3 text-sm font-semibold uppercase tracking-wide opacity-90">
-                  {getCategoryLabel(article.category)}
+                  {categoryConfig.label}
                 </p>
               </div>
             </div>
@@ -170,17 +177,14 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
         
         {/* 카테고리 배지 */}
         <div className="absolute top-3 left-3">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(article.category)}`}>
-            {getCategoryLabel(article.category)}
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${categoryConfig.color}`}>
+            {categoryConfig.label}
           </span>
         </div>
 
         {/* 북마크 버튼 */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onBookmark?.(article.id);
-          }}
+          onClick={handleBookmark}
           className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
           aria-label="북마크"
         >
@@ -250,10 +254,7 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
           <div className="flex items-center space-x-3">
             {/* 좋아요 버튼 */}
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onLike?.(article.id);
-              }}
+              onClick={handleLike}
               className="flex items-center space-x-1 hover:text-red-500 transition-colors"
             >
               <svg
@@ -314,4 +315,6 @@ export default function ArticleCard({ article, onLike, onBookmark, onClick }: Ar
       </div>
     </article>
   );
-}
+});
+
+export default ArticleCard;

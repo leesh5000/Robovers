@@ -19,7 +19,7 @@ export default function CompanyDetailPage() {
       // API 호출 시뮬레이션
       setTimeout(() => {
         const companyId = Array.isArray(params.id) ? params.id[0] : params.id;
-        const foundCompany = getDummyCompanyById(companyId);
+        const foundCompany = companyId ? getDummyCompanyById(companyId) : undefined;
         setCompany(foundCompany || null);
         setIsLoading(false);
       }, 500);

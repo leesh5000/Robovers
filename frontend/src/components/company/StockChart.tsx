@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -32,7 +32,7 @@ interface StockChartProps {
   companyName: string;
 }
 
-export default function StockChart({ companyId, companyName }: StockChartProps) {
+const StockChart = memo(function StockChart({ companyId, companyName }: StockChartProps) {
   const [priceHistory, setPriceHistory] = useState<StockPriceHistory[]>([]);
   const [timeRange, setTimeRange] = useState<'1M' | '3M' | '6M' | '1Y' | 'ALL'>('1M');
   const [isLoading, setIsLoading] = useState(true);
@@ -58,7 +58,7 @@ export default function StockChart({ companyId, companyName }: StockChartProps) 
     );
   }
 
-  const chartData = {
+  const chartData = useMemo(() => ({
     labels: priceHistory.map(item => {
       const date = new Date(item.date);
       if (timeRange === '1M' || timeRange === '3M') {
@@ -78,9 +78,9 @@ export default function StockChart({ companyId, companyName }: StockChartProps) 
         tension: 0.1,
       },
     ],
-  };
+  }), [priceHistory, timeRange]);
 
-  const options: ChartOptions<'line'> = {
+  const options: ChartOptions<'line'> = useMemo(() => ({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -133,15 +133,26 @@ export default function StockChart({ companyId, companyName }: StockChartProps) 
       axis: 'x',
       intersect: false,
     },
-  };
+  }), []);
 
-  const timeRangeButtons = [
+  const timeRangeButtons = useMemo(() => [
     { value: '1M', label: '1개월' },
     { value: '3M', label: '3개월' },
     { value: '6M', label: '6개월' },
     { value: '1Y', label: '1년' },
     { value: 'ALL', label: '전체' },
-  ];
+  ], []);
+
+  const handleTimeRangeChange = useCallback((range: typeof timeRange) => {
+    setTimeRange(range);
+  }, []);
+
+  const averageVolume = useMemo(() => {
+    if (priceHistory.length === 0) return 0;
+    return Math.round(
+      priceHistory.reduce((sum, item) => sum + (item.volume || 0), 0) / priceHistory.length
+    );
+  }, [priceHistory]);
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -151,7 +162,7 @@ export default function StockChart({ companyId, companyName }: StockChartProps) 
           {timeRangeButtons.map((button) => (
             <button
               key={button.value}
-              onClick={() => setTimeRange(button.value as typeof timeRange)}
+              onClick={() => handleTimeRangeChange(button.value as typeof timeRange)}
               className={`px-3 py-1 text-sm font-medium rounded transition-colors ${
                 timeRange === button.value
                   ? 'bg-white text-blue-600 shadow-sm'
@@ -174,13 +185,13 @@ export default function StockChart({ companyId, companyName }: StockChartProps) 
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600">평균 거래량</span>
             <span className="font-medium text-gray-900">
-              {Math.round(
-                priceHistory.reduce((sum, item) => sum + (item.volume || 0), 0) / priceHistory.length
-              ).toLocaleString()}
+              {averageVolume.toLocaleString()}
             </span>
           </div>
         </div>
       )}
     </div>
   );
-}
+});
+
+export default StockChart;

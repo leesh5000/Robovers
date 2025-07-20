@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Article, FilterOptions, SortOption } from '@/lib/types';
 import ArticleCard from './ArticleCard';
@@ -110,32 +110,34 @@ export default function MainFeed({
     rootMargin: '100px',
   });
 
-  const handleLike = (articleId: string) => {
+  const handleLike = useCallback((articleId: string) => {
     setArticles(prev => prev.map(article => 
       article.id === articleId 
         ? { ...article, likeCount: article.likeCount + 1 }
         : article
     ));
-  };
+  }, []);
 
-  const handleBookmark = (articleId: string) => {
+  const handleBookmark = useCallback((articleId: string) => {
     setArticles(prev => prev.map(article => 
       article.id === articleId 
         ? { ...article, isBookmarked: !article.isBookmarked }
         : article
     ));
-  };
+  }, []);
 
-  const handleCardClick = (articleId: string) => {
+  const handleCardClick = useCallback((articleId: string) => {
     router.push(`/articles/${articleId}`);
-  };
+  }, [router]);
 
-  const handleSortChange = (sortBy: SortOption) => {
+  const handleSortChange = useCallback((sortBy: SortOption) => {
     setFilters(prev => ({ ...prev, sortBy }));
-    
-    // 정렬 로직
-    const sortedArticles = [...articles].sort((a, b) => {
-      switch (sortBy) {
+  }, []);
+
+  // 정렬된 게시물 목록을 메모이제이션
+  const sortedArticles = useMemo(() => {
+    return [...articles].sort((a, b) => {
+      switch (filters.sortBy) {
         case 'latest':
           return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
         case 'popular':
@@ -148,27 +150,15 @@ export default function MainFeed({
           return 0;
       }
     });
-    
-    setArticles(sortedArticles);
-  };
+  }, [articles, filters.sortBy]);
 
-  const getSortLabel = (sortBy: SortOption) => {
-    const labels = {
-      'latest': '최신순',
-      'popular': '인기순',
-      'trending': '트렌딩',
-      'commented': '댓글순'
-    };
-    return labels[sortBy];
-  };
-
-  // 정렬 옵션을 드롭다운용으로 변환
-  const sortOptions: DropdownOption[] = [
+  // 정렬 옵션을 드롭다운용으로 변환 (메모이제이션)
+  const sortOptions: DropdownOption[] = useMemo(() => [
     { value: 'latest', label: '최신순' },
     { value: 'popular', label: '인기순' },
     { value: 'trending', label: '트렌딩' },
     { value: 'commented', label: '댓글순' }
-  ];
+  ], []);
 
   return (
     <div className="space-y-6">
@@ -179,7 +169,7 @@ export default function MainFeed({
             최신 로봇 뉴스 & 정보
           </h2>
           <span className="text-sm text-gray-500">
-            {articles.length}개의 게시물
+            {sortedArticles.length}개의 게시물
           </span>
         </div>
 
@@ -198,7 +188,7 @@ export default function MainFeed({
 
       {/* 게시물 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {articles.map((article) => (
+        {sortedArticles.map((article) => (
           <ArticleCard
             key={article.id}
             article={article}
@@ -263,7 +253,7 @@ export default function MainFeed({
       )}
 
       {/* 게시물이 없을 때 */}
-      {articles.length === 0 && !isLoading && (
+      {sortedArticles.length === 0 && !isLoading && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">🤖</div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
