@@ -10,6 +10,39 @@
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
   }
+  
+  /* 모든 input, textarea, select 요소에 일관된 파란색 포커스 스타일 적용 */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply outline-none ring-2 ring-blue-500 ring-offset-2 border-blue-500;
+  }
+  
+  /* input 타입별 기본 스타일 */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    @apply border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-900 placeholder-gray-500 transition-colors duration-200;
+  }
+  
+  /* 포커스 상태에서 파란색 테두리 */
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="number"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="search"]:focus,
+  textarea:focus,
+  select:focus {
+    @apply border-blue-500 ring-2 ring-blue-500 ring-offset-2;
+  }
 }
 
 @layer components {
