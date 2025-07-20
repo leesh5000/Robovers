@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { User } from '@/lib/types';
 import { getDummyUsers } from '@/lib/dummy-data';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 interface ExtendedUser extends User {
   role: 'admin' | 'editor' | 'moderator' | 'user';
@@ -17,9 +18,9 @@ const extendedUsers: ExtendedUser[] = getDummyUsers().map((user, index) => ({
   ...user,
   role: index === 0 ? 'admin' : index === 1 ? 'moderator' : 'user',
   status: 'active',
-  postCount: Math.floor(Math.random() * 100),
-  commentCount: Math.floor(Math.random() * 200),
-  reportCount: Math.floor(Math.random() * 5),
+  postCount: (index + 1) * 15,     // 15, 30, 45, 60, 75
+  commentCount: (index + 1) * 25,   // 25, 50, 75, 100, 125
+  reportCount: index % 3,           // 0, 1, 2, 0, 1
 }));
 
 export default function AdminUsersPage() {
@@ -28,6 +29,34 @@ export default function AdminUsersPage() {
   const [selectedStatus, setSelectedStatus] = useState<'all' | ExtendedUser['status']>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+
+  const roleFilterOptions: DropdownOption[] = [
+    { value: 'all', label: '모든 역할' },
+    { value: 'admin', label: '관리자' },
+    { value: 'editor', label: '편집자' },
+    { value: 'moderator', label: '모더레이터' },
+    { value: 'user', label: '일반 사용자' },
+  ];
+
+  const statusFilterOptions: DropdownOption[] = [
+    { value: 'all', label: '모든 상태' },
+    { value: 'active', label: '활성' },
+    { value: 'suspended', label: '정지' },
+    { value: 'banned', label: '차단' },
+  ];
+
+  const roleOptions: DropdownOption[] = [
+    { value: 'admin', label: '관리자' },
+    { value: 'editor', label: '편집자' },
+    { value: 'moderator', label: '모더레이터' },
+    { value: 'user', label: '일반 사용자' },
+  ];
+
+  const statusOptions: DropdownOption[] = [
+    { value: 'active', label: '활성' },
+    { value: 'suspended', label: '정지' },
+    { value: 'banned', label: '차단' },
+  ];
 
   const filteredUsers = users.filter(user => {
     const matchesRole = selectedRole === 'all' || user.role === selectedRole;
@@ -138,27 +167,18 @@ export default function AdminUsersPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
             />
           </div>
-          <select
+          <Dropdown
+            options={roleFilterOptions}
             value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          >
-            <option value="all">모든 역할</option>
-            <option value="admin">관리자</option>
-            <option value="editor">편집자</option>
-            <option value="moderator">모더레이터</option>
-            <option value="user">일반 사용자</option>
-          </select>
-          <select
+            onChange={(value) => setSelectedRole(value as any)}
+            className="w-36"
+          />
+          <Dropdown
+            options={statusFilterOptions}
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
-          >
-            <option value="all">모든 상태</option>
-            <option value="active">활성</option>
-            <option value="suspended">정지</option>
-            <option value="banned">차단</option>
-          </select>
+            onChange={(value) => setSelectedStatus(value as any)}
+            className="w-32"
+          />
         </div>
       </div>
 
@@ -225,27 +245,14 @@ export default function AdminUsersPage() {
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <select
-                    value={user.role}
-                    onChange={(e) => handleRoleChange(user.id, e.target.value as ExtendedUser['role'])}
-                    className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getRoleBadge(user.role)}`}
-                  >
-                    <option value="admin">관리자</option>
-                    <option value="editor">편집자</option>
-                    <option value="moderator">모더레이터</option>
-                    <option value="user">일반 사용자</option>
-                  </select>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadge(user.role)}`}>
+                    {roleOptions.find(opt => opt.value === user.role)?.label || user.role}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
-                  <select
-                    value={user.status}
-                    onChange={(e) => handleStatusChange(user.id, e.target.value as ExtendedUser['status'])}
-                    className={`px-2 py-1 text-xs font-semibold rounded-full border-0 ${getStatusBadge(user.status)}`}
-                  >
-                    <option value="active">활성</option>
-                    <option value="suspended">정지</option>
-                    <option value="banned">차단</option>
-                  </select>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(user.status)}`}>
+                    {statusOptions.find(opt => opt.value === user.status)?.label || user.status}
+                  </span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900">
