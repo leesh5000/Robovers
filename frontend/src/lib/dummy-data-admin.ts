@@ -1,4 +1,4 @@
-import { getDummyPosts, dummyUsers } from './dummy-data';
+import { getDummyPosts, getDummyUsers } from './dummy-data';
 
 // 어드민 페이지용 댓글 데이터 생성
 export function getDummyCommentsForAdmin() {

@@ -1,7 +1,12 @@
-import { CommunityPost, User, Company, Comment } from './types';
+import { CommunityPost, User, Company, Comment, StockPriceHistory } from './types';
+
+// 캐시된 더미 데이터
+let cachedUsers: User[] | null = null;
+let cachedPosts: CommunityPost[] | null = null;
+let cachedCompanies: Company[] | null = null;
 
 // 더미 사용자 데이터
-export const dummyUsers: User[] = [
+const generateDummyUsers = (): User[] => [
   {
     id: '1',
     username: 'robotmaster',
@@ -45,12 +50,12 @@ export const dummyUsers: User[] = [
 ];
 
 // 더미 커뮤니티 게시글 데이터
-const dummyPosts: CommunityPost[] = [
+const generateDummyPosts = (): CommunityPost[] => [
   {
     id: '1',
     title: '테슬라 옵티머스 2세대 발표! 이전 모델 대비 놀라운 개선점',
     content: '테슬라가 옵티머스 2세대를 발표했습니다. 이전 모델 대비 보행 속도가 30% 향상되었고, 손가락 움직임이 더욱 정교해졌습니다. 특히 물체를 잡고 조작하는 능력이 크게 개선되어 실제 작업 환경에서의 활용 가능성이 높아졌습니다. 가격은 아직 미정이지만, 대량 생산이 시작되면 2만 달러 이하로 낮출 수 있을 것으로 예상됩니다.',
-    author: dummyUsers[0],
+    author: generateDummyUsers()[0]!,
     createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2시간 전
     updatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
     category: 'technical',
@@ -65,7 +70,7 @@ const dummyPosts: CommunityPost[] = [
     id: '2',
     title: '보스턴 다이나믹스 아틀라스 vs 현대 DAL-e, 어떤 로봇이 더 뛰어날까?',
     content: '두 휴머노이드 로봇의 성능을 비교해봤습니다. 아틀라스는 운동 능력과 균형 감각에서 앞서고, DAL-e는 실용성과 비용 효율성에서 우위를 보입니다. 각각의 장단점을 자세히 분석해보겠습니다...',
-    author: dummyUsers[1],
+    author: generateDummyUsers()[1]!,
     createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5시간 전
     updatedAt: new Date(Date.now() - 5 * 60 * 60 * 1000),
     category: 'discussion',
@@ -80,7 +85,7 @@ const dummyPosts: CommunityPost[] = [
     id: '3',
     title: '휴머노이드 로봇 개발 시 고려해야 할 윤리적 문제들',
     content: '휴머노이드 로봇이 일상생활에 깊숙이 들어오면서 우리가 고민해야 할 윤리적 문제들이 있습니다. 프라이버시, 일자리 대체, 인간과의 관계 등 다양한 측면에서 논의가 필요합니다.',
-    author: dummyUsers[2],
+    author: generateDummyUsers()[2]!,
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1일 전
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     category: 'discussion',
@@ -95,7 +100,7 @@ const dummyPosts: CommunityPost[] = [
     id: '4',
     title: '초보자를 위한 ROS2 휴머노이드 로봇 프로그래밍 가이드',
     content: 'ROS2를 사용해서 휴머노이드 로봇을 프로그래밍하는 방법을 단계별로 설명합니다. 환경 설정부터 간단한 모션 제어까지 다룹니다.',
-    author: dummyUsers[3],
+    author: generateDummyUsers()[3]!,
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2일 전
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     category: 'technical',
@@ -110,7 +115,7 @@ const dummyPosts: CommunityPost[] = [
     id: '5',
     title: 'Figure 01 로봇이 BMW 공장에서 일하는 모습 공개!',
     content: 'Figure AI의 휴머노이드 로봇이 실제 BMW 제조 공장에서 작업하는 영상이 공개되었습니다. 부품 조립과 품질 검사를 수행하는 모습이 인상적입니다.',
-    author: dummyUsers[4],
+    author: generateDummyUsers()[4]!,
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3일 전
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
     category: 'showcase',
@@ -125,7 +130,7 @@ const dummyPosts: CommunityPost[] = [
     id: '6',
     title: '휴머노이드 로봇의 배터리 수명을 2배로 늘리는 방법은?',
     content: '최신 배터리 기술과 에너지 효율적인 모터 제어 알고리즘을 통해 휴머노이드 로봇의 작동 시간을 크게 늘릴 수 있습니다. 실제 연구 결과를 바탕으로 설명드립니다.',
-    author: dummyUsers[0],
+    author: generateDummyUsers()[0]!,
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4일 전
     updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
     category: 'technical',
@@ -140,7 +145,7 @@ const dummyPosts: CommunityPost[] = [
     id: '7',
     title: '가정용 휴머노이드 로봇, 언제쯤 우리 집에 들어올까?',
     content: '현재 기술 발전 속도와 가격 하락 추세를 고려하면, 5-10년 내에 일반 가정에서도 휴머노이드 로봇을 볼 수 있을 것으로 예상됩니다. 주요 기업들의 로드맵을 살펴보면...',
-    author: dummyUsers[1],
+    author: generateDummyUsers()[1]!,
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5일 전
     updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
     category: 'general',
@@ -155,7 +160,7 @@ const dummyPosts: CommunityPost[] = [
     id: '8',
     title: 'OpenAI가 로봇 분야에 재진출한다면? GPT와 로봇의 결합',
     content: 'OpenAI가 다시 로봇 분야에 뛰어든다면 어떤 일이 일어날까요? GPT 기술과 휴머노이드 로봇의 결합은 놀라운 시너지를 만들어낼 수 있습니다.',
-    author: dummyUsers[2],
+    author: generateDummyUsers()[2]!,
     createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6일 전
     updatedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000),
     category: 'discussion',
@@ -170,7 +175,7 @@ const dummyPosts: CommunityPost[] = [
     id: '9',
     title: '휴머노이드 로봇 스타트업에 투자하기 전 꼭 확인해야 할 5가지',
     content: '로봇 분야 투자를 고려하고 계신가요? 기술력, 시장성, 팀 구성, 특허, 파트너십 등 투자 전 반드시 검토해야 할 핵심 요소들을 정리했습니다.',
-    author: dummyUsers[3],
+    author: generateDummyUsers()[3]!,
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7일 전
     updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     category: 'general',
@@ -185,7 +190,7 @@ const dummyPosts: CommunityPost[] = [
     id: '10',
     title: '중국 유니트리 G1 로봇 실물 리뷰 - 가성비 최강 휴머노이드?',
     content: '16,000달러라는 파격적인 가격의 유니트리 G1을 직접 사용해본 후기입니다. 가격 대비 성능은 확실히 뛰어나지만, 몇 가지 아쉬운 점도 있었습니다.',
-    author: dummyUsers[4],
+    author: generateDummyUsers()[4]!,
     createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000), // 8일 전
     updatedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
     category: 'showcase',
@@ -200,7 +205,7 @@ const dummyPosts: CommunityPost[] = [
     id: '11',
     title: '로봇 관절 모터 선택 가이드 - 서보 vs 스테퍼 vs BLDC',
     content: '휴머노이드 로봇 개발 시 가장 중요한 부품 중 하나인 모터. 각 모터 타입의 장단점과 적용 사례를 상세히 비교해보겠습니다.',
-    author: dummyUsers[0],
+    author: generateDummyUsers()[0]!,
     createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000), // 10일 전
     updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
     category: 'technical',
@@ -215,7 +220,7 @@ const dummyPosts: CommunityPost[] = [
     id: '12',
     title: '휴머노이드 로봇이 의료 현장에서 간호사를 도울 수 있을까?',
     content: '고령화 사회에서 의료 인력 부족 문제를 해결할 수 있는 대안으로 휴머노이드 로봇이 주목받고 있습니다. 실제 적용 가능성과 한계점을 살펴봅니다.',
-    author: dummyUsers[1],
+    author: generateDummyUsers()[1]!,
     createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000), // 12일 전
     updatedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
     category: 'question',
@@ -229,19 +234,25 @@ const dummyPosts: CommunityPost[] = [
 ];
 
 export function getDummyPosts(): CommunityPost[] {
-  return [...dummyPosts];
+  if (!cachedPosts) {
+    cachedPosts = generateDummyPosts();
+  }
+  return [...cachedPosts];
 }
 
 export function getDummyPostById(id: string): CommunityPost | undefined {
-  return dummyPosts.find(post => post.id === id);
+  return getDummyPosts().find(post => post.id === id);
 }
 
 export function getDummyUsers(): User[] {
-  return [...dummyUsers];
+  if (!cachedUsers) {
+    cachedUsers = generateDummyUsers();
+  }
+  return [...cachedUsers];
 }
 
 // 더미 기업 데이터
-const dummyCompanies: Company[] = [
+const generateDummyCompanies = (): Company[] => [
   {
     id: '1',
     name: 'Tesla',
@@ -435,11 +446,14 @@ const dummyCompanies: Company[] = [
 ];
 
 export function getDummyCompanies(): Company[] {
-  return [...dummyCompanies];
+  if (!cachedCompanies) {
+    cachedCompanies = generateDummyCompanies();
+  }
+  return [...cachedCompanies];
 }
 
 export function getDummyCompanyById(id: string): Company | undefined {
-  return dummyCompanies.find(company => company.id === id);
+  return getDummyCompanies().find(company => company.id === id);
 }
 
 // 더미 주가 히스토리 데이터 생성
@@ -500,31 +514,31 @@ const generateDummyComments = (postId: string): Comment[] => {
   const baseComments: Omit<Comment, 'id' | 'createdAt'>[] = [
     {
       content: '정말 흥미로운 내용이네요! Tesla의 Optimus가 실제로 상용화되면 우리 생활이 많이 바뀔 것 같아요.',
-      author: dummyUsers[1],
+      author: generateDummyUsers()[1]!,
       likeCount: 12,
       isLiked: false,
     },
     {
       content: '기술적으로 아직 해결해야 할 과제들이 많을 것 같은데, 특히 배터리 지속시간과 안전성 부분이 중요할 것 같습니다.',
-      author: dummyUsers[2],
+      author: generateDummyUsers()[2]!,
       likeCount: 8,
       isLiked: true,
     },
     {
       content: '가격이 정말 중요한 요소인 것 같아요. 2만 달러면 일반 가정에서도 구매할 수 있는 수준이네요.',
-      author: dummyUsers[3],
+      author: generateDummyUsers()[3]!,
       likeCount: 15,
       isLiked: false,
     },
     {
       content: '보스턴 다이나믹스의 Atlas와 비교했을 때 어떤 장단점이 있을까요?',
-      author: dummyUsers[4],
+      author: generateDummyUsers()[4]!,
       likeCount: 5,
       isLiked: false,
     },
     {
       content: '휴머노이드 로봇의 윤리적 문제도 함께 논의되어야 할 것 같습니다. 일자리 대체 문제 등...',
-      author: dummyUsers[0],
+      author: generateDummyUsers()[0]!,
       likeCount: 23,
       isLiked: true,
     },
@@ -533,19 +547,19 @@ const generateDummyComments = (postId: string): Comment[] => {
   const replies: Omit<Comment, 'id' | 'createdAt'>[] = [
     {
       content: '맞습니다! 특히 제조업에서의 활용도가 높을 것 같아요.',
-      author: dummyUsers[0],
+      author: generateDummyUsers()[0]!,
       likeCount: 3,
       isLiked: false,
     },
     {
       content: '안전성 문제는 정말 중요하죠. ISO 표준 같은 것들이 필요할 것 같아요.',
-      author: dummyUsers[1],
+      author: generateDummyUsers()[1]!,
       likeCount: 7,
       isLiked: false,
     },
     {
       content: 'Atlas는 운동성능이, Optimus는 실용성이 더 좋은 것 같아요.',
-      author: dummyUsers[2],
+      author: generateDummyUsers()[2]!,
       likeCount: 4,
       isLiked: true,
     },
@@ -591,7 +605,14 @@ export function getDummyComments(postId: string): Comment[] {
 }
 
 // 어드민 페이지용 댓글 데이터 생성
+// 캐시된 어드민 댓글 데이터
+let cachedAdminComments: any[] | null = null;
+
 export function getDummyCommentsForAdmin() {
+  if (cachedAdminComments) {
+    return cachedAdminComments;
+  }
+  
   const posts = getDummyPosts();
   const adminComments: any[] = [];
   
@@ -657,7 +678,8 @@ export function getDummyCommentsForAdmin() {
   // 추가 댓글 50개 생성
   for (let i = 0; i < 50; i++) {
     const randomPost = posts[Math.floor(Math.random() * posts.length)];
-    const randomUser = dummyUsers[Math.floor(Math.random() * dummyUsers.length)];
+    const users = getDummyUsers();
+    const randomUser = users[Math.floor(Math.random() * users.length)];
     const randomContent = additionalComments[Math.floor(Math.random() * additionalComments.length)];
     const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -669,12 +691,21 @@ export function getDummyCommentsForAdmin() {
       createdAt: getRandomRecentDate(),
       likeCount: Math.floor(Math.random() * 50),
       isLiked: Math.random() > 0.7,
-      postId: randomPost.id,
-      postTitle: randomPost.title,
+      postId: randomPost?.id || 'unknown',
+      postTitle: randomPost?.title || 'Unknown Post',
       status: randomStatus,
       reportCount: randomStatus === 'reported' ? Math.floor(Math.random() * 15) + 1 : 0,
     });
   }
   
+  cachedAdminComments = adminComments;
   return adminComments;
+}
+
+// 캐시 초기화 함수 (필요시 사용)
+export function clearDummyDataCache() {
+  cachedUsers = null;
+  cachedPosts = null;
+  cachedCompanies = null;
+  cachedAdminComments = null;
 }

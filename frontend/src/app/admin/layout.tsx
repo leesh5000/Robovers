@@ -173,14 +173,14 @@ export default function AdminLayout({
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex min-h-[calc(100vh-4rem)]">
         {/* 사이드바 */}
         <aside
           className={`${
             isSidebarOpen ? 'w-64' : 'w-0'
-          } bg-white shadow-lg transition-all duration-300 overflow-hidden`}
+          } bg-white shadow-lg transition-all duration-300 overflow-hidden sticky top-16 h-[calc(100vh-4rem)]`}
         >
-          <nav className="p-4 space-y-1">
+          <nav className="p-4 space-y-1 overflow-y-auto h-full">
             {navItems.map((item) => (
               <div key={item.label}>
                 <div
@@ -239,7 +239,7 @@ export default function AdminLayout({
         </aside>
 
         {/* 메인 콘텐츠 */}
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 min-h-[calc(100vh-4rem)]">
           {children}
         </main>
       </div>

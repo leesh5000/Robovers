@@ -1,7 +1,7 @@
 'use client';
 
 import { Company } from '@/lib/types';
-import StockChart from './StockChart';
+import LazyStockChart from './LazyStockChart';
 import CompanyFinancials from './CompanyFinancials';
 
 interface CompanyDetailProps {
@@ -156,7 +156,7 @@ export default function CompanyDetail({ company }: CompanyDetailProps) {
 
       {/* 주가 차트 (상장 기업만) */}
       {company.isPublic && company.currentPrice > 0 && (
-        <StockChart companyId={company.id} companyName={company.name} />
+        <LazyStockChart companyId={company.id} companyName={company.name} />
       )}
 
       {/* 재무 정보 및 추가 정보 */}
