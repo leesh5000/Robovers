@@ -87,8 +87,7 @@ export default function CompanyList({ filters, searchQuery }: CompanyListProps) 
   }, [companies, filters, searchQuery]);
 
   const handleCompanyClick = (company: Company) => {
-    console.log('Company clicked:', company);
-    // 추후 기업 상세 페이지로 이동하는 로직 구현
+    window.location.href = `/companies/${company.id}`;
   };
 
   if (loading) {
