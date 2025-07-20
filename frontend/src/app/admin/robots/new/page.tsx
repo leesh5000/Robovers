@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { RobotCategory, RobotStatus } from '@/lib/types';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 export default function NewRobotPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function NewRobotPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories: { value: RobotCategory; label: string }[] = [
+  const categoryOptions: DropdownOption[] = [
     { value: 'industrial', label: '산업용' },
     { value: 'domestic', label: '가정용' },
     { value: 'research', label: '연구용' },
@@ -47,7 +48,7 @@ export default function NewRobotPage() {
     { value: 'service', label: '서비스' },
   ];
 
-  const statuses: { value: RobotStatus; label: string }[] = [
+  const statusOptions: DropdownOption[] = [
     { value: 'concept', label: '컨셉' },
     { value: 'prototype', label: '프로토타입' },
     { value: 'development', label: '개발중' },
@@ -56,6 +57,13 @@ export default function NewRobotPage() {
     { value: 'production', label: '생산' },
     { value: 'commercial', label: '상용화' },
     { value: 'discontinued', label: '단종' },
+  ];
+
+  const currencyOptions: DropdownOption[] = [
+    { value: 'USD', label: 'USD' },
+    { value: 'KRW', label: 'KRW' },
+    { value: 'EUR', label: 'EUR' },
+    { value: 'JPY', label: 'JPY' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -172,32 +180,24 @@ export default function NewRobotPage() {
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                 카테고리 *
               </label>
-              <select
-                id="category"
+              <Dropdown
+                options={categoryOptions}
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as RobotCategory })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, category: value as RobotCategory })}
+                className="w-full"
+              />
             </div>
 
             <div>
               <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
                 개발 상태 *
               </label>
-              <select
-                id="status"
+              <Dropdown
+                options={statusOptions}
                 value={formData.developmentStatus}
-                onChange={(e) => setFormData({ ...formData, developmentStatus: e.target.value as RobotStatus })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                {statuses.map((status) => (
-                  <option key={status.value} value={status.value}>{status.label}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, developmentStatus: value as RobotStatus })}
+                className="w-full"
+              />
             </div>
 
             <div>
@@ -438,20 +438,15 @@ export default function NewRobotPage() {
               <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-2">
                 통화
               </label>
-              <select
-                id="currency"
+              <Dropdown
+                options={currencyOptions}
                 value={formData.price.currency}
-                onChange={(e) => setFormData({
+                onChange={(value) => setFormData({
                   ...formData,
-                  price: { ...formData.price, currency: e.target.value }
+                  price: { ...formData.price, currency: value }
                 })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                <option value="USD">USD</option>
-                <option value="KRW">KRW</option>
-                <option value="EUR">EUR</option>
-                <option value="JPY">JPY</option>
-              </select>
+                className="w-full"
+              />
             </div>
 
             <div>

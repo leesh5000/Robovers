@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CompanySector } from '@/lib/types';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 export default function NewCompanyPage() {
   const router = useRouter();
@@ -26,7 +27,7 @@ export default function NewCompanyPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const sectors: { value: CompanySector; label: string }[] = [
+  const sectorOptions: DropdownOption[] = [
     { value: 'robotics', label: '로봇' },
     { value: 'automotive', label: '자동차' },
     { value: 'technology', label: '기술' },
@@ -35,8 +36,17 @@ export default function NewCompanyPage() {
     { value: 'consumer', label: '소비자' },
   ];
 
-  const countries = [
-    '미국', '한국', '일본', '중국', '독일', '영국', '프랑스', '캐나다', '노르웨이', '기타'
+  const countryOptions: DropdownOption[] = [
+    { value: '미국', label: '미국' },
+    { value: '한국', label: '한국' },
+    { value: '일본', label: '일본' },
+    { value: '중국', label: '중국' },
+    { value: '독일', label: '독일' },
+    { value: '영국', label: '영국' },
+    { value: '프랑스', label: '프랑스' },
+    { value: '캐나다', label: '캐나다' },
+    { value: '노르웨이', label: '노르웨이' },
+    { value: '기타', label: '기타' },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -163,34 +173,25 @@ export default function NewCompanyPage() {
               <label htmlFor="sector" className="block text-sm font-medium text-gray-700 mb-2">
                 섹터 *
               </label>
-              <select
-                id="sector"
+              <Dropdown
+                options={sectorOptions}
                 value={formData.sector}
-                onChange={(e) => setFormData({ ...formData, sector: e.target.value as CompanySector })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                {sectors.map((sector) => (
-                  <option key={sector.value} value={sector.value}>{sector.label}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, sector: value as CompanySector })}
+                className="w-full"
+              />
             </div>
 
             <div>
               <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
                 국가 *
               </label>
-              <select
-                id="country"
-                required
+              <Dropdown
+                options={countryOptions}
                 value={formData.country}
-                onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-              >
-                <option value="">선택하세요</option>
-                {countries.map((country) => (
-                  <option key={country} value={country}>{country}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, country: value })}
+                placeholder="선택하세요"
+                className="w-full"
+              />
             </div>
 
             <div>

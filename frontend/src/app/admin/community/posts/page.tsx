@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { CommunityPost, CommunityCategory } from '@/lib/types';
 import { getDummyPosts } from '@/lib/dummy-data';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 export default function AdminCommunityPostsPage() {
   const [posts, setPosts] = useState<CommunityPost[]>(getDummyPosts());
@@ -10,6 +11,21 @@ export default function AdminCommunityPostsPage() {
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'published' | 'pending' | 'pinned'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPosts, setSelectedPosts] = useState<string[]>([]);
+
+  const categoryOptions: DropdownOption[] = [
+    { value: 'all', label: '전체' },
+    { value: 'general', label: '일반' },
+    { value: 'technical', label: '기술' },
+    { value: 'showcase', label: '쇼케이스' },
+    { value: 'question', label: '질문' },
+    { value: 'discussion', label: '토론' },
+  ];
+
+  const statusOptions: DropdownOption[] = [
+    { value: 'all', label: '전체' },
+    { value: 'published', label: '게시됨' },
+    { value: 'pinned', label: '고정됨' },
+  ];
 
   const categories: { value: CommunityCategory | 'all'; label: string }[] = [
     { value: 'all', label: '전체' },
@@ -98,24 +114,18 @@ export default function AdminCommunityPostsPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-          <select
+          <Dropdown
+            options={categoryOptions}
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as CommunityCategory | 'all')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            {categories.map(cat => (
-              <option key={cat.value} value={cat.value}>{cat.label}</option>
-            ))}
-          </select>
-          <select
+            onChange={(value) => setSelectedCategory(value as CommunityCategory | 'all')}
+            className="w-32"
+          />
+          <Dropdown
+            options={statusOptions}
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            <option value="all">전체</option>
-            <option value="published">게시됨</option>
-            <option value="pinned">고정됨</option>
-          </select>
+            onChange={(value) => setSelectedStatus(value as any)}
+            className="w-32"
+          />
           {selectedPosts.length > 0 && (
             <button
               onClick={handleBulkDelete}

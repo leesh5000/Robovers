@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Company, CompanySector } from '@/lib/types';
 import { getDummyCompanies } from '@/lib/dummy-data';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 export default function AdminCompaniesPage() {
   const [companies, setCompanies] = useState<Company[]>(getDummyCompanies());
@@ -11,7 +12,7 @@ export default function AdminCompaniesPage() {
   const [selectedPublic, setSelectedPublic] = useState<'all' | 'public' | 'private'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const sectors: { value: CompanySector | 'all'; label: string }[] = [
+  const sectorOptions: DropdownOption[] = [
     { value: 'all', label: '전체' },
     { value: 'robotics', label: '로봇' },
     { value: 'automotive', label: '자동차' },
@@ -19,6 +20,12 @@ export default function AdminCompaniesPage() {
     { value: 'defense', label: '방위' },
     { value: 'research', label: '연구' },
     { value: 'consumer', label: '소비자' },
+  ];
+
+  const publicOptions: DropdownOption[] = [
+    { value: 'all', label: '전체' },
+    { value: 'public', label: '상장' },
+    { value: 'private', label: '비상장' },
   ];
 
   const filteredCompanies = companies.filter(company => {
@@ -97,24 +104,18 @@ export default function AdminCompaniesPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
-          <select
+          <Dropdown
+            options={sectorOptions}
             value={selectedSector}
-            onChange={(e) => setSelectedSector(e.target.value as CompanySector | 'all')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            {sectors.map(sector => (
-              <option key={sector.value} value={sector.value}>{sector.label}</option>
-            ))}
-          </select>
-          <select
+            onChange={(value) => setSelectedSector(value as CompanySector | 'all')}
+            className="w-32"
+          />
+          <Dropdown
+            options={publicOptions}
             value={selectedPublic}
-            onChange={(e) => setSelectedPublic(e.target.value as 'all' | 'public' | 'private')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="all">전체</option>
-            <option value="public">상장</option>
-            <option value="private">비상장</option>
-          </select>
+            onChange={(value) => setSelectedPublic(value as 'all' | 'public' | 'private')}
+            className="w-32"
+          />
         </div>
       </div>
 
@@ -208,7 +209,7 @@ export default function AdminCompaniesPage() {
                 </td>
                 <td className="px-6 py-4">
                   <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
-                    {sectors.find(s => s.value === company.sector)?.label || company.sector}
+                    {sectorOptions.find(s => s.value === company.sector)?.label || company.sector}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-900">

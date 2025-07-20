@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Robot, RobotCategory, RobotStatus } from '@/lib/types';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 // 더미 로봇 데이터 (기존 데이터 재사용)
 const dummyRobots: Robot[] = [
@@ -57,7 +58,7 @@ export default function AdminRobotsPage() {
   const [selectedStatus, setSelectedStatus] = useState<RobotStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categories: { value: RobotCategory | 'all'; label: string }[] = [
+  const categoryOptions: DropdownOption[] = [
     { value: 'all', label: '전체' },
     { value: 'industrial', label: '산업용' },
     { value: 'domestic', label: '가정용' },
@@ -66,6 +67,18 @@ export default function AdminRobotsPage() {
     { value: 'healthcare', label: '의료용' },
     { value: 'entertainment', label: '엔터테인먼트' },
     { value: 'service', label: '서비스' },
+  ];
+
+  const statusOptions: DropdownOption[] = [
+    { value: 'all', label: '전체' },
+    { value: 'concept', label: '컨셉' },
+    { value: 'prototype', label: '프로토타입' },
+    { value: 'development', label: '개발중' },
+    { value: 'research', label: '연구중' },
+    { value: 'testing', label: '테스트' },
+    { value: 'production', label: '생산' },
+    { value: 'commercial', label: '상용화' },
+    { value: 'discontinued', label: '단종' },
   ];
 
   const statuses: { value: RobotStatus | 'all'; label: string; color: string }[] = [
@@ -143,24 +156,18 @@ export default function AdminRobotsPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
-          <select
+          <Dropdown
+            options={categoryOptions}
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as RobotCategory | 'all')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            {categories.map(cat => (
-              <option key={cat.value} value={cat.value}>{cat.label}</option>
-            ))}
-          </select>
-          <select
+            onChange={(value) => setSelectedCategory(value as RobotCategory | 'all')}
+            className="w-40"
+          />
+          <Dropdown
+            options={statusOptions}
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value as RobotStatus | 'all')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            {statuses.map(status => (
-              <option key={status.value} value={status.value}>{status.label}</option>
-            ))}
-          </select>
+            onChange={(value) => setSelectedStatus(value as RobotStatus | 'all')}
+            className="w-32"
+          />
         </div>
       </div>
 

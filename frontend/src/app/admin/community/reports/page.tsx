@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 interface Report {
   id: string;
@@ -84,6 +85,20 @@ export default function AdminCommunityReportsPage() {
   const [selectedType, setSelectedType] = useState<'all' | Report['type']>('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | Report['status']>('all');
 
+  const typeOptions: DropdownOption[] = [
+    { value: 'all', label: '모든 유형' },
+    { value: 'post', label: '게시글' },
+    { value: 'comment', label: '댓글' },
+    { value: 'user', label: '사용자' },
+  ];
+
+  const statusOptions: DropdownOption[] = [
+    { value: 'all', label: '모든 상태' },
+    { value: 'pending', label: '대기중' },
+    { value: 'resolved', label: '처리됨' },
+    { value: 'dismissed', label: '기각됨' },
+  ];
+
   const filteredReports = reports.filter(report => {
     const matchesType = selectedType === 'all' || report.type === selectedType;
     const matchesStatus = selectedStatus === 'all' || report.status === selectedStatus;
@@ -142,26 +157,18 @@ export default function AdminCommunityReportsPage() {
       {/* 필터 */}
       <div className="bg-white rounded-lg shadow mb-6 p-4">
         <div className="flex flex-col md:flex-row gap-4">
-          <select
+          <Dropdown
+            options={typeOptions}
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
-            <option value="all">모든 유형</option>
-            <option value="post">게시글</option>
-            <option value="comment">댓글</option>
-            <option value="user">사용자</option>
-          </select>
-          <select
+            onChange={(value) => setSelectedType(value as any)}
+            className="w-32"
+          />
+          <Dropdown
+            options={statusOptions}
             value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value as any)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
-            <option value="all">모든 상태</option>
-            <option value="pending">대기중</option>
-            <option value="resolved">처리됨</option>
-            <option value="dismissed">기각됨</option>
-          </select>
+            onChange={(value) => setSelectedStatus(value as any)}
+            className="w-32"
+          />
           <div className="ml-auto text-sm text-gray-600">
             총 {filteredReports.length}건의 신고
           </div>

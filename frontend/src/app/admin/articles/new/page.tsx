@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ArticleCategory } from '@/lib/types';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 // 동적 import로 SSR 비활성화 (에디터는 클라이언트 전용)
 const RichTextEditor = dynamic(
@@ -25,7 +26,7 @@ export default function NewArticlePage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories: { value: ArticleCategory; label: string }[] = [
+  const categoryOptions: DropdownOption[] = [
     { value: 'news', label: '뉴스' },
     { value: 'tech-review', label: '기술 리뷰' },
     { value: 'company-update', label: '기업 소식' },
@@ -145,16 +146,12 @@ export default function NewArticlePage() {
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
                 카테고리 *
               </label>
-              <select
-                id="category"
+              <Dropdown
+                options={categoryOptions}
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as ArticleCategory })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {categories.map((cat) => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
-              </select>
+                onChange={(value) => setFormData({ ...formData, category: value as ArticleCategory })}
+                className="w-full"
+              />
             </div>
 
             <div>

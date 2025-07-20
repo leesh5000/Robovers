@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 interface RichTextEditorProps {
   value: string;
@@ -14,6 +15,14 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     italic: false,
     underline: false,
   });
+  const [selectedFormat, setSelectedFormat] = useState('p');
+
+  const formatOptions: DropdownOption[] = [
+    { value: 'p', label: '본문' },
+    { value: 'h1', label: '제목 1' },
+    { value: 'h2', label: '제목 2' },
+    { value: 'h3', label: '제목 3' },
+  ];
 
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
@@ -92,15 +101,16 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
         {/* 헤딩 */}
         <div className="flex gap-1 pr-2 border-r border-gray-300">
-          <select
-            onChange={(e) => execCommand('formatBlock', e.target.value)}
-            className="px-2 py-1 text-sm border border-gray-300 rounded"
-          >
-            <option value="p">본문</option>
-            <option value="h1">제목 1</option>
-            <option value="h2">제목 2</option>
-            <option value="h3">제목 3</option>
-          </select>
+          <Dropdown
+            options={formatOptions}
+            value={selectedFormat}
+            onChange={(value) => {
+              execCommand('formatBlock', value);
+              setSelectedFormat(value);
+            }}
+            size="sm"
+            className="w-24"
+          />
         </div>
 
         {/* 목록 */}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Article, ArticleCategory } from '@/lib/types';
+import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 // 더미 기사 데이터
 const dummyArticles: Article[] = [
@@ -43,6 +44,15 @@ export default function AdminArticlesPage() {
   const [selectedCategory, setSelectedCategory] = useState<ArticleCategory | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
+
+  const categoryOptions: DropdownOption[] = [
+    { value: 'all', label: '전체' },
+    { value: 'news', label: '뉴스' },
+    { value: 'tech-review', label: '기술 리뷰' },
+    { value: 'company-update', label: '기업 소식' },
+    { value: 'research', label: '연구' },
+    { value: 'innovation', label: '혁신' },
+  ];
 
   const categories: { value: ArticleCategory | 'all'; label: string }[] = [
     { value: 'all', label: '전체' },
@@ -118,15 +128,12 @@ export default function AdminArticlesPage() {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-          <select
+          <Dropdown
+            options={categoryOptions}
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value as ArticleCategory | 'all')}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {categories.map(cat => (
-              <option key={cat.value} value={cat.value}>{cat.label}</option>
-            ))}
-          </select>
+            onChange={(value) => setSelectedCategory(value as ArticleCategory | 'all')}
+            className="w-32"
+          />
           {selectedArticles.length > 0 && (
             <button
               onClick={handleBulkDelete}
