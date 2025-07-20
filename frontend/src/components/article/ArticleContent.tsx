@@ -2,6 +2,7 @@
 
 import { Post } from '@/lib/api/posts';
 import { useState } from 'react';
+import DOMPurify from 'dompurify';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useRouter } from 'next/navigation';
@@ -55,10 +56,17 @@ export default function ArticleContent({ post }: ArticleContentProps) {
     }
   };
 
+  // 마크다운을 HTML로 변환하고 DOMPurify로 sanitize
+  const sanitizedContent = DOMPurify.sanitize(convertMarkdownToHtml(post.content), {
+    ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'blockquote', 'code', 'pre'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    KEEP_CONTENT: true
+  });
+
   return (
     <article>
       <div className="prose prose-lg max-w-none mb-8">
-        <div dangerouslySetInnerHTML={{ __html: convertMarkdownToHtml(post.content) }} />
+        <div dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
       </div>
 
       {/* Source link for NEWS articles */}

@@ -11,7 +11,8 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.17.15",
@@ -21,7 +22,9 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.2.0",
+    "dompurify": "^3.2.6",
     "framer-motion": "^10.18.0",
+    "js-cookie": "^3.0.5",
     "next": "14.0.4",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
@@ -33,10 +36,13 @@
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.4.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/dompurify": "^3.2.0",
     "@types/jest": "^29.5.11",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.18",

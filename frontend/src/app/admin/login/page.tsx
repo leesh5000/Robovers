@@ -62,10 +62,13 @@ export default function AdminLoginPage() {
     setErrors({}); // Clear previous errors
     console.log('Starting login process...');
     
-    // 임시 관리자 로그인 처리
+    // 환경변수 기반 관리자 로그인 처리
     setTimeout(() => {
-      // 테스트용 관리자 계정
-      if (formData.email === 'admin@robovers.com' && formData.password === 'Admin1234!') {
+      // 환경변수에서 관리자 계정 정보 확인
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@robovers.com';
+      const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'ChangeMe123!';
+      
+      if (formData.email === adminEmail && formData.password === adminPassword) {
         console.log('Login successful! Redirecting to admin page...');
         // 쿠키에 임시 토큰 설정
         document.cookie = 'admin-token=temp-admin-token; path=/';
@@ -170,14 +173,16 @@ export default function AdminLoginPage() {
             </button>
           </div>
 
-          {/* 테스트 계정 안내 */}
-          <div className="mt-6 p-4 bg-gray-100 rounded-lg border border-gray-300">
-            <p className="text-sm text-gray-600">
-              <strong className="text-gray-900">테스트 관리자 계정:</strong><br />
-              이메일: admin@robovers.com<br />
-              비밀번호: Admin1234!
-            </p>
-          </div>
+          {/* 개발 환경에서만 테스트 계정 안내 */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <p className="text-sm text-yellow-800">
+                <strong className="text-yellow-900">개발 환경 관리자 계정:</strong><br />
+                이메일: {process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'admin@robovers.com'}<br />
+                프로덕션에서는 환경변수로 설정하세요.
+              </p>
+            </div>
+          )}
 
           <div className="text-center">
             <Link

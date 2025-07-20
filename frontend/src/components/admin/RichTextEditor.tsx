@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
 interface RichTextEditorProps {
@@ -17,6 +18,19 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
   });
   const [selectedFormat, setSelectedFormat] = useState('p');
 
+  // value가 변경될 때 에디터 내용을 안전하게 업데이트
+  useEffect(() => {
+    if (editorRef.current && value !== editorRef.current.innerHTML) {
+      // HTML 콘텐츠를 DOMPurify로 sanitize
+      const cleanHTML = DOMPurify.sanitize(value, {
+        ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'b', 'i', 'u', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img'],
+        ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target'],
+        KEEP_CONTENT: true
+      });
+      editorRef.current.innerHTML = cleanHTML;
+    }
+  }, [value]);
+
   const formatOptions: DropdownOption[] = [
     { value: 'p', label: '본문' },
     { value: 'h1', label: '제목 1' },
@@ -28,7 +42,13 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
     document.execCommand(command, false, value);
     updateActiveFormats();
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      // HTML 콘텐츠를 DOMPurify로 sanitize
+      const cleanHTML = DOMPurify.sanitize(editorRef.current.innerHTML, {
+        ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'b', 'i', 'u', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img'],
+        ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target'],
+        KEEP_CONTENT: true
+      });
+      onChange(cleanHTML);
     }
   };
 
@@ -42,7 +62,13 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
 
   const handleInput = () => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      // HTML 콘텐츠를 DOMPurify로 sanitize
+      const cleanHTML = DOMPurify.sanitize(editorRef.current.innerHTML, {
+        ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'b', 'i', 'u', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img'],
+        ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'target'],
+        KEEP_CONTENT: true
+      });
+      onChange(cleanHTML);
     }
   };
 
@@ -204,7 +230,6 @@ export default function RichTextEditor({ value, onChange }: RichTextEditorProps)
         onInput={handleInput}
         onMouseUp={updateActiveFormats}
         onKeyUp={updateActiveFormats}
-        dangerouslySetInnerHTML={{ __html: value }}
         style={{
           fontFamily: 'Arial, sans-serif',
           fontSize: '16px',

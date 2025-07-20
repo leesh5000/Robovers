@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { authApi, AuthResponse } from '@/lib/api/auth';
+import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 
 interface User {
@@ -45,9 +46,18 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authApi.login({ email, password });
           
-          // Save tokens
-          localStorage.setItem('accessToken', response.accessToken);
-          localStorage.setItem('refreshToken', response.refreshToken);
+          // Save tokens in secure httpOnly cookies (in production)
+          // For development, use secure cookies with proper flags
+          Cookies.set('accessToken', response.accessToken, {
+            expires: 1, // 1 day
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+          });
+          Cookies.set('refreshToken', response.refreshToken, {
+            expires: 7, // 7 days
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+          });
           
           set({
             user: response.user,
@@ -106,6 +116,9 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         authApi.logout();
+        // Remove tokens from cookies
+        Cookies.remove('accessToken');
+        Cookies.remove('refreshToken');
         set({
           user: null,
           isAuthenticated: false,
