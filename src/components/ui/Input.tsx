@@ -28,8 +28,8 @@ const Input = memo(forwardRef<HTMLInputElement, InputProps>(function Input(
 ) {
   const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
   
-  const baseInputStyles = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500';
-  const errorInputStyles = error ? 'border-red-300 focus:border-red-500' : '';
+  const baseInputStyles = 'block w-full rounded-md border-gray-300 shadow-sm focus:border-2 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500';
+  const errorInputStyles = error ? 'border-red-300 focus:border-2 focus:border-red-500' : '';
   const paddingStyles = leftIcon && rightIcon ? 'pl-10 pr-10' : leftIcon ? 'pl-10' : rightIcon ? 'pr-10' : '';
   
   return (
