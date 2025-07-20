@@ -4,72 +4,47 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Robovers is a humanoid robot information sharing platform built with:
+Robovers Frontend is a humanoid robot information sharing platform built with:
 
-- **Backend**: NestJS with Hexagonal Architecture, Prisma ORM, PostgreSQL
-- **Frontend**: Next.js 14, TailwindCSS, TanStack Query
-- **Infrastructure**: Docker, Redis, pnpm monorepo
+- **Frontend**: Next.js 14, TailwindCSS, TanStack Query, TypeScript
+- **Package Manager**: PNPM
+- **Testing**: Jest, React Testing Library
+- **State Management**: TanStack Query + Zustand
+
+**Note**: This is now a frontend-only project. The backend has been separated into a different repository.
 
 ## Essential Commands
 
 ### Development
 
 ```bash
-# Install dependencies (monorepo)
+# Install dependencies
 pnpm install
 
-# Run all services in development mode
+# Run development server (port 4000)
 pnpm dev
 
-# Run specific package
-pnpm --filter @robovers/backend dev
-pnpm --filter @robovers/frontend dev
+# Build for production
+pnpm build
 
-# Start Docker services (PostgreSQL, Redis)
-docker-compose up -d
+# Start production server
+pnpm start
 ```
 
 ### Testing
 
 ```bash
-# Run all tests (unit + integration)
+# Run all tests
 pnpm test
 
-# Run specific test types
-pnpm --filter @robovers/backend test:int        # Integration tests only
-pnpm --filter @robovers/backend test:all        # Unit + Integration tests
-pnpm --filter @robovers/backend test:e2e        # E2E tests (in test/e2e/)
-
 # Run tests in watch mode
-pnpm --filter @robovers/backend test:watch
-pnpm --filter @robovers/frontend test:watch
+pnpm test:watch
 
 # Run tests with coverage
-pnpm --filter @robovers/backend test:cov
-pnpm --filter @robovers/frontend test:coverage
+pnpm test:coverage
 
 # Run single test file
-pnpm --filter @robovers/backend test -- user.entity.spec.ts
-pnpm --filter @robovers/frontend test -- ArticleCard.test.tsx
-
-# Debug tests
-pnpm --filter @robovers/backend test:debug
-```
-
-### Database Management
-
-```bash
-# Generate Prisma client
-pnpm --filter @robovers/backend prisma:generate
-
-# Create new migration
-pnpm --filter @robovers/backend prisma:migrate:dev
-
-# Deploy migrations to production
-pnpm --filter @robovers/backend prisma:migrate:deploy
-
-# Open Prisma Studio
-pnpm --filter @robovers/backend prisma:studio
+pnpm test -- Button.test.tsx
 ```
 
 ### Code Quality
@@ -78,85 +53,17 @@ pnpm --filter @robovers/backend prisma:studio
 # Run linting
 pnpm lint
 
-# Fix linting issues
-pnpm lint --fix
-
 # Type checking
-pnpm --filter @robovers/frontend type-check
+pnpm type-check
 
 # Format code
-pnpm --filter @robovers/frontend format
-```
+pnpm format
 
-### Build & Production
-
-```bash
-# Build all packages
-pnpm build
-
-# Build specific package
-pnpm --filter @robovers/backend build
-pnpm --filter @robovers/frontend build
-
-# Start production server
-pnpm --filter @robovers/backend start:prod
-pnpm --filter @robovers/frontend start
+# Bundle analysis
+pnpm analyze
 ```
 
 ## Architecture Patterns
-
-### Backend - Hexagonal Architecture
-
-The backend follows hexagonal architecture with Domain-Driven Design (DDD) patterns:
-
-```text
-backend/src/
-├── modules/                 # Feature modules
-│   ├── user/
-│   │   ├── domain/
-│   │   │   ├── entities/           # Domain entities (User, EmailVerification)
-│   │   │   ├── value-objects/      # Value objects (Email, Password, Nickname)
-│   │   │   ├── repositories/       # Repository interfaces (ports)
-│   │   │   ├── factories/          # Entity factories
-│   │   │   └── exceptions/         # Domain-specific exceptions
-│   │   ├── application/
-│   │   │   ├── use-cases/          # Business use cases
-│   │   │   └── services/           # Application service interfaces
-│   │   ├── infrastructure/
-│   │   │   ├── persistence/
-│   │   │   │   ├── prisma/         # Prisma repository implementations
-│   │   │   │   └── mappers/        # Domain-DB mapping
-│   │   │   ├── services/           # External service implementations
-│   │   │   ├── auth/               # JWT strategy, guards
-│   │   │   └── config/             # Module configuration
-│   │   ├── presentation/
-│   │   │   ├── controllers/        # REST controllers
-│   │   │   ├── dtos/               # Request/response DTOs
-│   │   │   ├── decorators/         # Custom decorators
-│   │   │   └── validators/         # Input validation
-│   │   └── test/
-│   │       ├── unit/               # Domain & application layer tests
-│   │       ├── integration/        # Infrastructure layer tests
-│   │       ├── e2e/                # End-to-end tests
-│   │       └── fakes/              # Test doubles & fake implementations
-├── common/                         # Shared utilities (Prisma, Snowflake ID)
-└── main.ts                        # Application bootstrap
-```
-
-**Key DDD Patterns Implemented:**
-
-- **Entities**: Rich domain objects with business logic and invariants
-- **Value Objects**: Immutable objects representing descriptive aspects (Email, Password)
-- **Factories**: Object creation with complex business rules
-- **Repositories**: Data access abstraction with mapper pattern
-- **Use Cases**: Application-specific business rules
-- **Domain Exceptions**: Business rule violations expressed as exceptions
-
-**Dependency Direction:**
-- Infrastructure → Application → Domain
-- All dependencies point inward
-- Domain layer has no external dependencies
-- Infrastructure implements domain interfaces
 
 ### Frontend - Component Architecture
 
