@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Comment, CommunityPost } from '@/lib/types';
-import { getDummyCommentsForAdmin } from '@/lib/dummy-data';
+import { getDummyCommentsForAdmin } from '@/lib/dummy-data-admin';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 import Pagination from '@/components/ui/Pagination';
+import { handleCommentClick } from './comment-click';
 
 interface AdminComment extends Comment {
   postId: string;
@@ -342,7 +343,7 @@ export default function AdminCommentsPage() {
                   <div className="max-w-md">
                     <p 
                       className="text-sm text-gray-900 line-clamp-2 cursor-pointer hover:text-blue-600 transition-colors"
-                      onClick={() => window.location.href = `/community/${comment.postId}?commentId=${comment.id}`}
+                      onClick={() => handleCommentClick(comment.postId, comment.id)}
                     >
                       {comment.content}
                     </p>

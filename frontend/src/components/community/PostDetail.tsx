@@ -8,6 +8,7 @@ import CommentList from './CommentList';
 
 interface PostDetailProps {
   post: CommunityPost;
+  highlightCommentId?: string | null;
 }
 
 const categoryColors: Record<string, { bg: string; text: string }> = {
@@ -26,7 +27,7 @@ const categoryLabels: Record<string, string> = {
   discussion: '토론',
 };
 
-export default function PostDetail({ post }: PostDetailProps) {
+export default function PostDetail({ post, highlightCommentId }: PostDetailProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState(post.likeCount);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -264,7 +265,7 @@ export default function PostDetail({ post }: PostDetailProps) {
       </article>
 
       {/* 댓글 섹션 */}
-      <CommentList postId={post.id} />
+      <CommentList postId={post.id} highlightCommentId={highlightCommentId} />
     </div>
   );
 }

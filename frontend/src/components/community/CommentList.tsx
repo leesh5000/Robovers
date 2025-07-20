@@ -9,9 +9,10 @@ import Dropdown from '@/components/ui/Dropdown';
 
 interface CommentListProps {
   postId: string;
+  highlightCommentId?: string | null;
 }
 
-export default function CommentList({ postId }: CommentListProps) {
+export default function CommentList({ postId, highlightCommentId }: CommentListProps) {
   const [comments, setComments] = useState<CommentType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'latest' | 'oldest' | 'popular'>('latest');
@@ -25,6 +26,18 @@ export default function CommentList({ postId }: CommentListProps) {
   useEffect(() => {
     loadComments();
   }, [postId, sortBy]);
+
+  // 하이라이팅된 댓글로 스크롤
+  useEffect(() => {
+    if (highlightCommentId && !isLoading) {
+      setTimeout(() => {
+        const element = document.getElementById(`comment-${highlightCommentId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [highlightCommentId, isLoading]);
 
   const loadComments = async () => {
     setIsLoading(true);
@@ -216,6 +229,8 @@ export default function CommentList({ postId }: CommentListProps) {
               onReply={handleReply}
               onLike={handleLike}
               onDelete={handleDelete}
+              isHighlighted={comment.id === highlightCommentId}
+              highlightCommentId={highlightCommentId}
             />
           ))
         ) : (

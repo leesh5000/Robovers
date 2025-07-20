@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { CommunityPost } from '@/lib/types';
 import { getDummyPostById } from '@/lib/dummy-data';
@@ -9,8 +9,11 @@ import PostDetail from '@/components/community/PostDetail';
 export default function CommunityPostDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [post, setPost] = useState<CommunityPost | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const highlightCommentId = searchParams.get('commentId');
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -98,7 +101,7 @@ export default function CommunityPostDetailPage() {
           뒤로 가기
         </button>
 
-        <PostDetail post={post} />
+        <PostDetail post={post} highlightCommentId={highlightCommentId} />
       </div>
     </div>
   );

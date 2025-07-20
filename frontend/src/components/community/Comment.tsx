@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Comment as CommentType } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -12,6 +12,8 @@ interface CommentProps {
   onLike?: (commentId: string) => void;
   onDelete?: (commentId: string) => void;
   depth?: number;
+  isHighlighted?: boolean;
+  highlightCommentId?: string | null;
 }
 
 export default function Comment({ 
@@ -19,10 +21,22 @@ export default function Comment({
   onReply, 
   onLike, 
   onDelete, 
-  depth = 0 
+  depth = 0,
+  isHighlighted = false,
+  highlightCommentId
 }: CommentProps) {
   const [isReplying, setIsReplying] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
+  
+  // 답글이 하이라이팅된 경우 자동으로 펼치기
+  useEffect(() => {
+    if (comment.replies && highlightCommentId) {
+      const hasHighlightedReply = comment.replies.some(reply => reply.id === highlightCommentId);
+      if (hasHighlightedReply) {
+        setIsExpanded(true);
+      }
+    }
+  }, [comment.replies, highlightCommentId]);
   const [isLiked, setIsLiked] = useState(comment.isLiked || false);
   const [likeCount, setLikeCount] = useState(comment.likeCount);
 
@@ -45,7 +59,13 @@ export default function Comment({
 
   return (
     <div className={`${depth > 0 ? 'ml-8 pl-4 border-l-2 border-gray-100' : ''}`}>
-      <div className="bg-white rounded-lg p-4 border border-gray-100">
+      <div 
+        id={`comment-${comment.id}`}
+        className={`bg-white rounded-lg p-4 border transition-all duration-500 ${
+          isHighlighted 
+            ? 'border-blue-400 bg-blue-50 animate-pulse-slow' 
+            : 'border-gray-100'
+        }`}>
         {/* 댓글 헤더 */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -210,6 +230,8 @@ export default function Comment({
               onLike={onLike}
               onDelete={onDelete}
               depth={depth + 1}
+              isHighlighted={reply.id === highlightCommentId}
+              highlightCommentId={highlightCommentId}
             />
           ))}
         </div>
