@@ -15,7 +15,7 @@ import {
   TooltipItem,
 } from 'chart.js';
 import { StockPriceHistory } from '@/lib/types';
-import { getDummyStockHistory } from '@/lib/dummy-data';
+import { getDummyStockHistory } from '@/lib/dummy-data-stock';
 
 ChartJS.register(
   CategoryScale,

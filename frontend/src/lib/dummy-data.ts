@@ -1,7 +1,7 @@
 import { CommunityPost, User, Company, Comment } from './types';
 
 // 더미 사용자 데이터
-const dummyUsers: User[] = [
+export const dummyUsers: User[] = [
   {
     id: '1',
     username: 'robotmaster',
@@ -442,6 +442,59 @@ export function getDummyCompanyById(id: string): Company | undefined {
   return dummyCompanies.find(company => company.id === id);
 }
 
+// 더미 주가 히스토리 데이터 생성
+export function getDummyStockHistory(companyId: string, timeRange: '1M' | '3M' | '6M' | '1Y' | 'ALL'): StockPriceHistory[] {
+  const company = getDummyCompanyById(companyId);
+  if (!company || !company.isPublic || !company.currentPrice) {
+    return [];
+  }
+
+  const basePrice = company.currentPrice;
+  const volatility = 0.02; // 2% 일일 변동성
+  const trend = company.changePercent > 0 ? 0.0002 : -0.0002; // 약간의 추세
+  
+  // 기간별 데이터 포인트 수
+  const dataPoints = {
+    '1M': 30,
+    '3M': 90,
+    '6M': 180,
+    '1Y': 365,
+    'ALL': 730
+  };
+
+  const points = dataPoints[timeRange];
+  const history: StockPriceHistory[] = [];
+  
+  let currentPrice = basePrice;
+  const now = new Date();
+
+  for (let i = points; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - i);
+    
+    // 랜덤 변동 + 추세
+    const randomChange = (Math.random() - 0.5) * volatility;
+    const trendChange = trend;
+    currentPrice = currentPrice * (1 + randomChange + trendChange);
+    
+    // 주말 제외 (간단한 구현)
+    if (date.getDay() !== 0 && date.getDay() !== 6) {
+      history.push({
+        date: date,
+        price: Math.max(currentPrice, 1), // 최소 가격 $1
+        volume: Math.floor(Math.random() * 10000000) + 1000000, // 1M ~ 11M
+      });
+    }
+  }
+
+  // 마지막 값을 현재 가격으로 조정
+  if (history.length > 0) {
+    history[history.length - 1].price = basePrice;
+  }
+
+  return history;
+}
+
 // 더미 댓글 데이터
 const generateDummyComments = (postId: string): Comment[] => {
   const baseComments: Omit<Comment, 'id' | 'createdAt'>[] = [
@@ -535,4 +588,93 @@ const generateDummyComments = (postId: string): Comment[] => {
 
 export function getDummyComments(postId: string): Comment[] {
   return generateDummyComments(postId);
+}
+
+// 어드민 페이지용 댓글 데이터 생성
+export function getDummyCommentsForAdmin() {
+  const posts = getDummyPosts();
+  const adminComments: any[] = [];
+  
+  // 각 포스트별로 댓글 생성
+  posts.forEach((post, postIndex) => {
+    const comments = generateDummyComments(post.id);
+    
+    comments.forEach((comment, commentIndex) => {
+      // 상태 랜덤 배정
+      const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      
+      adminComments.push({
+        ...comment,
+        postId: post.id,
+        postTitle: post.title,
+        status: randomStatus,
+        reportCount: randomStatus === 'reported' ? Math.floor(Math.random() * 10) + 1 : 0,
+      });
+      
+      // 답글도 추가
+      if (comment.replies) {
+        comment.replies.forEach(reply => {
+          const replyStatus = statuses[Math.floor(Math.random() * statuses.length)];
+          adminComments.push({
+            ...reply,
+            postId: post.id,
+            postTitle: post.title,
+            status: replyStatus,
+            reportCount: replyStatus === 'reported' ? Math.floor(Math.random() * 5) + 1 : 0,
+            parentId: comment.id,
+          });
+        });
+      }
+    });
+  });
+  
+  // 추가 더미 댓글 생성 (더 많은 데이터를 위해)
+  const additionalComments = [
+    '이 기능 정말 유용하네요!',
+    '더 자세한 설명이 필요할 것 같습니다.',
+    '오류가 발생하는데 해결 방법이 있을까요?',
+    '좋은 정보 감사합니다.',
+    '다른 의견도 들어보고 싶네요.',
+    '이 부분은 조금 다르게 생각합니다.',
+    '실제로 적용해보니 잘 작동합니다!',
+    '추가 자료 있으면 공유 부탁드려요.',
+    '비슷한 경험이 있어서 공감됩니다.',
+    '더 많은 사람들이 알았으면 좋겠어요.'
+  ];
+  
+  // 최근 30일 내의 랜덤 날짜 생성
+  const getRandomRecentDate = () => {
+    const now = new Date();
+    const daysAgo = Math.floor(Math.random() * 30);
+    const date = new Date(now);
+    date.setDate(date.getDate() - daysAgo);
+    date.setHours(Math.floor(Math.random() * 24));
+    date.setMinutes(Math.floor(Math.random() * 60));
+    return date;
+  };
+  
+  // 추가 댓글 50개 생성
+  for (let i = 0; i < 50; i++) {
+    const randomPost = posts[Math.floor(Math.random() * posts.length)];
+    const randomUser = dummyUsers[Math.floor(Math.random() * dummyUsers.length)];
+    const randomContent = additionalComments[Math.floor(Math.random() * additionalComments.length)];
+    const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
+    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+    
+    adminComments.push({
+      id: `extra-comment-${i}`,
+      content: randomContent,
+      author: randomUser,
+      createdAt: getRandomRecentDate(),
+      likeCount: Math.floor(Math.random() * 50),
+      isLiked: Math.random() > 0.7,
+      postId: randomPost.id,
+      postTitle: randomPost.title,
+      status: randomStatus,
+      reportCount: randomStatus === 'reported' ? Math.floor(Math.random() * 15) + 1 : 0,
+    });
+  }
+  
+  return adminComments;
 }
