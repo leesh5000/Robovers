@@ -86,7 +86,12 @@ const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onC
     }
   };
 
-  const formatPublishedDate = (date: Date) => {
+  const formatPublishedDate = useCallback((date: Date) => {
+    if (!isClient) {
+      // 서버 사이드에서는 고정된 형식을 사용
+      return date.toLocaleDateString('ko-KR');
+    }
+    
     const now = new Date();
     const diffInMs = now.getTime() - date.getTime();
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
@@ -101,7 +106,7 @@ const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onC
     } else {
       return date.toLocaleDateString('ko-KR');
     }
-  };
+  }, [isClient]);
 
   const formatCount = (count: number) => {
     if (count >= 1000) {
@@ -242,11 +247,9 @@ const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onC
         <div className="flex items-center justify-between text-sm text-gray-500">
           <div className="flex items-center space-x-4">
             <span className="font-medium">{article.author}{article.source && ` · ${article.source}`}</span>
-            {isClient ? (
-              <span>{formatPublishedDate(article.publishedAt)}</span>
-            ) : (
-              <span suppressHydrationWarning>{article.publishedAt.toLocaleDateString('ko-KR')}</span>
-            )}
+            <span suppressHydrationWarning>
+              {formatPublishedDate(new Date(article.publishedAt))}
+            </span>
             <span>조회 {article.viewCount.toLocaleString()}</span>
           </div>
 

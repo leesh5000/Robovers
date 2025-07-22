@@ -139,7 +139,10 @@ export default function MainFeed({
     return [...articles].sort((a, b) => {
       switch (filters.sortBy) {
         case 'latest':
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+          // Date 객체가 문자열로 전달될 수 있으므로 안전하게 변환
+          const dateA = a.publishedAt instanceof Date ? a.publishedAt : new Date(a.publishedAt);
+          const dateB = b.publishedAt instanceof Date ? b.publishedAt : new Date(b.publishedAt);
+          return dateB.getTime() - dateA.getTime();
         case 'popular':
           return b.viewCount - a.viewCount;
         case 'trending':

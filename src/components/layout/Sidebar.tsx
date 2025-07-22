@@ -18,7 +18,8 @@ const mockCompanies: Company[] = [
     changePercent: 2.3,
     changeAmount: 5.58,
     logoUrl: '🚗',
-    marketCap: 789000000000
+    marketCap: 789000000000,
+    isPublic: true
   },
   {
     id: '2',
@@ -28,7 +29,8 @@ const mockCompanies: Company[] = [
     changePercent: -1.2,
     changeAmount: -0.55,
     logoUrl: '🤖',
-    marketCap: 15000000000
+    marketCap: 15000000000,
+    isPublic: true
   },
   {
     id: '3',
@@ -38,7 +40,8 @@ const mockCompanies: Company[] = [
     changePercent: 4.1,
     changeAmount: 34.50,
     logoUrl: '💻',
-    marketCap: 2100000000000
+    marketCap: 2100000000000,
+    isPublic: true
   },
   {
     id: '4',
@@ -48,7 +51,8 @@ const mockCompanies: Company[] = [
     changePercent: 0,
     changeAmount: 0,
     logoUrl: '🦾',
-    marketCap: 2700000000
+    marketCap: 2700000000,
+    isPublic: false
   }
 ];
 
@@ -141,8 +145,10 @@ export default function Sidebar({ className = '' }: SidebarProps) {
   };
 
   const formatTimeAgo = (date: Date) => {
+    // Date 객체가 아닌 경우 안전하게 변환
+    const safeDate = date instanceof Date ? date : new Date(date);
     const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
+    const diffInMs = now.getTime() - safeDate.getTime();
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
     const diffInHours = Math.floor(diffInMinutes / 60);
 
@@ -151,7 +157,7 @@ export default function Sidebar({ className = '' }: SidebarProps) {
     } else if (diffInHours < 24) {
       return `${diffInHours}시간 전`;
     } else {
-      return date.toLocaleDateString('ko-KR');
+      return safeDate.toLocaleDateString('ko-KR');
     }
   };
 
