@@ -41,6 +41,22 @@ services:
       timeout: 5s
       retries: 5
 
+  # Email Testing Service (Development)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: robovers-mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - robovers-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   # Backend Service
   backend:
     build:
