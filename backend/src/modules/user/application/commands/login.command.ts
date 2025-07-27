@@ -5,6 +5,7 @@ import { Email } from '../../domain/value-objects/email.vo';
 import {
   UnauthorizedException,
   ForbiddenException,
+  EmailNotVerifiedException,
 } from '@/common/exceptions/app.exception';
 import {
   USER_REPOSITORY_TOKEN,
@@ -25,7 +26,6 @@ export interface LoginCommandOutput {
     role: string;
     emailVerified: boolean;
   };
-  needEmailVerification: boolean;
 }
 
 @Injectable()
@@ -44,7 +44,9 @@ export class LoginCommand {
     // 사용자 조회
     const user = await this.userRepository.findByEmail(emailVo.getValue());
     if (!user) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 일치하지 않습니다.',
+      );
     }
 
     // 비밀번호 확인
@@ -53,7 +55,9 @@ export class LoginCommand {
       user.getPassword(),
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('이메일 또는 비밀번호가 일치하지 않습니다.');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 일치하지 않습니다.',
+      );
     }
 
     // 계정 상태 확인
@@ -61,8 +65,13 @@ export class LoginCommand {
       throw new ForbiddenException('비활성화된 계정입니다.');
     }
 
-    // 로그인 가능 여부 확인
-    const needEmailVerification = !user.isEmailVerified();
+    // 이메일 인증 상태 확인
+    if (!user.canLogin()) {
+      throw new EmailNotVerifiedException(
+        '이메일 인증이 필요합니다.',
+        user.getEmail(),
+      );
+    }
 
     // 마지막 로그인 시간 업데이트
     user.updateLastLogin();
@@ -77,7 +86,6 @@ export class LoginCommand {
         role: user.getRole(),
         emailVerified: user.isEmailVerified(),
       },
-      needEmailVerification,
     };
   }
 }

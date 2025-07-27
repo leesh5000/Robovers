@@ -7,6 +7,9 @@ import { Email } from '../../domain/value-objects/email.vo';
 import { Password } from '../../domain/value-objects/password.vo';
 import { Nickname } from '../../domain/value-objects/nickname.vo';
 import { ConflictException } from '@/common/exceptions/app.exception';
+import { EmailVerificationTokenService } from '@/modules/auth/domain/services/email-verification-token.service';
+import { TokenStorageService } from '@/modules/auth/infrastructure/redis/token-storage.service';
+import { EmailRateLimiterService } from '@/modules/auth/infrastructure/rate-limit/email-rate-limiter.service';
 import {
   USER_REPOSITORY_TOKEN,
   PASSWORD_HASH_SERVICE_TOKEN,
@@ -34,6 +37,9 @@ export class RegisterUserCommand {
     private readonly passwordHashService: PasswordHashService,
     @Inject(EMAIL_SERVICE_TOKEN)
     private readonly emailService: EmailService,
+    private readonly emailVerificationTokenService: EmailVerificationTokenService,
+    private readonly tokenStorageService: TokenStorageService,
+    private readonly emailRateLimiterService: EmailRateLimiterService,
   ) {}
 
   async execute(
@@ -88,8 +94,40 @@ export class RegisterUserCommand {
   }
 
   private async sendVerificationEmail(email: string): Promise<void> {
-    // TODO: 실제 토큰 생성 로직 구현
-    const verificationToken = 'temp-verification-token';
-    await this.emailService.sendVerificationEmail(email, verificationToken);
+    // Rate limit 확인
+    const rateLimitResult = await this.emailRateLimiterService.checkRateLimit(
+      email,
+      'verification',
+    );
+
+    if (!rateLimitResult.allowed) {
+      console.warn(
+        `Rate limit exceeded for email verification: ${email}. Retry after ${rateLimitResult.retryAfter} seconds`,
+      );
+      return;
+    }
+
+    // 6자리 인증 코드 생성
+    const verificationCode =
+      await this.emailVerificationTokenService.generateVerificationCode();
+
+    // Redis에 코드 저장 (1시간 유효)
+    await this.tokenStorageService.saveEmailVerificationToken(
+      email,
+      verificationCode,
+      3600,
+    );
+
+    // 이메일 발송
+    const sent = await this.emailService.sendVerificationEmail(
+      email,
+      verificationCode,
+    );
+
+    if (!sent) {
+      console.error(`Failed to send verification email to ${email}`);
+      // Rate limit 초기화 (실패한 경우)
+      await this.emailRateLimiterService.resetRateLimit(email, 'verification');
+    }
   }
 }
