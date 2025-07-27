@@ -12,6 +12,7 @@ import { Response } from 'express';
 import { RegisterUserCommand } from '../../application/commands/register-user.command';
 import { LoginCommand } from '../../application/commands/login.command';
 import { VerifyEmailCommand } from '../../application/commands/verify-email.command';
+import { ResendVerificationCommand } from '../../application/commands/resend-verification.command';
 import {
   RegisterUserDto,
   RegisterUserResponseDto,
@@ -31,6 +32,7 @@ export class AuthController {
     private readonly registerUserCommand: RegisterUserCommand,
     private readonly loginCommand: LoginCommand,
     private readonly verifyEmailCommand: VerifyEmailCommand,
+    private readonly resendVerificationCommand: ResendVerificationCommand,
     @Inject(TOKEN_SERVICE_TOKEN)
     private readonly tokenService: TokenService,
   ) {}
@@ -43,7 +45,9 @@ export class AuthController {
     type: RegisterUserResponseDto,
   })
   @ApiResponse({ status: 409, description: '이메일 또는 닉네임 중복' })
-  async register(@Body() dto: RegisterUserDto): Promise<RegisterUserResponseDto> {
+  async register(
+    @Body() dto: RegisterUserDto,
+  ): Promise<RegisterUserResponseDto> {
     return this.registerUserCommand.execute(dto);
   }
 
@@ -56,6 +60,7 @@ export class AuthController {
     type: LoginResponseDto,
   })
   @ApiResponse({ status: 401, description: '인증 실패' })
+  @ApiResponse({ status: 422, description: '이메일 인증 필요' })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) response: Response,
@@ -105,7 +110,22 @@ export class AuthController {
     type: VerifyEmailResponseDto,
   })
   @ApiResponse({ status: 400, description: '유효하지 않은 토큰' })
-  async verifyEmail(@Body() dto: VerifyEmailDto): Promise<VerifyEmailResponseDto> {
+  async verifyEmail(
+    @Body() dto: VerifyEmailDto,
+  ): Promise<VerifyEmailResponseDto> {
     return this.verifyEmailCommand.execute(dto);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: '인증 이메일 재발송' })
+  @ApiResponse({
+    status: 200,
+    description: '인증 이메일 재발송 성공',
+  })
+  async resendVerification(
+    @Body() dto: { email: string },
+  ): Promise<{ message: string }> {
+    return this.resendVerificationCommand.execute(dto);
   }
 }

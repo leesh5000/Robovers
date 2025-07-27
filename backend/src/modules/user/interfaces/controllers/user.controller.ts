@@ -1,13 +1,10 @@
+import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
 import {
-  Controller,
-  Get,
-  Put,
-  Body,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { Request } from 'express';
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { GetUserProfileQuery } from '../../application/queries/get-user-profile.query';
 import { UpdateUserProfileCommand } from '../../application/commands/update-user-profile.command';
 import { UserProfileDto } from '../dtos/user-profile.dto';
