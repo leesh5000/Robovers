@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import MainFeed from '@/components/feed/MainFeed';
 import Sidebar from '@/components/layout/Sidebar';
 import { Article } from '@/lib/types';
@@ -75,21 +75,22 @@ const robotNewsData = {
 
 // 추가 목 데이터 생성 함수
 const generateMockArticles = (page: number): Article[] => {
-  const baseId = page * 10;
   return Array.from({ length: 10 }, (_, index) => {
-    const id = baseId + index;
+    // 타임스탬프와 페이지, 인덱스를 조합하여 완전히 고유한 ID 생성
+    const uniqueId = `${Date.now()}-${page}-${index}-${Math.random().toString(36).substr(2, 9)}`;
+    const displayId = page * 10 + index + 1000; // 표시용 ID
     const category = ['news', 'tech-review', 'company-update', 'research'][index % 4] as any;
-    const titleIndex = id % robotNewsData.titles.length;
-    const timeDiff = id < 20 ? id * 3 : id * 12; // 초반엔 시간 간격 짧게, 후반엔 길게
+    const titleIndex = displayId % robotNewsData.titles.length;
+    const timeDiff = displayId < 20 ? displayId * 3 : displayId * 12; // 초반엔 시간 간격 짧게, 후반엔 길게
     
     return {
-      id: `${id}`,
+      id: `generated-${uniqueId}`, // 타임스탬프 기반 완전히 고유한 ID
       title: robotNewsData.titles[titleIndex],
       content: `${robotNewsData.titles[titleIndex]}에 대한 상세한 내용입니다. ${robotNewsData.excerpts[index % robotNewsData.excerpts.length]}...`,
       excerpt: robotNewsData.excerpts[index % robotNewsData.excerpts.length],
       imageUrl: robotNewsData.imageUrls[index % robotNewsData.imageUrls.length],
-      author: robotNewsData.authors[id % robotNewsData.authors.length],
-      source: robotNewsData.sources[id % robotNewsData.sources.length],
+      author: robotNewsData.authors[displayId % robotNewsData.authors.length],
+      source: robotNewsData.sources[displayId % robotNewsData.sources.length],
       publishedAt: new Date(Date.now() - timeDiff * 60 * 60 * 1000),
       category,
       tags: [
@@ -111,35 +112,81 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const isInitialLoadExecuted = useRef(false);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadMoreArticles = useCallback(async () => {
     if (isLoading || !hasMore) return;
 
+    console.log('[loadMoreArticles] 시작 - page:', page, 'isInitialLoading:', isInitialLoading);
     setIsLoading(true);
     
-    // API 호출 시뮬레이션
-    setTimeout(() => {
-      const newArticles = generateMockArticles(page);
-      
-      setArticles(prev => [...prev, ...newArticles]);
-      setPage(prev => prev + 1);
-      
-      // 5페이지 이후로는 더 이상 로드하지 않음
-      if (page >= 4) {
-        setHasMore(false);
-      }
-      
-      setIsLoading(false);
+    try {
+      // 초기 로딩은 즉시 실행, 추가 로딩만 지연
       if (isInitialLoading) {
+        const newArticles = generateMockArticles(page);
+        console.log('[loadMoreArticles] 초기 기사 생성:', newArticles.length);
+        
+        setArticles(prev => [...prev, ...newArticles]);
+        setPage(prev => prev + 1);
+        
+        if (page >= 4) {
+          setHasMore(false);
+        }
+        
+        setIsLoading(false);
         setIsInitialLoading(false);
+      } else {
+        // 추가 로딩은 지연 시뮬레이션
+        // 이전 타임아웃 정리
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+        }
+        
+        loadingTimeoutRef.current = setTimeout(() => {
+          const newArticles = generateMockArticles(page);
+          console.log('[loadMoreArticles] 추가 기사 생성:', newArticles.length);
+          
+          setArticles(prev => [...prev, ...newArticles]);
+          setPage(prev => prev + 1);
+          
+          // 5페이지 이후로는 더 이상 로드하지 않음
+          if (page >= 4) {
+            setHasMore(false);
+          }
+          
+          setIsLoading(false);
+        }, 1000); // 1초 지연으로 로딩 시뮬레이션
       }
-    }, 1000); // 1초 지연으로 로딩 시뮬레이션
+    } catch (error) {
+      console.error('[loadMoreArticles] 에러 발생:', error);
+      setIsLoading(false);
+      setIsInitialLoading(false);
+    }
   }, [page, isLoading, hasMore, isInitialLoading]);
 
   // 컴포넌트 마운트 시 초기 데이터 로드
   useEffect(() => {
-    loadMoreArticles();
+    console.log('[useEffect] 마운트 - isInitialLoadExecuted:', isInitialLoadExecuted.current);
+    
+    // React StrictMode에서 중복 실행 방지
+    if (!isInitialLoadExecuted.current) {
+      isInitialLoadExecuted.current = true;
+      console.log('[useEffect] 초기 로드 실행');
+      loadMoreArticles();
+    }
+
+    // Cleanup 함수
+    return () => {
+      console.log('[useEffect] cleanup 실행');
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 렌더링 시점 상태 확인
+  console.log('[render] 상태 - isInitialLoading:', isInitialLoading, 'articles:', articles.length);
 
   return (
     <>
@@ -159,7 +206,7 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[...Array(4)].map((_, index) => (
-                    <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div key={`home-skeleton-${index}`} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                       <div className="h-48 bg-gray-200 animate-pulse" />
                       <div className="p-6 space-y-4">
                         <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />

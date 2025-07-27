@@ -57,22 +57,41 @@ apiClient.interceptors.response.use(
       }
     }
 
+    // 네트워크 에러 처리 (백엔드 서버 연결 실패)
+    if (error.code === 'ERR_NETWORK' || error.code === 'ERR_CONNECTION_REFUSED') {
+      const appError = new AppException(
+        ErrorCode.NETWORK_ERROR,
+        '백엔드 서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요. (http://localhost:4010)',
+        undefined,
+        { originalError: error.message }
+      );
+      logError(appError, 'API Client - Connection Failed');
+      toast.error('백엔드 서버에 연결할 수 없습니다.\n터미널에서 backend 폴더로 이동 후 npm run start:dev를 실행해주세요.');
+      return Promise.reject(appError);
+    }
+
     // 표준 에러 처리
     const statusCode = error.response?.status;
-    const errorCode = statusCode ? mapHttpStatusToErrorCode(statusCode) : ErrorCode.NETWORK_ERROR;
+    const responseData = error.response?.data;
+    
+    // 422 에러 중 이메일 인증 에러인지 확인
+    let errorCode = statusCode ? mapHttpStatusToErrorCode(statusCode) : ErrorCode.NETWORK_ERROR;
+    if (statusCode === 422 && responseData?.errorCode === 'EMAIL_NOT_VERIFIED') {
+      errorCode = ErrorCode.EMAIL_NOT_VERIFIED;
+    }
     
     const appError = new AppException(
       errorCode,
-      error.response?.data?.message || error.message,
+      responseData?.message || error.message,
       statusCode,
-      error.response?.data
+      responseData
     );
 
     // 에러 로깅
     logError(appError, 'API Client');
 
-    // 토스트 메시지 표시 (사용자 친화적 메시지)
-    if (errorCode !== ErrorCode.UNAUTHORIZED) { // 401은 자동 리다이렉트되므로 토스트 표시 안함
+    // 토스트 메시지 표시 (이메일 인증 에러는 AuthStore에서 처리)
+    if (errorCode !== ErrorCode.UNAUTHORIZED && errorCode !== ErrorCode.EMAIL_NOT_VERIFIED) {
       toast.error(appError.message);
     }
 
