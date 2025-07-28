@@ -191,13 +191,14 @@ export default function MainFeed({
 
       {/* 게시물 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {sortedArticles.map((article) => (
+        {sortedArticles.map((article, index) => (
           <ArticleCard
             key={article.id}
             article={article}
             onLike={handleLike}
             onBookmark={handleBookmark}
             onClick={handleCardClick}
+            priority={index < 2} // 첫 2개 이미지에 priority 설정
           />
         ))}
       </div>
@@ -206,7 +207,7 @@ export default function MainFeed({
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[...Array(4)].map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div key={`skeleton-${index}`} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               <div className="h-48 bg-gray-200 animate-pulse" />
               <div className="p-6 space-y-4">
                 <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />

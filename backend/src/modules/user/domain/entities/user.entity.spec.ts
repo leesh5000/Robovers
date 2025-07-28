@@ -1,5 +1,5 @@
 import { UserEntity } from './user.entity';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '../value-objects/user-role.vo';
 
 describe('UserEntity', () => {
   describe('create', () => {
@@ -59,7 +59,9 @@ describe('UserEntity', () => {
 
       user.verifyEmail();
 
-      expect(() => user.verifyEmail()).toThrow('이미 이메일 인증이 완료되었습니다.');
+      expect(() => user.verifyEmail()).toThrow(
+        '이미 이메일 인증이 완료되었습니다.',
+      );
     });
   });
 
@@ -85,7 +87,9 @@ describe('UserEntity', () => {
 
       user.updateProfile(undefined, 'https://example.com/new-profile.jpg');
 
-      expect(user.getProfileImageUrl()).toBe('https://example.com/new-profile.jpg');
+      expect(user.getProfileImageUrl()).toBe(
+        'https://example.com/new-profile.jpg',
+      );
     });
   });
 

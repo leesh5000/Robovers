@@ -1,5 +1,13 @@
 export interface EmailService {
-  sendVerificationEmail(email: string, verificationToken: string): Promise<void>;
-  sendPasswordResetEmail(email: string, resetToken: string): Promise<void>;
-  sendWelcomeEmail(email: string, nickname: string): Promise<void>;
+  sendEmail(data: {
+    to: string;
+    subject: string;
+    html: string;
+  }): Promise<boolean>;
+  sendVerificationEmail(
+    email: string,
+    verificationToken: string,
+  ): Promise<boolean>;
+  sendPasswordResetEmail(email: string, resetToken: string): Promise<boolean>;
+  sendWelcomeEmail(email: string, nickname: string): Promise<boolean>;
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
@@ -11,20 +11,22 @@ import { RegisterUserCommand } from './application/commands/register-user.comman
 import { LoginCommand } from './application/commands/login.command';
 import { UpdateUserProfileCommand } from './application/commands/update-user-profile.command';
 import { VerifyEmailCommand } from './application/commands/verify-email.command';
+import { ResendVerificationCommand } from './application/commands/resend-verification.command';
 import { GetUserProfileQuery } from './application/queries/get-user-profile.query';
 
 // Infrastructure Services
 import { PrismaUserRepository } from './infrastructure/persistence/prisma-user.repository';
 import { BcryptPasswordHashService } from './infrastructure/services/bcrypt-password-hash.service';
-import { MockEmailService } from './infrastructure/services/mock-email.service';
 import { JwtTokenService } from './infrastructure/services/jwt-token.service';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
+
+// Modules
+import { AuthModule } from '../auth/auth.module';
 
 // DI Tokens
 import {
   USER_REPOSITORY_TOKEN,
   PASSWORD_HASH_SERVICE_TOKEN,
-  EMAIL_SERVICE_TOKEN,
   TOKEN_SERVICE_TOKEN,
 } from './infrastructure/di-tokens';
 
@@ -32,6 +34,7 @@ import {
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({}),
+    forwardRef(() => AuthModule),
   ],
   controllers: [AuthController, UserController],
   providers: [
@@ -40,6 +43,7 @@ import {
     LoginCommand,
     UpdateUserProfileCommand,
     VerifyEmailCommand,
+    ResendVerificationCommand,
     GetUserProfileQuery,
 
     // Infrastructure Layer - Repository
@@ -53,10 +57,7 @@ import {
       provide: PASSWORD_HASH_SERVICE_TOKEN,
       useClass: BcryptPasswordHashService,
     },
-    {
-      provide: EMAIL_SERVICE_TOKEN,
-      useClass: MockEmailService,
-    },
+    // EMAIL_SERVICE_TOKEN은 AuthModule에서 제공받음
     {
       provide: TOKEN_SERVICE_TOKEN,
       useClass: JwtTokenService,
@@ -65,9 +66,6 @@ import {
     // Strategies
     JwtStrategy,
   ],
-  exports: [
-    USER_REPOSITORY_TOKEN,
-    TOKEN_SERVICE_TOKEN,
-  ],
+  exports: [USER_REPOSITORY_TOKEN, TOKEN_SERVICE_TOKEN],
 })
 export class UserModule {}

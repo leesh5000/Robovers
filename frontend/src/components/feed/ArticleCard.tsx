@@ -10,9 +10,10 @@ interface ArticleCardProps {
   onLike?: (articleId: string) => void;
   onBookmark?: (articleId: string) => void;
   onClick?: (articleId: string) => void;
+  priority?: boolean;
 }
 
-const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onClick }: ArticleCardProps) {
+const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onClick, priority = false }: ArticleCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -141,11 +142,13 @@ const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onC
       {/* 썸네일 이미지 */}
       <div className="relative h-48 w-full overflow-hidden">
         {article.imageUrl && !imageError ? (
-          <Link href={`/articles/${article.id}`}>
+          <Link href={`/articles/${article.id}`} className="relative block h-full w-full">
             <Image
               src={article.imageUrl}
               alt={article.title}
               fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority={priority}
               className={`object-cover hover:scale-105 transition-transform duration-200 ${
                 isImageLoading ? 'animate-pulse bg-gray-200' : ''
               }`}
@@ -158,7 +161,7 @@ const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onC
           </Link>
         ) : (
           /* 기본 이미지 */
-          <Link href={`/articles/${article.id}`}>
+          <Link href={`/articles/${article.id}`} className="relative block h-full w-full">
             <div className={`relative h-full w-full bg-gradient-to-br ${categoryConfig.gradient} hover:opacity-90 transition-opacity`}>
               {/* 패턴 오버레이 */}
               <div className="absolute inset-0 opacity-10">

@@ -17,6 +17,7 @@ export enum ErrorCode {
   UNAUTHORIZED = 'UNAUTHORIZED',
   FORBIDDEN = 'FORBIDDEN',
   TOKEN_EXPIRED = 'TOKEN_EXPIRED',
+  EMAIL_NOT_VERIFIED = 'EMAIL_NOT_VERIFIED',
   
   // Validation errors
   VALIDATION_ERROR = 'VALIDATION_ERROR',
@@ -42,6 +43,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.UNAUTHORIZED]: '로그인이 필요합니다.',
   [ErrorCode.FORBIDDEN]: '접근 권한이 없습니다.',
   [ErrorCode.TOKEN_EXPIRED]: '로그인이 만료되었습니다. 다시 로그인해주세요.',
+  [ErrorCode.EMAIL_NOT_VERIFIED]: '이메일 인증이 필요합니다.',
   
   [ErrorCode.VALIDATION_ERROR]: '입력 데이터가 올바르지 않습니다.',
   [ErrorCode.REQUIRED_FIELD]: '필수 입력 항목입니다.',

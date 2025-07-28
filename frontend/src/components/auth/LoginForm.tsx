@@ -24,7 +24,15 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password);
+      const result = await login(data.email, data.password);
+      
+      // 이메일 인증이 필요한 경우
+      if (result.needsEmailVerification) {
+        router.push('/signup/verify');
+        return;
+      }
+      
+      // 로그인 성공
       router.push('/');
     } catch (error) {
       // Error is handled by the store and toast

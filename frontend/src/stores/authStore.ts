@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import { authApi, AuthResponse } from '@/lib/api/auth';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
+import { AppException, ErrorCode } from '@/lib/errors';
 
 interface User {
   id: string;
@@ -20,7 +21,7 @@ interface AuthState {
   isLoading: boolean;
   pendingEmail: string | null;
   
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<{ needsEmailVerification?: boolean; email?: string }>;
   register: (data: {
     email: string;
     password: string;
@@ -66,8 +67,20 @@ export const useAuthStore = create<AuthState>()(
           });
           
           toast.success('로그인 성공!');
+          return {};
         } catch (error) {
           set({ isLoading: false });
+          
+          // 이메일 인증이 필요한 경우
+          if (error instanceof AppException && error.code === ErrorCode.EMAIL_NOT_VERIFIED) {
+            const emailData = error.details;
+            if (emailData?.needEmailVerification && emailData?.email) {
+              set({ pendingEmail: emailData.email });
+              toast.error('이메일 인증이 필요합니다.');
+              return { needsEmailVerification: true, email: emailData.email };
+            }
+          }
+          
           throw error;
         }
       },
