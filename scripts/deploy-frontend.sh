@@ -42,7 +42,7 @@ log "이미지 태그: ${IMAGE_TAG}"
 
 # 1. ECR 로그인
 log "ECR 로그인 중..."
-aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${IMAGE_TAG%%:*}
+aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin "${IMAGE_TAG%%:*}"
 
 # 2. 새 이미지 다운로드
 log "새 Docker 이미지 다운로드 중..."
@@ -76,7 +76,7 @@ docker run -d \
     -p 4000:3000 \
     ${ENV_FILE_ARG} \
     -e NODE_ENV=production \
-    -e NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-"http://localhost:4010/api"} \
+    -e NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:4010/api}" \
     --network robovers-network \
     "${IMAGE_TAG}"
 
@@ -94,22 +94,24 @@ log "컨테이너가 성공적으로 시작되었습니다."
 log "헬스체크 수행 중..."
 RETRY_COUNT=0
 
-while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+set +e
+while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
     if curl -f "${HEALTH_CHECK_URL}" > /dev/null 2>&1; then
         log "헬스체크 성공!"
         break
     fi
     
     RETRY_COUNT=$((RETRY_COUNT + 1))
-    if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+    if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
         error "헬스체크 실패! 최대 재시도 횟수 초과"
         docker logs "${CONTAINER_NAME}" | tail -50
         exit 1
     fi
     
     warning "헬스체크 재시도 중... ($RETRY_COUNT/$MAX_RETRIES)"
-    sleep $RETRY_DELAY
+    sleep "$RETRY_DELAY"
 done
+set -e
 
 # 8. 이전 이미지 정리
 log "사용하지 않는 Docker 이미지 정리 중..."

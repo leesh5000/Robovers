@@ -14,6 +14,10 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   AWS_REGION: ap-northeast-2
   NODE_VERSION: '20'
@@ -48,7 +52,7 @@ jobs:
         id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
           
       - name: Setup pnpm cache
         uses: actions/cache@v4
@@ -73,14 +77,14 @@ jobs:
           if pnpm run lint > eslint-output.txt 2>&1; then
             echo "### ✅ ESLint 검사 통과" >> $GITHUB_STEP_SUMMARY
             echo "코드 품질 검사를 성공적으로 통과했습니다." >> $GITHUB_STEP_SUMMARY
-            echo "eslint_status=success" >> $GITHUB_OUTPUT
+            echo "eslint_status=success" >> "$GITHUB_OUTPUT"
           else
             echo "### ❌ ESLint 오류 발견" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             tail -n 50 eslint-output.txt >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "eslint_status=failed" >> $GITHUB_OUTPUT
+            echo "eslint_status=failed" >> "$GITHUB_OUTPUT"
             exit 1
           fi
 
@@ -108,7 +112,7 @@ jobs:
         id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
           
       - name: Setup pnpm cache
         uses: actions/cache@v4
@@ -133,14 +137,14 @@ jobs:
           if pnpm run typecheck > tsc-output.txt 2>&1; then
             echo "### ✅ TypeScript 검사 통과" >> $GITHUB_STEP_SUMMARY
             echo "모든 타입이 올바르게 정의되어 있습니다." >> $GITHUB_STEP_SUMMARY
-            echo "typecheck_status=success" >> $GITHUB_OUTPUT
+            echo "typecheck_status=success" >> "$GITHUB_OUTPUT"
           else
             echo "### ❌ TypeScript 타입 오류 발견" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`typescript" >> $GITHUB_STEP_SUMMARY
             cat tsc-output.txt | head -n 30 >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "typecheck_status=failed" >> $GITHUB_OUTPUT
+            echo "typecheck_status=failed" >> "$GITHUB_OUTPUT"
             
             # 오류 개수 집계
             ERROR_COUNT=$(grep -c "error TS" tsc-output.txt || true)
@@ -173,7 +177,7 @@ jobs:
         id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
           
       - name: Setup pnpm cache
         uses: actions/cache@v4
@@ -213,14 +217,14 @@ jobs:
           # 단위 테스트 실행
           if pnpm test > test-output.txt 2>&1; then
             echo "### ✅ 단위 테스트 통과" >> $GITHUB_STEP_SUMMARY
-            echo "unit_test_status=success" >> $GITHUB_OUTPUT
+            echo "unit_test_status=success" >> "$GITHUB_OUTPUT"
           else
             echo "### ❌ 단위 테스트 실패" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             tail -n 50 test-output.txt >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "unit_test_status=failed" >> $GITHUB_OUTPUT
+            echo "unit_test_status=failed" >> "$GITHUB_OUTPUT"
             exit 1
           fi
           
@@ -235,14 +239,14 @@ jobs:
           # 통합 테스트 실행
           if pnpm test:int > int-test-output.txt 2>&1; then
             echo "### ✅ 통합 테스트 통과" >> $GITHUB_STEP_SUMMARY
-            echo "int_test_status=success" >> $GITHUB_OUTPUT
+            echo "int_test_status=success" >> "$GITHUB_OUTPUT"
           else
             echo "### ❌ 통합 테스트 실패" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             tail -n 50 int-test-output.txt >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "int_test_status=failed" >> $GITHUB_OUTPUT
+            echo "int_test_status=failed" >> "$GITHUB_OUTPUT"
             exit 1
           fi
           
@@ -300,7 +304,7 @@ jobs:
         id: pnpm-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          echo "STORE_PATH=$(pnpm store path)" >> "$GITHUB_OUTPUT"
           
       - name: Setup pnpm cache
         uses: actions/cache@v4
@@ -346,14 +350,14 @@ jobs:
               echo "| 빌드 크기 | ${BUILD_SIZE} |" >> $GITHUB_STEP_SUMMARY
             fi
             
-            echo "build_status=success" >> $GITHUB_OUTPUT
+            echo "build_status=success" >> "$GITHUB_OUTPUT"
           else
             echo "### ❌ 빌드 실패" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
             tail -n 50 build-output.txt >> $GITHUB_STEP_SUMMARY
             echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-            echo "build_status=failed" >> $GITHUB_OUTPUT
+            echo "build_status=failed" >> "$GITHUB_OUTPUT"
             exit 1
           fi
           
@@ -443,10 +447,10 @@ jobs:
           
       - name: Create deployment directory on EC2
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
             mkdir -p ${{ env.DEPLOY_DIR }}
             cd ${{ env.DEPLOY_DIR }}
-          EOF
+EOF
           
       - name: Copy deployment files to EC2
         run: |
@@ -472,11 +476,11 @@ jobs:
           IMAGE_TAGS="${{ needs.docker-build.outputs.image-tag }}"
           FIRST_TAG=$(echo "$IMAGE_TAGS" | head -1 | xargs)
           
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ${{ env.DEPLOY_DIR }}
             chmod +x deploy-backend.sh
             ./deploy-backend.sh "$FIRST_TAG"
-          EOF
+EOF
           
           DEPLOY_RESULT=$?
           DEPLOY_END=$(date +%s)
@@ -485,10 +489,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ $DEPLOY_RESULT -eq 0 ]; then
             echo "### ✅ 배포 성공" >> $GITHUB_STEP_SUMMARY
-            echo "deploy_status=success" >> $GITHUB_OUTPUT
+            echo "deploy_status=success" >> "$GITHUB_OUTPUT"
           else
             echo "### ❌ 배포 실패" >> $GITHUB_STEP_SUMMARY
-            echo "deploy_status=failed" >> $GITHUB_OUTPUT
+            echo "deploy_status=failed" >> "$GITHUB_OUTPUT"
             exit 1
           fi
           
