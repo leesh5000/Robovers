@@ -1,0 +1,521 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+env:
+  AWS_REGION: ap-northeast-2
+  NODE_VERSION: '20'
+  PNPM_VERSION: '10'
+  DEPLOY_DIR: ~/robovers/backend
+  # TestContainers 환경 변수
+  TESTCONTAINERS_RYUK_DISABLED: true
+  TESTCONTAINERS_CHECKS_DISABLE: true
+
+jobs:
+  # 코드 품질 검사 - ESLint
+  lint:
+    name: ESLint Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+          
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: Install dependencies
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+          
+      - name: Run ESLint
+        id: eslint
+        working-directory: backend
+        run: |
+          echo "## 🔍 ESLint 검사 시작" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # ESLint 실행 및 결과 캡처
+          if pnpm run lint > eslint-output.txt 2>&1; then
+            echo "### ✅ ESLint 검사 통과" >> $GITHUB_STEP_SUMMARY
+            echo "코드 품질 검사를 성공적으로 통과했습니다." >> $GITHUB_STEP_SUMMARY
+            echo "eslint_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "### ❌ ESLint 오류 발견" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            tail -n 50 eslint-output.txt >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "eslint_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+  # TypeScript 타입 체크
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+          
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: Install dependencies
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+          
+      - name: Run TypeScript check
+        id: typecheck
+        working-directory: backend
+        run: |
+          echo "## 📘 TypeScript 타입 검사 시작" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # TypeScript 검사 실행
+          if pnpm run typecheck > tsc-output.txt 2>&1; then
+            echo "### ✅ TypeScript 검사 통과" >> $GITHUB_STEP_SUMMARY
+            echo "모든 타입이 올바르게 정의되어 있습니다." >> $GITHUB_STEP_SUMMARY
+            echo "typecheck_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "### ❌ TypeScript 타입 오류 발견" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`typescript" >> $GITHUB_STEP_SUMMARY
+            cat tsc-output.txt | head -n 30 >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "typecheck_status=failed" >> $GITHUB_OUTPUT
+            
+            # 오류 개수 집계
+            ERROR_COUNT=$(grep -c "error TS" tsc-output.txt || true)
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**총 ${ERROR_COUNT}개의 타입 오류가 발견되었습니다.**" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+  # 테스트 실행
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+          
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: Install dependencies
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+        
+      - name: Docker environment check
+        run: |
+          echo "🐳 === Docker 환경 확인 시작 ==="
+          echo "🔍 Docker 버전 확인:"
+          docker --version
+          echo ""
+          echo "🔍 Docker 정보:"
+          docker info
+          echo ""
+          echo "🔍 사용 가능한 메모리:"
+          free -h
+          echo "🐳 === Docker 환경 확인 완료 ==="
+          
+      - name: Run unit tests
+        id: unit-test
+        working-directory: backend
+        run: |
+          echo "## 🧪 단위 테스트 실행" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # JVM 메모리 설정
+          export NODE_OPTIONS="--max_old_space_size=4096"
+          
+          # 단위 테스트 실행
+          if pnpm test > test-output.txt 2>&1; then
+            echo "### ✅ 단위 테스트 통과" >> $GITHUB_STEP_SUMMARY
+            echo "unit_test_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "### ❌ 단위 테스트 실패" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            tail -n 50 test-output.txt >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "unit_test_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+      - name: Run integration tests
+        id: int-test
+        working-directory: backend
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔗 통합 테스트 실행" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # 통합 테스트 실행
+          if pnpm test:int > int-test-output.txt 2>&1; then
+            echo "### ✅ 통합 테스트 통과" >> $GITHUB_STEP_SUMMARY
+            echo "int_test_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "### ❌ 통합 테스트 실패" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            tail -n 50 int-test-output.txt >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "int_test_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+      - name: Coverage Report
+        if: success()
+        working-directory: backend
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 커버리지 리포트" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| 항목 | 커버리지 |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            LINES=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+            STATEMENTS=$(jq '.total.statements.pct' coverage/coverage-summary.json)
+            FUNCTIONS=$(jq '.total.functions.pct' coverage/coverage-summary.json)
+            BRANCHES=$(jq '.total.branches.pct' coverage/coverage-summary.json)
+            echo "| 라인 | ${LINES}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| 구문 | ${STATEMENTS}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| 함수 | ${FUNCTIONS}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| 분기 | ${BRANCHES}% |" >> $GITHUB_STEP_SUMMARY
+          fi
+        
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            backend/coverage/
+            backend/test-results/
+
+  # 애플리케이션 빌드
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+          
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: Install dependencies
+        working-directory: backend
+        run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma client
+        working-directory: backend
+        run: pnpm prisma:generate
+          
+      - name: Build application
+        id: build
+        working-directory: backend
+        run: |
+          echo "## 🏭 애플리케이션 빌드" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # 빌드 시작 시간 기록
+          BUILD_START=$(date +%s)
+          
+          # 빌드 실행
+          if pnpm run build > build-output.txt 2>&1; then
+            BUILD_END=$(date +%s)
+            BUILD_TIME=$((BUILD_END - BUILD_START))
+            
+            echo "### ✅ 빌드 성공" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            echo "| 빌드 시간 | ${BUILD_TIME}초 |" >> $GITHUB_STEP_SUMMARY
+            echo "| 빌드 상태 | ✅ 성공 |" >> $GITHUB_STEP_SUMMARY
+            
+            # 빌드 결과 분석
+            if [ -d dist ]; then
+              BUILD_SIZE=$(du -sh dist | cut -f1)
+              echo "| 빌드 크기 | ${BUILD_SIZE} |" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            echo "build_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "### ❌ 빌드 실패" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            tail -n 50 build-output.txt >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "build_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: backend/dist/
+
+  # Docker 이미지 빌드
+  docker-build:
+    name: Build Docker Image
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: AWS
+    
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.SERVER_ECR_REPOSITORY }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{date 'YYYYMMDD'}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+            
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          build-args: |
+            NODE_ENV=production
+
+  # EC2 서버로 배포
+  deploy:
+    name: Deploy to EC2
+    needs: docker-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: AWS
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          
+      - name: Create deployment directory on EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+            mkdir -p ${{ env.DEPLOY_DIR }}
+            cd ${{ env.DEPLOY_DIR }}
+          EOF
+          
+      - name: Copy deployment files to EC2
+        run: |
+          scp -i ~/.ssh/id_rsa scripts/deploy-backend.sh ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:${{ env.DEPLOY_DIR }}/
+          scp -i ~/.ssh/id_rsa backend/docker-compose.prod.yml ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:${{ env.DEPLOY_DIR }}/
+          
+      - name: Deploy application
+        id: deploy
+        run: |
+          echo "## 🚀 EC2 배포 시작" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| 항목 | 값 |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| 대상 서버 | ${{ secrets.EC2_HOST }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 배포 디렉토리 | ${{ env.DEPLOY_DIR }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 이미지 태그 | ${{ needs.docker-build.outputs.image-tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 배포 시작 | $(date -u +"%Y-%m-%d %H:%M:%S UTC") |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          DEPLOY_START=$(date +%s)
+          
+          # 첫 번째 태그 추출
+          IMAGE_TAGS="${{ needs.docker-build.outputs.image-tag }}"
+          FIRST_TAG=$(echo "$IMAGE_TAGS" | head -1 | xargs)
+          
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+            cd ${{ env.DEPLOY_DIR }}
+            chmod +x deploy-backend.sh
+            ./deploy-backend.sh "$FIRST_TAG"
+          EOF
+          
+          DEPLOY_RESULT=$?
+          DEPLOY_END=$(date +%s)
+          DEPLOY_TIME=$((DEPLOY_END - DEPLOY_START))
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ $DEPLOY_RESULT -eq 0 ]; then
+            echo "### ✅ 배포 성공" >> $GITHUB_STEP_SUMMARY
+            echo "deploy_status=success" >> $GITHUB_OUTPUT
+          else
+            echo "### ❌ 배포 실패" >> $GITHUB_STEP_SUMMARY
+            echo "deploy_status=failed" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          echo "| 배포 시간 | ${DEPLOY_TIME}초 |" >> $GITHUB_STEP_SUMMARY
+          echo "| 배포 종료 | $(date -u +"%Y-%m-%d %H:%M:%S UTC") |" >> $GITHUB_STEP_SUMMARY
+          
+      - name: Health check
+        if: success()
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🏥 헬스체크 수행" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          RETRY_COUNT=0
+          MAX_RETRIES=30
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "curl -f http://localhost:4010/api/health" > /dev/null 2>&1; then
+              echo "✅ 헬스체크 성공!" >> $GITHUB_STEP_SUMMARY
+              break
+            fi
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "재시도 $RETRY_COUNT/$MAX_RETRIES..." >> $GITHUB_STEP_SUMMARY
+            sleep 2
+          done
+          
+          if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
+            echo "❌ 헬스체크 실패" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
