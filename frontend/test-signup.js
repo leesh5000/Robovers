@@ -1,4 +1,5 @@
 const { chromium } = require('@playwright/test');
+require('dotenv').config({ path: '.env.test' });
 
 (async () => {
   console.log('회원가입 기능 테스트 시작...');
@@ -72,11 +73,12 @@ const { chromium } = require('@playwright/test');
     console.log('✓ 이메일 입력 완료');
     
     // 비밀번호 입력
-    await page.fill('input[type="password"]:nth-of-type(1)', 'Test1234!@#');
+    const testPassword = process.env.TEST_PASSWORD || 'TestPass123!';
+    await page.fill('input[type="password"]:nth-of-type(1)', testPassword);
     console.log('✓ 비밀번호 입력 완료');
     
     // 비밀번호 확인 입력
-    await page.fill('input[type="password"]:nth-of-type(2)', 'Test1234!@#');
+    await page.fill('input[type="password"]:nth-of-type(2)', testPassword);
     console.log('✓ 비밀번호 확인 입력 완료');
     
     // 스크린샷 저장
