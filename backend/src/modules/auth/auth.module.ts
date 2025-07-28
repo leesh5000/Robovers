@@ -40,12 +40,26 @@ export const EMAIL_SERVICE_TOKEN = 'EmailService';
     // Redis Client
     {
       provide: 'REDIS_CLIENT',
-      useFactory: (configService: ConfigService) => {
-        return new Redis({
+      useFactory: async (configService: ConfigService) => {
+        const redis = new Redis({
           host: configService.get<string>('REDIS_HOST', 'localhost'),
           port: configService.get<number>('REDIS_PORT', 6379),
           password: configService.get<string>('REDIS_PASSWORD'),
+          retryStrategy: (times) => Math.min(times * 50, 2000),
+          lazyConnect: true,
         });
+
+        try {
+          await redis.connect();
+          redis.on('error', (err) => {
+            console.error('Redis connection error:', err);
+          });
+          return redis;
+        } catch (error) {
+          throw new Error(
+            `Failed to connect to Redis: ${error.message || error}`,
+          );
+        }
       },
       inject: [ConfigService],
     },

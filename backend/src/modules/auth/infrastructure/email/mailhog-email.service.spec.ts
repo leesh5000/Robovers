@@ -94,10 +94,10 @@ describe('MailHogEmailService', () => {
     it('인증 이메일을 발송한다', async () => {
       // Given
       const email = 'user@example.com';
-      const token = 'verification-token';
+      const code = '123456';
 
       // When
-      const result = await service.sendVerificationEmail(email, token);
+      const result = await service.sendVerificationEmail(email, code);
 
       // Then
       expect(result).toBe(true);
@@ -105,9 +105,34 @@ describe('MailHogEmailService', () => {
         expect.objectContaining({
           to: email,
           subject: '이메일 인증 코드 - Robovers',
-          html: expect.stringContaining(token),
+          html: expect.any(String),
         }),
       );
+
+      // HTML 내용 검증
+      const sentHtml = mockTransporter.sendMail.mock.calls[0][0].html;
+      expect(sentHtml).toContain('이메일 인증');
+      expect(sentHtml).toContain('123456');
+      expect(sentHtml).toContain('6자리 코드');
+      expect(sentHtml).toContain('1시간 동안 유효');
+      expect(sentHtml).not.toContain('?token='); // URL에 토큰이 포함되지 않음
+    });
+
+    it('XSS 공격 패턴을 안전하게 이스케이프한다', async () => {
+      // Given
+      const email = 'user@example.com';
+      const maliciousCode = '<script>alert("xss")</script>';
+
+      // When
+      const result = await service.sendVerificationEmail(email, maliciousCode);
+
+      // Then
+      expect(result).toBe(true);
+      const sentHtml = mockTransporter.sendMail.mock.calls[0][0].html;
+      expect(sentHtml).toContain(
+        '&lt;script&gt;alert(&quot;xss&quot;)&lt;&#x2F;script&gt;',
+      );
+      expect(sentHtml).not.toContain('<script>');
     });
   });
 
@@ -116,7 +141,6 @@ describe('MailHogEmailService', () => {
       // Given
       const email = 'user@example.com';
       const token = 'reset-token';
-      const resetUrl = `http://localhost:4000/auth/reset-password?token=${token}`;
 
       // When
       const result = await service.sendPasswordResetEmail(email, token);
@@ -127,9 +151,63 @@ describe('MailHogEmailService', () => {
         expect.objectContaining({
           to: email,
           subject: '비밀번호 재설정 - Robovers',
-          html: expect.stringContaining(resetUrl),
+          html: expect.any(String),
         }),
       );
+
+      // HTML 내용 검증
+      const sentHtml = mockTransporter.sendMail.mock.calls[0][0].html;
+      expect(sentHtml).toContain('비밀번호 재설정');
+      expect(sentHtml).toContain(
+        'http:&#x2F;&#x2F;localhost:4000&#x2F;auth&#x2F;reset-password',
+      );
+      expect(sentHtml).toContain('reset-token');
+      expect(sentHtml).not.toContain('?token='); // URL에 토큰이 포함되지 않음
+    });
+  });
+
+  describe('sendWelcomeEmail', () => {
+    it('환영 이메일을 발송한다', async () => {
+      // Given
+      const email = 'user@example.com';
+      const name = 'John Doe';
+
+      // When
+      const result = await service.sendWelcomeEmail(email, name);
+
+      // Then
+      expect(result).toBe(true);
+      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: email,
+          subject: expect.stringContaining('Robovers에 오신 것을 환영합니다!'),
+          html: expect.any(String),
+        }),
+      );
+
+      // HTML 내용 검증
+      const sentHtml = mockTransporter.sendMail.mock.calls[0][0].html;
+      expect(sentHtml).toContain('John Doe');
+      expect(sentHtml).toContain('환영합니다');
+      expect(sentHtml).toContain(
+        '휴머노이드 로봇 정보를 공유하고 소통하는 커뮤니티',
+      );
+    });
+
+    it('이름에 XSS 공격 패턴이 포함된 경우 안전하게 처리한다', async () => {
+      // Given
+      const email = 'user@example.com';
+      const maliciousName = '<img src=x onerror=alert("xss")>';
+
+      // When
+      const result = await service.sendWelcomeEmail(email, maliciousName);
+
+      // Then
+      expect(result).toBe(true);
+      const sentHtml = mockTransporter.sendMail.mock.calls[0][0].html;
+      expect(sentHtml).not.toContain('<img');
+      // HTML 이스케이핑이 되어있는지만 확인
+      expect(sentHtml).toContain('&lt;img');
     });
   });
 });

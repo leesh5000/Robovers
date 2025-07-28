@@ -95,8 +95,6 @@ describe('GmailEmailService', () => {
       // Given
       const email = 'newuser@example.com';
       const token = 'prod-verification-token';
-      const expectedUrl =
-        'https://robovers.com/auth/verify-email?token=' + token;
 
       // When
       const result = await service.sendVerificationEmail(email, token);
@@ -107,9 +105,15 @@ describe('GmailEmailService', () => {
         expect.objectContaining({
           to: email,
           subject: '이메일 인증 - Robovers',
-          html: expect.stringContaining(expectedUrl),
+          html: expect.any(String),
         }),
       );
+
+      // HTML 내용 검증
+      const sentHtml = mockTransporter.sendMail.mock.calls[0][0].html;
+      expect(sentHtml).toContain('이메일 인증');
+      expect(sentHtml).toContain('prod-verification-token');
+      expect(sentHtml).not.toContain('?token='); // URL에 토큰이 포함되지 않음
     });
   });
 
@@ -118,8 +122,6 @@ describe('GmailEmailService', () => {
       // Given
       const email = 'user@example.com';
       const token = 'prod-reset-token';
-      const expectedUrl =
-        'https://robovers.com/auth/reset-password?token=' + token;
 
       // When
       const result = await service.sendPasswordResetEmail(email, token);
@@ -130,9 +132,15 @@ describe('GmailEmailService', () => {
         expect.objectContaining({
           to: email,
           subject: '비밀번호 재설정 - Robovers',
-          html: expect.stringContaining(expectedUrl),
+          html: expect.any(String),
         }),
       );
+
+      // HTML 내용 검증
+      const sentHtml = mockTransporter.sendMail.mock.calls[0][0].html;
+      expect(sentHtml).toContain('비밀번호 재설정');
+      expect(sentHtml).toContain('prod-reset-token');
+      expect(sentHtml).not.toContain('?token='); // URL에 토큰이 포함되지 않음
     });
   });
 

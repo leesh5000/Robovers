@@ -88,4 +88,43 @@ describe('AuthModule', () => {
       await moduleRef.close();
     });
   });
+
+  describe('Redis connection validation', () => {
+    it('should throw error when Redis connection fails', async () => {
+      // Mock Redis to simulate connection failure
+      jest.doMock('ioredis', () => {
+        return jest.fn().mockImplementation(() => ({
+          connect: jest.fn().mockRejectedValue(new Error('Connection refused')),
+          on: jest.fn(),
+        }));
+      });
+
+      // Re-import AuthModule to use the mocked Redis
+      const { AuthModule: AuthModuleWithMock } = await import('./auth.module');
+
+      await expect(
+        Test.createTestingModule({
+          imports: [
+            ConfigModule.forRoot({
+              ignoreEnvFile: true,
+              isGlobal: true,
+              load: [
+                () => ({
+                  JWT_SECRET: 'test-secret-key',
+                  JWT_EXPIRES_IN: '7d',
+                  REDIS_HOST: 'invalid-host',
+                  REDIS_PORT: 6379,
+                  NODE_ENV: 'test',
+                }),
+              ],
+            }),
+            AuthModuleWithMock,
+          ],
+        }).compile(),
+      ).rejects.toThrow('Failed to connect to Redis');
+
+      // Clean up the mock
+      jest.resetModules();
+    });
+  });
 });
