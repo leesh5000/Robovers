@@ -19,12 +19,20 @@ export const EMAIL_SERVICE_TOKEN = 'EmailService';
   imports: [
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d'),
-        },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const jwtSecret = configService.get<string>('JWT_SECRET');
+        if (!jwtSecret || jwtSecret.trim() === '') {
+          throw new Error(
+            'JWT_SECRET must be defined in environment variables',
+          );
+        }
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn: configService.get<string>('JWT_EXPIRES_IN', '7d'),
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],
