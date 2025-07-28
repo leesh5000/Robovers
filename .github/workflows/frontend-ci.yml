@@ -476,7 +476,7 @@ jobs:
           ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
             mkdir -p ${DEPLOY_DIR}
             cd ${DEPLOY_DIR}
-EOF
+          EOF
           
       - name: Copy deployment script to EC2
         run: |
@@ -506,7 +506,7 @@ EOF
             cd ${DEPLOY_DIR}
             chmod +x deploy-frontend.sh
             ./deploy-frontend.sh "${FIRST_TAG}"
-EOF
+          EOF
           
           DEPLOY_RESULT=$?
           DEPLOY_END=$(date +%s)
