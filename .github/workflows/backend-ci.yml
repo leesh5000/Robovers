@@ -447,9 +447,10 @@ jobs:
           
       - name: Create deployment directory on EC2
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
-            mkdir -p ${{ env.DEPLOY_DIR }}
-            cd ${{ env.DEPLOY_DIR }}
+          DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+            mkdir -p ${DEPLOY_DIR}
+            cd ${DEPLOY_DIR}
 EOF
           
       - name: Copy deployment files to EC2
@@ -475,11 +476,12 @@ EOF
           # 첫 번째 태그 추출
           IMAGE_TAGS="${{ needs.docker-build.outputs.image-tag }}"
           FIRST_TAG=$(echo "$IMAGE_TAGS" | head -1 | xargs)
+          DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
           
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
-            cd ${{ env.DEPLOY_DIR }}
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+            cd ${DEPLOY_DIR}
             chmod +x deploy-backend.sh
-            ./deploy-backend.sh "$FIRST_TAG"
+            ./deploy-backend.sh "${FIRST_TAG}"
 EOF
           
           DEPLOY_RESULT=$?
