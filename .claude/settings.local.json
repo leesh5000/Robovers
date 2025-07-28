@@ -41,7 +41,19 @@
       "Bash(taskkill:*)",
       "Bash(Remove-Item \"C:\\Users\\leesh\\Desktop\\projects\\ClaudeCodeSync\\test-joinpath.ps1\" -Force)",
       "Bash(npm run dev:*)",
-      "mcp__memory__create_relations"
+      "mcp__memory__create_relations",
+      "mcp__github__get_pull_request",
+      "mcp__github__list_pull_requests",
+      "mcp__github__get_pull_request_comments",
+      "mcp__github__get_pull_request_reviews",
+      "Bash(npm run test:*)",
+      "Bash(git add:*)",
+      "Bash(git restore:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "mcp__github__create_pull_request",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
