@@ -95,30 +95,25 @@ describe('EmailVerificationTokenService', () => {
       expect(result).toEqual({ isValid: false, email: null });
     });
 
-    it('constant-time 비교를 사용하여 timing attack을 방지한다', async () => {
+    it('should use timingSafeEqual for constant-time comparison', async () => {
       // Given
+      const crypto = require('crypto');
+      const timingSafeEqualSpy = jest.spyOn(crypto, 'timingSafeEqual');
       const email = 'test@example.com';
       const correctCode = '123456';
-      const wrongCode1 = '023456'; // 첫 번째 문자만 다름
+      const wrongCode = '654321';
 
-      // When - 여러 번 실행하여 시간 차이가 일정한지 확인
-      const timings = [];
-      for (let i = 0; i < 100; i++) {
-        const start = process.hrtime.bigint();
-        await service.verifyCode(email, wrongCode1, correctCode);
-        const end = process.hrtime.bigint();
-        timings.push(Number(end - start));
-      }
+      // When
+      await service.verifyCode(email, wrongCode, correctCode);
 
-      const avgTiming = timings.reduce((a, b) => a + b, 0) / timings.length;
-      const variance =
-        timings.reduce((sum, time) => sum + Math.pow(time - avgTiming, 2), 0) /
-        timings.length;
-      const stdDev = Math.sqrt(variance);
+      // Then
+      expect(timingSafeEqualSpy).toHaveBeenCalledWith(
+        Buffer.from(wrongCode),
+        Buffer.from(correctCode)
+      );
 
-      // Then - 표준편차가 평균의 200% 이내여야 함 (일정한 시간)
-      // 테스트 환경에서는 더 관대한 기준 적용
-      expect(stdDev / avgTiming).toBeLessThan(2.0);
+      // Cleanup
+      timingSafeEqualSpy.mockRestore();
     });
   });
 });
