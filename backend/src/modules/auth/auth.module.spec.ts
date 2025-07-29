@@ -1,3 +1,13 @@
+// Mock ioredis before any imports
+jest.mock('ioredis', () => {
+  return jest.fn().mockImplementation(() => ({
+    connect: jest.fn().mockResolvedValue(undefined),
+    on: jest.fn(),
+    disconnect: jest.fn(),
+    quit: jest.fn(),
+  }));
+});
+
 import { Test } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth.module';
@@ -15,6 +25,8 @@ describe('AuthModule', () => {
                 () => ({
                   // JWT_SECRET is intentionally not provided
                   JWT_EXPIRES_IN: '7d',
+                  REDIS_HOST: 'localhost',
+                  REDIS_PORT: 6379,
                 }),
               ],
             }),
@@ -35,6 +47,8 @@ describe('AuthModule', () => {
                 () => ({
                   JWT_SECRET: '',
                   JWT_EXPIRES_IN: '7d',
+                  REDIS_HOST: 'localhost',
+                  REDIS_PORT: 6379,
                 }),
               ],
             }),
@@ -55,6 +69,8 @@ describe('AuthModule', () => {
                 () => ({
                   JWT_SECRET: '   ',
                   JWT_EXPIRES_IN: '7d',
+                  REDIS_HOST: 'localhost',
+                  REDIS_PORT: 6379,
                 }),
               ],
             }),
@@ -65,18 +81,6 @@ describe('AuthModule', () => {
     });
 
     it('should initialize successfully when JWT_SECRET is properly defined', async () => {
-      // Mock Redis to avoid actual connection
-      jest.doMock('ioredis', () => {
-        return jest.fn().mockImplementation(() => ({
-          connect: jest.fn().mockResolvedValue(undefined),
-          on: jest.fn(),
-          disconnect: jest.fn(),
-        }));
-      });
-
-      // Re-import AuthModule to use the mocked Redis
-      const { AuthModule: AuthModuleWithMock } = await import('./auth.module');
-
       const moduleRef = await Test.createTestingModule({
         imports: [
           ConfigModule.forRoot({
@@ -92,20 +96,20 @@ describe('AuthModule', () => {
               }),
             ],
           }),
-          AuthModuleWithMock,
+          AuthModule,
         ],
       }).compile();
 
       expect(moduleRef).toBeDefined();
       await moduleRef.close();
-
-      // Clean up the mock
-      jest.resetModules();
     });
   });
 
   describe('Redis connection validation', () => {
     it('should throw error when Redis connection fails', async () => {
+      // Clear the module cache
+      jest.resetModules();
+      
       // Mock Redis to simulate connection failure
       jest.doMock('ioredis', () => {
         return jest.fn().mockImplementation(() => ({
@@ -138,8 +142,16 @@ describe('AuthModule', () => {
         }).compile(),
       ).rejects.toThrow('Failed to connect to Redis');
 
-      // Clean up the mock
+      // Restore the original mock
       jest.resetModules();
+      jest.mock('ioredis', () => {
+        return jest.fn().mockImplementation(() => ({
+          connect: jest.fn().mockResolvedValue(undefined),
+          on: jest.fn(),
+          disconnect: jest.fn(),
+          quit: jest.fn(),
+        }));
+      });
     });
   });
 });
