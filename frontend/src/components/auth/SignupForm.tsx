@@ -62,6 +62,7 @@ export default function SignupForm() {
               message: '닉네임은 영문, 숫자, 언더스코어(_), 하이픈(-)만 사용 가능합니다',
             },
           })}
+          id="nickname"
           type="text"
           autoComplete="nickname"
           className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-2 focus:border-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"
@@ -86,6 +87,7 @@ export default function SignupForm() {
               message: '올바른 이메일 형식이 아닙니다',
             },
           })}
+          id="email"
           type="email"
           autoComplete="email"
           className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-2 focus:border-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"
@@ -117,6 +119,7 @@ export default function SignupForm() {
                 message: '비밀번호는 대문자, 소문자, 숫자, 특수문자를 각각 하나 이상 포함해야 합니다',
               },
             })}
+            id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="new-password"
             className="block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-2 focus:border-blue-500 focus:shadow-lg text-base py-3 px-4 pr-12 transition-all duration-200"
@@ -154,6 +157,7 @@ export default function SignupForm() {
             validate: (value) =>
               value === password || '비밀번호가 일치하지 않습니다',
           })}
+          id="confirmPassword"
           type={showPassword ? 'text' : 'password'}
           autoComplete="new-password"
           className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-2 focus:border-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"

@@ -1,4 +1,5 @@
 import {
+  cn,
   dateUtils,
   numberUtils,
   stringUtils,
@@ -7,7 +8,70 @@ import {
   performanceUtils,
   urlUtils,
   storageUtils,
+  browserUtils,
 } from '../utils';
+
+// Mock for tests
+const mockCreateElement = jest.fn(() => ({
+  innerHTML: '',
+  textContent: 'Mock text content',
+  innerText: 'Mock inner text',
+  href: '',
+  download: '',
+  click: jest.fn(),
+}));
+
+const mockAppendChild = jest.fn();
+const mockRemoveChild = jest.fn();
+
+// Mock DOM methods
+(global as any).document = {
+  ...global.document,
+  createElement: mockCreateElement,
+  body: {
+    ...global.document.body,
+    appendChild: mockAppendChild,
+    removeChild: mockRemoveChild,
+  },
+};
+
+// Mock clipboard
+(global as any).navigator = {
+  ...global.navigator,
+  clipboard: {
+    writeText: jest.fn(),
+  },
+  onLine: true,
+};
+
+// Mock window properties
+(global as any).window = {
+  ...global.window,
+  innerWidth: 1024,
+  matchMedia: jest.fn(() => ({ matches: false })),
+};
+
+// Mock URL methods  
+(global as any).URL = {
+  ...global.URL,
+  createObjectURL: jest.fn(() => 'blob:mock-url'),
+  revokeObjectURL: jest.fn(),
+};
+
+describe('cn', () => {
+  it('should combine class names', () => {
+    const result = cn('class1', 'class2');
+    expect(result).toContain('class1');
+    expect(result).toContain('class2');
+  });
+
+  it('should handle conditional classes', () => {
+    const result = cn('base', true && 'active', false && 'inactive');
+    expect(result).toContain('base');
+    expect(result).toContain('active');
+    expect(result).not.toContain('inactive');
+  });
+});
 
 describe('dateUtils', () => {
   describe('formatRelativeTime', () => {
@@ -34,6 +98,30 @@ describe('dateUtils', () => {
       const tenDaysAgo = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000);
       const result = dateUtils.formatRelativeTime(tenDaysAgo);
       expect(result).toMatch(/\d{4}\. \d{1,2}\. \d{1,2}\./);
+    });
+  });
+
+  describe('formatDate', () => {
+    it('should format date in Korean locale', () => {
+      const date = new Date('2023-01-15T10:30:00');
+      const result = dateUtils.formatDate(date);
+      expect(result).toContain('2023');
+    });
+
+    it('should use custom options', () => {
+      const date = new Date('2023-01-15T10:30:00');
+      const result = dateUtils.formatDate(date, { year: 'numeric', month: 'long' });
+      expect(typeof result).toBe('string');
+      expect(result).toContain('2023');
+    });
+  });
+
+  describe('formatDateTime', () => {
+    it('should format date and time in Korean locale', () => {
+      const date = new Date('2023-01-15T10:30:00');
+      const result = dateUtils.formatDateTime(date);
+      expect(result).toContain('2023');
+      expect(typeof result).toBe('string');
     });
   });
 
@@ -70,6 +158,25 @@ describe('numberUtils', () => {
 
     it('should format millions with M suffix', () => {
       expect(numberUtils.formatCount(2500000)).toBe('2.5M');
+    });
+  });
+
+  describe('formatCurrency', () => {
+    it('should format currency with default KRW', () => {
+      const result = numberUtils.formatCurrency(10000);
+      expect(result).toContain('10,000');
+      expect(result).toContain('₩');
+    });
+
+    it('should format currency with specified currency', () => {
+      const result = numberUtils.formatCurrency(1000, 'USD');
+      expect(result).toContain('1,000');
+      expect(result).toContain('$');
+    });
+
+    it('should handle zero amount', () => {
+      const result = numberUtils.formatCurrency(0);
+      expect(result).toContain('0');
     });
   });
 
@@ -127,6 +234,23 @@ describe('stringUtils', () => {
 
     it('should handle special characters', () => {
       expect(stringUtils.slugify('Test@#$%^&*()String')).toBe('teststring');
+    });
+  });
+
+  describe('removeHtml', () => {
+    it('should remove HTML tags and return text content', () => {
+      const result = stringUtils.removeHtml('<p>Hello <strong>World</strong>!</p>');
+      expect(result).toBe('Mock text content');
+    });
+
+    it('should handle empty HTML', () => {
+      const result = stringUtils.removeHtml('');
+      expect(result).toBe('Mock text content');
+    });
+
+    it('should handle plain text', () => {
+      const result = stringUtils.removeHtml('Plain text');
+      expect(result).toBe('Mock text content');
     });
   });
 
@@ -244,6 +368,43 @@ describe('objectUtils', () => {
       expect(objectUtils.isEmpty({ a: 1 })).toBe(false);
       expect(objectUtils.isEmpty('hello')).toBe(false);
     });
+
+    it('should handle Map objects', () => {
+      expect(objectUtils.isEmpty(new Map())).toBe(true);
+      expect(objectUtils.isEmpty(new Map([['key', 'value']]))).toBe(false);
+    });
+
+    it('should handle Set objects', () => {
+      expect(objectUtils.isEmpty(new Set())).toBe(true);
+      expect(objectUtils.isEmpty(new Set([1, 2, 3]))).toBe(false);
+    });
+  });
+
+  describe('deepClone', () => {
+    it('should create deep copy of object', () => {
+      const original = { a: 1, b: { c: 2 } };
+      const cloned = objectUtils.deepClone(original);
+      
+      expect(cloned).toEqual(original);
+      expect(cloned).not.toBe(original);
+      expect(cloned.b).not.toBe(original.b);
+    });
+
+    it('should handle arrays', () => {
+      const original = [1, [2, 3], { a: 4 }];
+      const cloned = objectUtils.deepClone(original);
+      
+      expect(cloned).toEqual(original);
+      expect(cloned).not.toBe(original);
+      expect(cloned[1]).not.toBe(original[1]);
+    });
+
+    it('should handle primitive values', () => {
+      expect(objectUtils.deepClone('string')).toBe('string');
+      expect(objectUtils.deepClone(42)).toBe(42);
+      expect(objectUtils.deepClone(true)).toBe(true);
+      expect(objectUtils.deepClone(null)).toBe(null);
+    });
   });
 
   describe('isEqual', () => {
@@ -308,6 +469,121 @@ describe('performanceUtils', () => {
       jest.clearAllTimers();
     });
   });
+
+  describe('sleep', () => {
+    jest.useFakeTimers();
+
+    it('should return a promise that resolves after specified time', async () => {
+      const promise = performanceUtils.sleep(1000);
+      jest.advanceTimersByTime(1000);
+      await expect(promise).resolves.toBeUndefined();
+    });
+
+    it('should handle zero delay', async () => {
+      const promise = performanceUtils.sleep(0);
+      jest.advanceTimersByTime(0);
+      await expect(promise).resolves.toBeUndefined();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+    });
+  });
+});
+
+describe('browserUtils', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('copyToClipboard', () => {
+    it('should copy text successfully', async () => {
+      const writeTextMock = (global as any).navigator.clipboard.writeText as jest.Mock;
+      writeTextMock.mockResolvedValue(undefined);
+      
+      const result = await browserUtils.copyToClipboard('test text');
+      
+      expect(result).toBe(true);
+      expect(writeTextMock).toHaveBeenCalledWith('test text');
+    });
+
+    it('should handle clipboard failure', async () => {
+      const writeTextMock = (global as any).navigator.clipboard.writeText as jest.Mock;
+      writeTextMock.mockRejectedValue(new Error('Failed'));
+      
+      const result = await browserUtils.copyToClipboard('test text');
+      
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('downloadFile', () => {
+    it('should create download link and trigger download', () => {
+      const mockBlob = new Blob(['test content'], { type: 'text/plain' });
+      const mockAnchor = {
+        innerHTML: '',
+        textContent: '',
+        innerText: '',
+        href: '',
+        download: '',
+        click: jest.fn(),
+      };
+      
+      mockCreateElement.mockReturnValue(mockAnchor);
+      
+      browserUtils.downloadFile(mockBlob, 'test.txt');
+      
+      expect(mockCreateElement).toHaveBeenCalledWith('a');
+      expect(mockAnchor.href).toBe('blob:mock-url');
+      expect(mockAnchor.download).toBe('test.txt');
+      expect(mockAnchor.click).toHaveBeenCalled();
+      expect(mockAppendChild).toHaveBeenCalledWith(mockAnchor);
+      expect(mockRemoveChild).toHaveBeenCalledWith(mockAnchor);
+      expect((global as any).URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
+    });
+  });
+
+  describe('getDeviceType', () => {
+    it('should return mobile for width < 768', () => {
+      (global.window as any).innerWidth = 500;
+      expect(browserUtils.getDeviceType()).toBe('mobile');
+    });
+
+    it('should return tablet for width < 1024', () => {
+      (global.window as any).innerWidth = 800;
+      expect(browserUtils.getDeviceType()).toBe('tablet');
+    });
+
+    it('should return desktop for width >= 1024', () => {
+      (global.window as any).innerWidth = 1200;
+      expect(browserUtils.getDeviceType()).toBe('desktop');
+    });
+  });
+
+  describe('isOnline', () => {
+    it('should return navigator.onLine value', () => {
+      (global.navigator as any).onLine = true;
+      expect(browserUtils.isOnline()).toBe(true);
+
+      (global.navigator as any).onLine = false;
+      expect(browserUtils.isOnline()).toBe(false);
+    });
+  });
+
+  describe('getPreferredColorScheme', () => {
+    it('should return dark for dark color scheme', () => {
+      const matchMediaMock = (global as any).window.matchMedia as jest.Mock;
+      matchMediaMock.mockReturnValue({ matches: true });
+      expect(browserUtils.getPreferredColorScheme()).toBe('dark');
+      expect(matchMediaMock).toHaveBeenCalledWith('(prefers-color-scheme: dark)');
+    });
+
+    it('should return light for light color scheme', () => {
+      const matchMediaMock = (global as any).window.matchMedia as jest.Mock;
+      matchMediaMock.mockReturnValue({ matches: false });
+      expect(browserUtils.getPreferredColorScheme()).toBe('light');
+    });
+  });
 });
 
 describe('urlUtils', () => {
@@ -334,6 +610,30 @@ describe('urlUtils', () => {
     it('should handle empty query string', () => {
       const result = urlUtils.parseQueryString('');
       expect(result).toEqual({});
+    });
+  });
+
+  describe('buildUrl', () => {
+    it('should build URL with path and params', () => {
+      const result = urlUtils.buildUrl('https://example.com', '/api/users', { page: 1, limit: 10 });
+      expect(result).toContain('https://example.com/api/users');
+      expect(result).toContain('page=1');
+      expect(result).toContain('limit=10');
+    });
+
+    it('should build URL without params', () => {
+      const result = urlUtils.buildUrl('https://example.com', '/api/users');
+      expect(result).toBe('https://example.com/api/users');
+    });
+
+    it('should handle relative paths', () => {
+      const result = urlUtils.buildUrl('https://example.com', 'api/users');
+      expect(result).toBe('https://example.com/api/users');
+    });
+
+    it('should handle empty params object', () => {
+      const result = urlUtils.buildUrl('https://example.com', '/api/users', {});
+      expect(result).toBe('https://example.com/api/users');
     });
   });
 });
@@ -391,6 +691,23 @@ describe('storageUtils', () => {
       expect(success).toBe(true);
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith('test', '{"value":"hello"}');
     });
+
+    it('should handle storage errors', () => {
+      mockLocalStorage.setItem.mockImplementation(() => {
+        throw new Error('Storage quota exceeded');
+      });
+      
+      const success = storageUtils.set('test', 'value');
+      expect(success).toBe(false);
+    });
+
+    it('should handle circular references', () => {
+      const obj: any = { name: 'test' };
+      obj.self = obj; // Create circular reference
+      
+      const success = storageUtils.set('circular', obj);
+      expect(success).toBe(false);
+    });
   });
 
   describe('remove', () => {
@@ -398,6 +715,32 @@ describe('storageUtils', () => {
       const success = storageUtils.remove('test');
       expect(success).toBe(true);
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('test');
+    });
+
+    it('should handle removal errors', () => {
+      mockLocalStorage.removeItem.mockImplementation(() => {
+        throw new Error('Remove failed');
+      });
+      
+      const success = storageUtils.remove('test');
+      expect(success).toBe(false);
+    });
+  });
+
+  describe('clear', () => {
+    it('should clear all storage', () => {
+      const success = storageUtils.clear();
+      expect(success).toBe(true);
+      expect(mockLocalStorage.clear).toHaveBeenCalled();
+    });
+
+    it('should handle clear errors', () => {
+      mockLocalStorage.clear.mockImplementation(() => {
+        throw new Error('Clear failed');
+      });
+      
+      const success = storageUtils.clear();
+      expect(success).toBe(false);
     });
   });
 });

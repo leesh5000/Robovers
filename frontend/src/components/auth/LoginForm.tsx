@@ -53,6 +53,7 @@ export default function LoginForm() {
               message: '올바른 이메일 형식이 아닙니다',
             },
           })}
+          id="email"
           type="email"
           autoComplete="email"
           className="mt-1 block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-2 focus:border-blue-500 focus:shadow-lg text-base py-3 px-4 transition-all duration-200"
@@ -71,6 +72,7 @@ export default function LoginForm() {
             {...register('password', {
               required: '비밀번호를 입력해주세요',
             })}
+            id="password"
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             className="block w-full rounded-md border border-gray-400 bg-white shadow-md hover:border-gray-500 focus:border-2 focus:border-blue-500 focus:shadow-lg text-base py-3 px-4 pr-12 transition-all duration-200"

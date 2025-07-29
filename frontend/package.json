@@ -14,7 +14,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
-    "analyze": "ANALYZE=true next build",
+    "analyze": "cross-env ANALYZE=true next build",
+    "test:coverage:win": "set NODE_ENV=test&& jest --coverage",
     "mock-server": "node mock-server.js"
   },
   "dependencies": {
@@ -53,6 +54,7 @@
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
     "autoprefixer": "^10.4.16",
+    "cross-env": "^10.0.0",
     "dotenv": "^17.2.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.0.4",

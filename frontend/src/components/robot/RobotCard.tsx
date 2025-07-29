@@ -165,7 +165,7 @@ export default function RobotCard({ robot, onClick }: RobotCardProps) {
         </div>
 
         {/* 가격 정보 */}
-        {robot.price && (
+        {robot.price && robot.price.amount !== undefined && (
           <div className="border-t border-gray-200 pt-3">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-500">가격</span>

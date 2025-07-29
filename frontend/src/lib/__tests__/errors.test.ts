@@ -5,6 +5,7 @@ import {
   mapHttpStatusToErrorCode,
   createAppError,
   getUserFriendlyMessage,
+  logError,
 } from '../errors';
 
 describe('AppException', () => {
@@ -184,5 +185,100 @@ describe('ERROR_MESSAGES', () => {
     expect(ERROR_MESSAGES[ErrorCode.UNAUTHORIZED]).toContain('로그인');
     expect(ERROR_MESSAGES[ErrorCode.VALIDATION_ERROR]).toContain('입력');
     expect(ERROR_MESSAGES[ErrorCode.SERVER_ERROR]).toContain('서버');
+  });
+});
+
+describe('logError', () => {
+  let mockConsoleError: jest.SpyInstance;
+
+  beforeEach(() => {
+    mockConsoleError = jest.spyOn(console, 'error').mockImplementation();
+  });
+
+  afterEach(() => {
+    mockConsoleError.mockRestore();
+  });
+
+  it('should log AppError with context', () => {
+    const appError = {
+      code: ErrorCode.VALIDATION_ERROR,
+      message: 'Test validation error',
+      statusCode: 400,
+      details: { field: 'email' }
+    };
+    const context = 'Test context';
+
+    logError(appError, context);
+
+    expect(mockConsoleError).toHaveBeenCalledWith('[Error]', {
+      context,
+      code: appError.code,
+      message: appError.message,
+      statusCode: appError.statusCode,
+      details: appError.details,
+      timestamp: expect.any(String)
+    });
+  });
+
+  it('should log Error object without context', () => {
+    const error = new Error('Test error message');
+
+    logError(error);
+
+    expect(mockConsoleError).toHaveBeenCalledWith('[Error]', {
+      context: undefined,
+      code: ErrorCode.UNKNOWN_ERROR,
+      message: 'Test error message',
+      statusCode: undefined,
+      details: undefined,
+      timestamp: expect.any(String)
+    });
+  });
+
+  it('should log AppException', () => {
+    const appException = new AppException(ErrorCode.NETWORK_ERROR, 'Network failed', 503, { retry: true });
+    const context = 'API Call';
+
+    logError(appException, context);
+
+    expect(mockConsoleError).toHaveBeenCalledWith('[Error]', {
+      context,
+      code: ErrorCode.NETWORK_ERROR,
+      message: 'Network failed',
+      statusCode: 503,
+      details: { retry: true },
+      timestamp: expect.any(String)
+    });
+  });
+
+  it('should log axios-like error', () => {
+    const axiosError = new Error('Request failed') as Error & { response?: { status: number; data?: { message?: string } } };
+    axiosError.response = {
+      status: 500,
+      data: { message: 'Internal server error' }
+    };
+
+    logError(axiosError, 'API Request');
+
+    expect(mockConsoleError).toHaveBeenCalledWith('[Error]', {
+      context: 'API Request',
+      code: ErrorCode.SERVER_ERROR,
+      message: 'Internal server error',
+      statusCode: 500,
+      details: { message: 'Internal server error' },
+      timestamp: expect.any(String)
+    });
+  });
+
+  it('should include valid ISO timestamp', () => {
+    const error = new Error('Test error');
+    
+    logError(error);
+
+    const logCall = mockConsoleError.mock.calls[0][1];
+    const timestamp = logCall.timestamp;
+    
+    expect(timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    expect(new Date(timestamp).getTime()).toBeGreaterThan(Date.now() - 1000);
   });
 });
