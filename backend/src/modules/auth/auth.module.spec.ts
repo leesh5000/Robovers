@@ -65,6 +65,18 @@ describe('AuthModule', () => {
     });
 
     it('should initialize successfully when JWT_SECRET is properly defined', async () => {
+      // Mock Redis to avoid actual connection
+      jest.doMock('ioredis', () => {
+        return jest.fn().mockImplementation(() => ({
+          connect: jest.fn().mockResolvedValue(undefined),
+          on: jest.fn(),
+          disconnect: jest.fn(),
+        }));
+      });
+
+      // Re-import AuthModule to use the mocked Redis
+      const { AuthModule: AuthModuleWithMock } = await import('./auth.module');
+
       const moduleRef = await Test.createTestingModule({
         imports: [
           ConfigModule.forRoot({
@@ -80,12 +92,15 @@ describe('AuthModule', () => {
               }),
             ],
           }),
-          AuthModule,
+          AuthModuleWithMock,
         ],
       }).compile();
 
       expect(moduleRef).toBeDefined();
       await moduleRef.close();
+
+      // Clean up the mock
+      jest.resetModules();
     });
   });
 
