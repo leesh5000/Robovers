@@ -53,7 +53,9 @@
       "Bash(git push:*)",
       "Bash(git checkout:*)",
       "mcp__github__create_pull_request",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(pnpm run:*)",
+      "Bash(npm run typecheck:*)"
     ],
     "deny": []
   }
