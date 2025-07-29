@@ -54,7 +54,15 @@
       "Bash(git checkout:*)",
       "mcp__github__create_pull_request",
       "WebFetch(domain:github.com)",
-      "Bash(yamllint:*)"
+      "Bash(pnpm run:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(git pull:*)",
+      "Bash(find:*)",
+      "Bash(pnpm --filter @robovers/backend test)",
+      "Bash(cmd.exe /c \"pnpm --filter @robovers/backend test\")",
+      "Bash(dir)",
+      "Bash(docker:*)",
+      "Bash(pnpm typecheck:*)"
     ],
     "deny": []
   }

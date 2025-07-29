@@ -45,21 +45,17 @@ export const EMAIL_SERVICE_TOKEN = 'EmailService';
           host: configService.get<string>('REDIS_HOST', 'localhost'),
           port: configService.get<number>('REDIS_PORT', 6379),
           password: configService.get<string>('REDIS_PASSWORD'),
-          retryStrategy: (times) => Math.min(times * 50, 2000),
-          lazyConnect: true,
+          retryStrategy: (times) => Math.min(times * 100, 5000),
+          lazyConnect: false,
+          connectTimeout: 10000,
+          maxRetriesPerRequest: 3,
         });
 
-        try {
-          await redis.connect();
-          redis.on('error', (err) => {
-            console.error('Redis connection error:', err);
-          });
-          return redis;
-        } catch (error) {
-          throw new Error(
-            `Failed to connect to Redis: ${error.message || error}`,
-          );
-        }
+        redis.on('error', (err) => {
+          console.error('Redis connection error:', err);
+        });
+
+        return redis;
       },
       inject: [ConfigService],
     },

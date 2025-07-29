@@ -65,6 +65,10 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: pnpm prisma:generate
           
       - name: Run ESLint
         id: eslint
@@ -125,6 +129,10 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: pnpm prisma:generate
           
       - name: Run TypeScript check
         id: typecheck
@@ -190,6 +198,10 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: pnpm prisma:generate
         
       - name: Docker environment check
         run: |
@@ -448,7 +460,7 @@ jobs:
       - name: Create deployment directory on EC2
         run: |
           DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
             mkdir -p ${DEPLOY_DIR}
             cd ${DEPLOY_DIR}
           EOF
@@ -478,7 +490,7 @@ jobs:
           FIRST_TAG=$(echo "$IMAGE_TAGS" | head -1 | xargs)
           DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
           
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ${DEPLOY_DIR}
             chmod +x deploy-backend.sh
             ./deploy-backend.sh "${FIRST_TAG}"

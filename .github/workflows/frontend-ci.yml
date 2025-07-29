@@ -473,7 +473,7 @@ jobs:
       - name: Create deployment directory on EC2
         run: |
           DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
             mkdir -p ${DEPLOY_DIR}
             cd ${DEPLOY_DIR}
           EOF
@@ -502,7 +502,7 @@ jobs:
           FIRST_TAG=$(echo "$IMAGE_TAGS" | head -1 | xargs)
           DEPLOY_DIR="${{ env.DEPLOY_DIR }}"
           
-          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
             cd ${DEPLOY_DIR}
             chmod +x deploy-frontend.sh
             ./deploy-frontend.sh "${FIRST_TAG}"
