@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Comment as CommentType } from '@/lib/types';
 import { getDummyComments } from '@/lib/dummy-data';
 import Comment from './Comment';
@@ -23,28 +23,12 @@ export default function CommentList({ postId, highlightCommentId }: CommentListP
     { value: 'popular', label: '좋아요순' },
   ];
 
-  useEffect(() => {
-    loadComments();
-  }, [postId, sortBy]);
-
-  // 하이라이팅된 댓글로 스크롤
-  useEffect(() => {
-    if (highlightCommentId && !isLoading) {
-      setTimeout(() => {
-        const element = document.getElementById(`comment-${highlightCommentId}`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 100);
-    }
-  }, [highlightCommentId, isLoading]);
-
-  const loadComments = async () => {
+  const loadComments = useCallback(async () => {
     setIsLoading(true);
     
     // API 호출 시뮬레이션
     setTimeout(() => {
-      let commentsData = getDummyComments(postId);
+      const commentsData = getDummyComments(postId);
       
       // 정렬 적용
       switch (sortBy) {
@@ -62,7 +46,23 @@ export default function CommentList({ postId, highlightCommentId }: CommentListP
       setComments(commentsData);
       setIsLoading(false);
     }, 300);
-  };
+  }, [postId, sortBy]);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
+
+  // 하이라이팅된 댓글로 스크롤
+  useEffect(() => {
+    if (highlightCommentId && !isLoading) {
+      setTimeout(() => {
+        const element = document.getElementById(`comment-${highlightCommentId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+    }
+  }, [highlightCommentId, isLoading]);
 
   const handleAddComment = async (content: string) => {
     // 새 댓글 추가 시뮬레이션

@@ -19,7 +19,7 @@ export default function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuthStore();
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 

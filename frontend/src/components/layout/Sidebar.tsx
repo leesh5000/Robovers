@@ -133,16 +133,6 @@ const popularTags = [
 export default function Sidebar({ className = '' }: SidebarProps) {
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
-  const formatMarketCap = (marketCap: number) => {
-    if (marketCap >= 1000000000000) {
-      return `${(marketCap / 1000000000000).toFixed(1)}T`;
-    } else if (marketCap >= 1000000000) {
-      return `${(marketCap / 1000000000).toFixed(1)}B`;
-    } else if (marketCap >= 1000000) {
-      return `${(marketCap / 1000000).toFixed(1)}M`;
-    }
-    return marketCap.toString();
-  };
 
   const formatTimeAgo = (date: Date) => {
     // Date 객체가 아닌 경우 안전하게 변환

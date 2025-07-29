@@ -32,10 +32,10 @@ interface StockChartProps {
   companyName: string;
 }
 
-const StockChart = memo(function StockChart({ companyId, companyName }: StockChartProps) {
+const StockChart = memo(function StockChart({ companyId }: StockChartProps) {
   const [priceHistory, setPriceHistory] = useState<StockPriceHistory[]>([]);
   const [timeRange, setTimeRange] = useState<'1M' | '3M' | '6M' | '1Y' | 'ALL'>('1M');
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // 더미 데이터 로드
@@ -46,17 +46,6 @@ const StockChart = memo(function StockChart({ companyId, companyName }: StockCha
       setIsLoading(false);
     }, 300);
   }, [companyId, timeRange]);
-
-  if (isLoading) {
-    return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-32 mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
 
   const chartData = useMemo(() => ({
     labels: priceHistory.map(item => {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Comment, CommunityPost } from '@/lib/types';
+import { Comment } from '@/lib/types';
 import { getDummyCommentsForAdmin } from '@/lib/dummy-data-admin';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 import Pagination from '@/components/ui/Pagination';

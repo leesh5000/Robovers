@@ -2,7 +2,7 @@
 export interface AppError {
   code: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   statusCode?: number;
 }
 
@@ -61,9 +61,9 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
 export class AppException extends Error {
   code: ErrorCode;
   statusCode?: number;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 
-  constructor(code: ErrorCode, message?: string, statusCode?: number, details?: Record<string, any>) {
+  constructor(code: ErrorCode, message?: string, statusCode?: number, details?: Record<string, unknown>) {
     super(message || ERROR_MESSAGES[code]);
     this.name = 'AppException';
     this.code = code;
@@ -111,13 +111,21 @@ export function createAppError(error: unknown): AppError {
   if (error instanceof Error) {
     // Axios 에러 처리
     if ('response' in error && typeof error.response === 'object' && error.response) {
-      const response = error.response as { status: number; data?: any };
+      const response = error.response as { status: number; data?: { message?: string } };
       const code = mapHttpStatusToErrorCode(response.status);
       return {
         code,
         message: response.data?.message || ERROR_MESSAGES[code],
         statusCode: response.status,
         details: response.data
+      };
+    }
+
+    // 네트워크 에러 처리 (Axios network error)
+    if ('request' in error && !('response' in error)) {
+      return {
+        code: ErrorCode.NETWORK_ERROR,
+        message: ERROR_MESSAGES[ErrorCode.NETWORK_ERROR]
       };
     }
 

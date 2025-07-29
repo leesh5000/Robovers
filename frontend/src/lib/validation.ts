@@ -1,6 +1,6 @@
 // 폼 검증 유틸리티
 
-export interface ValidationRule<T = any> {
+export interface ValidationRule<T = unknown> {
   required?: boolean;
   minLength?: number;
   maxLength?: number;
@@ -21,7 +21,7 @@ export interface ValidationResult {
 }
 
 // 개별 필드 검증
-export function validateField(value: any, rules: ValidationRule): string | null {
+export function validateField(value: unknown, rules: ValidationRule): string | null {
   // Required 검증
   if (rules.required && (value === undefined || value === null || value === '')) {
     return rules.message || '필수 입력 항목입니다.';
@@ -66,7 +66,7 @@ export function validateField(value: any, rules: ValidationRule): string | null 
 }
 
 // 폼 전체 검증
-export function validateFormData(data: Record<string, any>, rules: ValidationRules): ValidationResult {
+export function validateFormData(data: Record<string, unknown>, rules: ValidationRules): ValidationResult {
   const errors: Record<string, string> = {};
 
   for (const [fieldName, fieldRules] of Object.entries(rules)) {
@@ -144,3 +144,59 @@ export const validators = {
     message: message || `${min}부터 ${max} 사이의 값을 입력해주세요.`
   })
 };
+
+// 개별 검증 함수들
+export function validateEmail(email: string): boolean {
+  if (!email || typeof email !== 'string') {
+    return false;
+  }
+  return commonValidationRules.email.pattern.test(email);
+}
+
+export function validatePassword(password: string): { isValid: boolean; errors?: string[]; error?: string } {
+  if (!password || typeof password !== 'string') {
+    return { isValid: false, error: '비밀번호를 입력해주세요' };
+  }
+
+  const errors: string[] = [];
+
+  if (password.length < 8) {
+    errors.push('비밀번호는 8자 이상이어야 합니다');
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push('소문자를 포함해야 합니다');
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('대문자를 포함해야 합니다');
+  }
+  if (!/\d/.test(password)) {
+    errors.push('숫자를 포함해야 합니다');
+  }
+  if (!/[@$!%*?&]/.test(password)) {
+    errors.push('특수문자를 포함해야 합니다');
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors: errors.length > 0 ? errors : undefined,
+    error: errors.length > 0 ? errors[0] : undefined
+  };
+}
+
+export function validateUsername(username: string): { isValid: boolean; error?: string } {
+  if (!username || typeof username !== 'string') {
+    return { isValid: false, error: '사용자명을 입력해주세요' };
+  }
+
+  if (username.length < 3) {
+    return { isValid: false, error: '사용자명은 3자 이상이어야 합니다' };
+  }
+  if (username.length > 20) {
+    return { isValid: false, error: '사용자명은 20자 이하여야 합니다' };
+  }
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+    return { isValid: false, error: '사용자명은 영문자, 숫자, 밑줄(_)만 사용 가능합니다' };
+  }
+
+  return { isValid: true };
+}

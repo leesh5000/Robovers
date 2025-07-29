@@ -5,7 +5,6 @@ import {
   arrayUtils,
   objectUtils,
   performanceUtils,
-  browserUtils,
   urlUtils,
   storageUtils,
 } from '../utils';

@@ -23,7 +23,7 @@ describe('Integration: Form Flows', () => {
           // Validate on change
           let error = '';
           if (field === 'email') {
-            error = validateField(value, { required: true, email: true }) || '';
+            error = validateField(value, { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: '올바른 이메일 주소를 입력해주세요.' }) || '';
           } else if (field === 'password') {
             error = validateField(value, { required: true, minLength: 8 }) || '';
           }
@@ -34,15 +34,15 @@ describe('Integration: Form Flows', () => {
         const handleFormSubmit = (e: React.FormEvent) => {
           e.preventDefault();
           
-          const formErrors = validateFormData(values, {
-            email: [{ required: true }, { email: true }],
-            password: [{ required: true }, { minLength: 8 }]
+          const validation = validateFormData(values, {
+            email: { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: '올바른 이메일 주소를 입력해주세요.' },
+            password: { required: true, minLength: 8 }
           });
           
-          if (Object.keys(formErrors).length === 0) {
+          if (validation.isValid) {
             handleSubmit(values);
           } else {
-            setErrors(formErrors);
+            setErrors(validation.errors);
           }
         };
         
@@ -73,7 +73,7 @@ describe('Integration: Form Flows', () => {
       const submitButton = screen.getByRole('button', { name: /제출/i });
       await user.click(submitButton);
       
-      expect(screen.getByText('이 필드는 필수입니다.')).toBeInTheDocument();
+      expect(screen.getByText('필수 입력 항목입니다.')).toBeInTheDocument();
       expect(handleSubmit).not.toHaveBeenCalled();
       
       // Test email validation

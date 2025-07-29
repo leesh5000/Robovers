@@ -189,7 +189,7 @@ export default function AdminCommunityPage() {
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-sm text-gray-900">새 게시글 "휴머노이드 로봇의 미래는?" 작성됨</p>
+                <p className="text-sm text-gray-900">새 게시글 &quot;휴머노이드 로봇의 미래는?&quot; 작성됨</p>
                 <p className="text-xs text-gray-500 mt-1">user123 · 5분 전</p>
               </div>
             </div>
@@ -212,7 +212,7 @@ export default function AdminCommunityPage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm text-gray-900">인기 게시글 댓글 20개 돌파</p>
-                <p className="text-xs text-gray-500 mt-1">"Atlas 로봇 리뷰" 게시글 · 30분 전</p>
+                <p className="text-xs text-gray-500 mt-1">&quot;Atlas 로봇 리뷰&quot; 게시글 · 30분 전</p>
               </div>
             </div>
           </div>

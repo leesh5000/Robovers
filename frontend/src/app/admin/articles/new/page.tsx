@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ArticleCategory } from '@/lib/types';
@@ -103,9 +104,11 @@ export default function NewArticlePage() {
             </label>
             <div className="flex items-start gap-4">
               {formData.imageUrl && (
-                <img
+                <Image
                   src={formData.imageUrl}
                   alt="대표 이미지"
+                  width={128}
+                  height={128}
                   className="w-32 h-32 object-cover rounded-lg"
                 />
               )}

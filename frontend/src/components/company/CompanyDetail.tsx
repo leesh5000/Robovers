@@ -1,6 +1,7 @@
 'use client';
 
 import { Company } from '@/lib/types';
+import Image from 'next/image';
 import LazyStockChart from './LazyStockChart';
 import CompanyFinancials from './CompanyFinancials';
 
@@ -54,9 +55,11 @@ export default function CompanyDetail({ company }: CompanyDetailProps) {
           {/* 로고 및 기본 정보 */}
           <div className="flex items-start gap-6">
             {company.logoUrl ? (
-              <img
+              <Image
                 src={company.logoUrl}
                 alt={`${company.name} logo`}
+                width={96}
+                height={96}
                 className="w-24 h-24 object-contain rounded-lg border border-gray-200 p-2"
                 onError={(e) => {
                   e.currentTarget.src = 'https://via.placeholder.com/96x96?text=' + company.name.charAt(0);

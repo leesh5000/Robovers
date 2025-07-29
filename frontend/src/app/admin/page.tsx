@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface DashboardStats {
@@ -21,7 +21,7 @@ interface RecentActivity {
 }
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats>({
+  const [stats] = useState<DashboardStats>({
     totalArticles: 156,
     totalRobots: 28,
     totalCompanies: 10,

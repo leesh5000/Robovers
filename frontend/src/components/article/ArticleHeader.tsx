@@ -1,5 +1,6 @@
 import { Post, PostCategory } from '@/lib/api/posts';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface ArticleHeaderProps {
   post: Post;
@@ -57,9 +58,11 @@ export default function ArticleHeader({ post }: ArticleHeaderProps) {
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
               {post.author.profileImageUrl ? (
-                <img 
+                <Image 
                   src={post.author.profileImageUrl} 
                   alt={post.author.nickname}
+                  width={32}
+                  height={32}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (

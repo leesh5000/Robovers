@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { CompanySector } from '@/lib/types';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
@@ -131,9 +132,11 @@ export default function NewCompanyPage() {
             </label>
             <div className="flex items-start gap-4">
               {formData.logoUrl && (
-                <img
+                <Image
                   src={formData.logoUrl}
                   alt="기업 로고"
+                  width={96}
+                  height={96}
                   className="w-24 h-24 object-contain rounded-lg border border-gray-200"
                 />
               )}

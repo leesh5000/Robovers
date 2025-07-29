@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Comment as CommentType } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -72,9 +73,11 @@ export default function Comment({
             {/* 작성자 아바타 */}
             <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
               {comment.author.avatar ? (
-                <img
+                <Image
                   src={comment.author.avatar}
                   alt={comment.author.username}
+                  width={32}
+                  height={32}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (

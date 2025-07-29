@@ -357,3 +357,8 @@ After completing tasks, verify:
 3. Code follows project conventions
 4. Commit messages are clear and follow the template
 5. Database migrations are properly created if schema changed
+
+## 테스트 코드 작성 지침
+
+- 단위테스트 : 가급적 mocking보다는 Fake 객체를 만들어서 사용하고 이를 재사용하시오.
+- 통합테스트 : TestContainers를 사용하여 외부 의존성을 실제로 실행하고 이와 연동하여 테스트하시오.

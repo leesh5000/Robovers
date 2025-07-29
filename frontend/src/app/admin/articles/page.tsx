@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Article, ArticleCategory } from '@/lib/types';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
@@ -192,9 +193,11 @@ export default function AdminArticlesPage() {
                 <td className="px-6 py-4">
                   <div className="flex items-center">
                     {article.imageUrl && (
-                      <img
+                      <Image
                         src={article.imageUrl}
                         alt=""
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded object-cover mr-3"
                       />
                     )}

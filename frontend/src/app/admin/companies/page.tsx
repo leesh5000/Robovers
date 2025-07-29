@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Company, CompanySector } from '@/lib/types';
 import { getDummyCompanies } from '@/lib/dummy-data';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
@@ -156,9 +157,11 @@ export default function AdminCompaniesPage() {
                 <td className="px-6 py-4">
                   <div className="flex items-center">
                     {company.logoUrl && (
-                      <img
+                      <Image
                         src={company.logoUrl}
                         alt=""
+                        width={40}
+                        height={40}
                         className="w-10 h-10 rounded object-contain mr-3"
                         onError={(e) => {
                           e.currentTarget.src = 'https://via.placeholder.com/40x40?text=' + company.name.charAt(0);

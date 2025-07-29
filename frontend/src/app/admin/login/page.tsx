@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
         setErrors(prev => ({ ...prev, email: '올바른 이메일 형식이 아닙니다' }));
       } else {
         setErrors(prev => {
-          const { email, ...rest } = prev;
+          const { email: _email, ...rest } = prev;
           return rest;
         });
       }

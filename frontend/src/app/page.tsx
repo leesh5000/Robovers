@@ -79,7 +79,7 @@ const generateMockArticles = (page: number): Article[] => {
     // 타임스탬프와 페이지, 인덱스를 조합하여 완전히 고유한 ID 생성
     const uniqueId = `${Date.now()}-${page}-${index}-${Math.random().toString(36).substr(2, 9)}`;
     const displayId = page * 10 + index + 1000; // 표시용 ID
-    const category = ['news', 'tech-review', 'company-update', 'research'][index % 4] as any;
+    const category = ['news', 'tech-review', 'company-update', 'research'][index % 4] as ArticleCategory;
     const titleIndex = displayId % robotNewsData.titles.length;
     const timeDiff = displayId < 20 ? displayId * 3 : displayId * 12; // 초반엔 시간 간격 짧게, 후반엔 길게
     

@@ -6,10 +6,9 @@ import { Article } from '@/lib/types';
 // Mock Next.js Image component
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: ({ src, alt, fill, ...props }: any) => {
-    // fill prop을 제거하고 나머지 props만 전달
+  default: ({ src, alt, fill: _fill, priority: _priority, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => {
+    // fill과 priority prop을 제거하고 나머지 props만 전달
     const imgProps = { ...props };
-    delete imgProps.fill;
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img src={src} alt={alt} {...imgProps} />

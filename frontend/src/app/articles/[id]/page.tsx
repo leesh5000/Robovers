@@ -16,21 +16,21 @@ export default function ArticlePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const data = await postsApi.getPost(articleId);
+        setPost(data);
+      } catch (error) {
+        toast.error('기사를 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (articleId) {
       fetchPost();
     }
   }, [articleId]);
-
-  const fetchPost = async () => {
-    try {
-      const data = await postsApi.getPost(articleId);
-      setPost(data);
-    } catch (error) {
-      toast.error('기사를 불러오는데 실패했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (

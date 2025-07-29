@@ -160,13 +160,13 @@ export default function AdminCommunityReportsPage() {
           <Dropdown
             options={typeOptions}
             value={selectedType}
-            onChange={(value) => setSelectedType(value as any)}
+            onChange={(value) => setSelectedType(value as 'all' | 'post' | 'comment' | 'user')}
             className="w-32"
           />
           <Dropdown
             options={statusOptions}
             value={selectedStatus}
-            onChange={(value) => setSelectedStatus(value as any)}
+            onChange={(value) => setSelectedStatus(value as 'all' | 'pending' | 'resolved' | 'dismissed')}
             className="w-32"
           />
           <div className="ml-auto text-sm text-gray-600">

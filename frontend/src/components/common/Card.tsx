@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import { clsx } from 'clsx';
+import Image from 'next/image';
 import { CardProps } from '@/lib/interfaces';
 
 const Card = memo(function Card({
@@ -89,9 +90,11 @@ const Card = memo(function Card({
       {/* 이미지 */}
       {image && (
         <div className="relative h-48 w-full overflow-hidden">
-          <img
+          <Image
             src={image}
             alt={imageAlt || title || ''}
+            width={400}
+            height={192}
             className="w-full h-full object-cover"
           />
         </div>

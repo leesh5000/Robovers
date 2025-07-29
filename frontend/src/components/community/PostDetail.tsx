@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { CommunityPost } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -107,9 +108,11 @@ export default function PostDetail({ post, highlightCommentId }: PostDetailProps
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
               {post.author.avatar ? (
-                <img
+                <Image
                   src={post.author.avatar}
                   alt={post.author.username}
+                  width={40}
+                  height={40}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (

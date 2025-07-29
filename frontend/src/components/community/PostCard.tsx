@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { CommunityPost } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { ko } from 'date-fns/locale';
@@ -101,9 +102,11 @@ export default function PostCard({ post }: PostCardProps) {
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
             {post.author.avatar ? (
-              <img
+              <Image
                 src={post.author.avatar}
                 alt={post.author.username}
+                width={32}
+                height={32}
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (

@@ -109,12 +109,6 @@ const ArticleCard = memo(function ArticleCard({ article, onLike, onBookmark, onC
     }
   }, [isClient]);
 
-  const formatCount = (count: number) => {
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}k`;
-    }
-    return count.toString();
-  };
 
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     // 버튼이나 링크 클릭이 아닌 경우에만 onClick 호출

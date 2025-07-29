@@ -123,7 +123,7 @@ export default function AdminCommunityPostsPage() {
           <Dropdown
             options={statusOptions}
             value={selectedStatus}
-            onChange={(value) => setSelectedStatus(value as any)}
+            onChange={(value) => setSelectedStatus(value as 'all' | 'published' | 'pinned')}
             className="w-32"
           />
           {selectedPosts.length > 0 && (

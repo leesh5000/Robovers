@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DataTable from '../DataTable';
 import { DataTableColumn } from '@/lib/interfaces';
@@ -148,7 +148,6 @@ describe('DataTable', () => {
   });
 
   it('should not allow sorting on non-sortable columns', async () => {
-    const user = userEvent.setup();
     render(<DataTable {...defaultProps} />);
     
     const idHeader = screen.getByText('ID');

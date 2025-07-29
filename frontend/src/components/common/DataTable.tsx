@@ -5,13 +5,13 @@ import { DataTableProps } from '@/lib/interfaces';
 import Button from '@/components/ui/Button';
 import Pagination from '@/components/ui/Pagination';
 
-function DataTable<T extends Record<string, any>>({
+function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   currentPage,
   totalPages,
   pageSize,
-  totalItems,
+  totalItems: _totalItems,
   onPageChange,
   isLoading = false,
   error,

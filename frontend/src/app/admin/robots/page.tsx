@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Robot, RobotCategory, RobotStatus } from '@/lib/types';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
@@ -176,9 +177,11 @@ export default function AdminRobotsPage() {
         {filteredRobots.map((robot) => (
           <div key={robot.id} className="bg-white rounded-lg shadow overflow-hidden">
             {robot.imageUrl && (
-              <img
+              <Image
                 src={robot.imageUrl}
                 alt={robot.name}
+                width={400}
+                height={192}
                 className="w-full h-48 object-cover"
               />
             )}

@@ -67,13 +67,13 @@ export default function AdminUsersPage() {
     return matchesRole && matchesStatus && matchesSearch;
   });
 
-  const handleRoleChange = (userId: string, newRole: ExtendedUser['role']) => {
+  const _handleRoleChange = (userId: string, newRole: ExtendedUser['role']) => {
     setUsers(users.map(u => 
       u.id === userId ? { ...u, role: newRole } : u
     ));
   };
 
-  const handleStatusChange = (userId: string, newStatus: ExtendedUser['status']) => {
+  const _handleStatusChange = (userId: string, newStatus: ExtendedUser['status']) => {
     setUsers(users.map(u => 
       u.id === userId ? { ...u, status: newStatus } : u
     ));
@@ -170,13 +170,13 @@ export default function AdminUsersPage() {
           <Dropdown
             options={roleFilterOptions}
             value={selectedRole}
-            onChange={(value) => setSelectedRole(value as any)}
+            onChange={(value) => setSelectedRole(value as 'all' | ExtendedUser['role'])}
             className="w-36"
           />
           <Dropdown
             options={statusFilterOptions}
             value={selectedStatus}
-            onChange={(value) => setSelectedStatus(value as any)}
+            onChange={(value) => setSelectedStatus(value as 'all' | ExtendedUser['status'])}
             className="w-32"
           />
         </div>

@@ -20,20 +20,20 @@ export default function ProfilePage() {
       return;
     }
 
+    const fetchProfile = async () => {
+      try {
+        const profile = await usersApi.getProfile();
+        setUser(profile);
+      } catch (error) {
+        toast.error('프로필을 불러오는데 실패했습니다.');
+        router.push('/');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchProfile();
   }, [isAuthenticated, router]);
-
-  const fetchProfile = async () => {
-    try {
-      const profile = await usersApi.getProfile();
-      setUser(profile);
-    } catch (error) {
-      toast.error('프로필을 불러오는데 실패했습니다.');
-      router.push('/');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleUpdateSuccess = (updatedUser: UserProfile) => {
     setUser(updatedUser);

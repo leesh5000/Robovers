@@ -605,8 +605,15 @@ export function getDummyComments(postId: string): Comment[] {
 }
 
 // 어드민 페이지용 댓글 데이터 생성
+interface AdminComment extends Comment {
+  postId: string;
+  postTitle: string;
+  status: 'visible' | 'hidden' | 'reported';
+  reportCount?: number;
+}
+
 // 캐시된 어드민 댓글 데이터
-let cachedAdminComments: any[] | null = null;
+let cachedAdminComments: AdminComment[] | null = null;
 
 export function getDummyCommentsForAdmin() {
   if (cachedAdminComments) {
@@ -614,13 +621,13 @@ export function getDummyCommentsForAdmin() {
   }
   
   const posts = getDummyPosts();
-  const adminComments: any[] = [];
+  const adminComments: AdminComment[] = [];
   
   // 각 포스트별로 댓글 생성
-  posts.forEach((post, postIndex) => {
+  posts.forEach((post, _postIndex) => {
     const comments = generateDummyComments(post.id);
     
-    comments.forEach((comment, commentIndex) => {
+    comments.forEach((comment, _commentIndex) => {
       // 상태 랜덤 배정
       const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];

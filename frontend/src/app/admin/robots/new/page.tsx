@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { RobotCategory, RobotStatus } from '@/lib/types';
 import Dropdown, { DropdownOption } from '@/components/ui/Dropdown';
 
@@ -148,9 +149,11 @@ export default function NewRobotPage() {
             </label>
             <div className="flex items-start gap-4">
               {formData.imageUrl && (
-                <img
+                <Image
                   src={formData.imageUrl}
                   alt="로봇 이미지"
+                  width={128}
+                  height={128}
                   className="w-32 h-32 object-cover rounded-lg"
                 />
               )}

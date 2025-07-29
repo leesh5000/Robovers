@@ -111,8 +111,9 @@ export const stringUtils = {
 
   isValidUrl: (url: string): boolean => {
     try {
-      new URL(url);
-      return true;
+      const urlObj = new URL(url);
+      // http 또는 https 프로토콜만 허용
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
     } catch {
       return false;
     }
@@ -156,7 +157,7 @@ export const arrayUtils = {
     }, {} as Record<K, T[]>);
   },
 
-  sortBy: <T>(array: T[], keyFn: (item: T) => any, direction: 'asc' | 'desc' = 'asc'): T[] => {
+  sortBy: <T>(array: T[], keyFn: (item: T) => string | number | Date, direction: 'asc' | 'desc' = 'asc'): T[] => {
     return [...array].sort((a, b) => {
       const aVal = keyFn(a);
       const bVal = keyFn(b);
@@ -188,7 +189,7 @@ export const objectUtils = {
     return result;
   },
 
-  isEmpty: (obj: any): boolean => {
+  isEmpty: (obj: unknown): boolean => {
     if (obj == null) return true;
     if (Array.isArray(obj) || typeof obj === 'string') return obj.length === 0;
     if (obj instanceof Map || obj instanceof Set) return obj.size === 0;
@@ -199,14 +200,14 @@ export const objectUtils = {
     return JSON.parse(JSON.stringify(obj));
   },
 
-  isEqual: (a: any, b: any): boolean => {
+  isEqual: (a: unknown, b: unknown): boolean => {
     return JSON.stringify(a) === JSON.stringify(b);
   }
 };
 
 // 디바운스 및 스로틀 유틸리티
 export const performanceUtils = {
-  debounce: <T extends (...args: any[]) => any>(
+  debounce: <T extends (...args: unknown[]) => unknown>(
     func: T,
     wait: number
   ): ((...args: Parameters<T>) => void) => {
@@ -217,7 +218,7 @@ export const performanceUtils = {
     };
   },
 
-  throttle: <T extends (...args: any[]) => any>(
+  throttle: <T extends (...args: unknown[]) => unknown>(
     func: T,
     wait: number
   ): ((...args: Parameters<T>) => void) => {
@@ -276,7 +277,7 @@ export const browserUtils = {
 
 // URL 유틸리티
 export const urlUtils = {
-  buildQueryString: (params: Record<string, any>): string => {
+  buildQueryString: (params: Record<string, string | number | boolean | null | undefined>): string => {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
@@ -295,7 +296,7 @@ export const urlUtils = {
     return result;
   },
 
-  buildUrl: (baseUrl: string, path: string, params?: Record<string, any>): string => {
+  buildUrl: (baseUrl: string, path: string, params?: Record<string, string | number | boolean | null | undefined>): string => {
     const url = new URL(path, baseUrl);
     if (params) {
       const queryString = urlUtils.buildQueryString(params);
@@ -318,7 +319,7 @@ export const storageUtils = {
     }
   },
 
-  set: (key: string, value: any): boolean => {
+  set: (key: string, value: unknown): boolean => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
       return true;

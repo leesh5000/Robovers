@@ -1,4 +1,4 @@
-import apiClient from './client';
+// API client import removed - using dummy data
 
 export type PostCategory = 'NEWS' | 'DISCUSSION' | 'QUESTION' | 'TUTORIAL' | 'REVIEW' | 'ANALYSIS';
 
@@ -145,7 +145,7 @@ const mockComments: Comment[] = [
 
 export const postsApi = {
   // Get single post
-  getPost: async (id: string): Promise<Post> => {
+  getPost: async (_id: string): Promise<Post> => {
     // Mock implementation for now
     // Replace with actual API call: return apiClient.get<Post>(`/posts/${id}`).then(res => res.data);
     return new Promise((resolve) => {
@@ -156,7 +156,7 @@ export const postsApi = {
   },
 
   // Get post comments
-  getComments: async (postId: string): Promise<Comment[]> => {
+  getComments: async (_postId: string): Promise<Comment[]> => {
     // Mock implementation for now
     // Replace with actual API call: return apiClient.get<Comment[]>(`/posts/${postId}/comments`).then(res => res.data);
     return new Promise((resolve) => {
@@ -167,7 +167,7 @@ export const postsApi = {
   },
 
   // Like post
-  likePost: async (postId: string): Promise<void> => {
+  likePost: async (_postId: string): Promise<void> => {
     // Replace with actual API call: return apiClient.post(`/posts/${postId}/like`);
     return new Promise((resolve) => {
       setTimeout(() => {

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { authApi, AuthResponse } from '@/lib/api/auth';
+import { authApi } from '@/lib/api/auth';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import { AppException, ErrorCode } from '@/lib/errors';

@@ -1,6 +1,7 @@
 'use client';
 
 import { Company } from '@/lib/types';
+import Image from 'next/image';
 
 interface CompanyCardProps {
   company: Company;
@@ -41,9 +42,11 @@ export default function CompanyCard({ company, onClick }: CompanyCardProps) {
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           {company.logoUrl ? (
-            <img
+            <Image
               src={company.logoUrl}
               alt={`${company.name} logo`}
+              width={48}
+              height={48}
               className="w-12 h-12 object-contain rounded"
               onError={(e) => {
                 e.currentTarget.src = 'https://via.placeholder.com/48x48?text=' + company.name.charAt(0);

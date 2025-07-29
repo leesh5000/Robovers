@@ -23,9 +23,9 @@ describe('Validation Functions', () => {
     });
 
     it('should handle edge cases', () => {
-      expect(validateEmail(null as any)).toBe(false);
-      expect(validateEmail(undefined as any)).toBe(false);
-      expect(validateEmail(123 as any)).toBe(false);
+      expect(validateEmail(null as unknown as string)).toBe(false);
+      expect(validateEmail(undefined as unknown as string)).toBe(false);
+      expect(validateEmail(123 as unknown as string)).toBe(false);
     });
   });
 
@@ -59,9 +59,9 @@ describe('Validation Functions', () => {
     });
 
     it('should handle edge cases', () => {
-      expect(validatePassword(null as any).isValid).toBe(false);
-      expect(validatePassword(undefined as any).isValid).toBe(false);
-      expect(validatePassword(123456 as any).isValid).toBe(false);
+      expect(validatePassword(null as unknown as string).isValid).toBe(false);
+      expect(validatePassword(undefined as unknown as string).isValid).toBe(false);
+      expect(validatePassword(123456 as unknown as string).isValid).toBe(false);
     });
     
     it('should return appropriate error messages', () => {
@@ -111,9 +111,9 @@ describe('Validation Functions', () => {
     });
 
     it('should handle edge cases', () => {
-      expect(validateUsername(null as any).isValid).toBe(false);
-      expect(validateUsername(undefined as any).isValid).toBe(false);
-      expect(validateUsername(12345 as any).isValid).toBe(false);
+      expect(validateUsername(null as unknown as string).isValid).toBe(false);
+      expect(validateUsername(undefined as unknown as string).isValid).toBe(false);
+      expect(validateUsername(12345 as unknown as string).isValid).toBe(false);
     });
     
     it('should return appropriate error messages', () => {
@@ -124,7 +124,7 @@ describe('Validation Functions', () => {
       expect(tooLong.error).toBe('사용자명은 20자 이하여야 합니다');
       
       const invalidChars = validateUsername('user@123');
-      expect(invalidChars.error).toBe('사용자명은 영문자, 숫자, 언더스코어만 사용 가능합니다');
+      expect(invalidChars.error).toBe('사용자명은 영문자, 숫자, 밑줄(_)만 사용 가능합니다');
     });
   });
 });

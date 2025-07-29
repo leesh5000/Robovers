@@ -36,7 +36,7 @@ export interface PaginationProps {
 }
 
 // 필터링 props
-export interface FilterProps<T = any> {
+export interface FilterProps<T = Record<string, unknown>> {
   filters: T;
   onFilterChange: (filters: T) => void;
   onClearFilters?: () => void;
@@ -137,7 +137,7 @@ export interface DataTableProps<T> extends BaseComponentProps, StateProps, Pagin
   columns: Array<{
     key: keyof T;
     title: string;
-    render?: (value: any, item: T, index: number) => React.ReactNode;
+    render?: (value: T[keyof T], item: T, index: number) => React.ReactNode;
     sortable?: boolean;
     width?: string | number;
     align?: 'left' | 'center' | 'right';

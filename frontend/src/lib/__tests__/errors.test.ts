@@ -93,13 +93,12 @@ describe('createAppError', () => {
   });
 
   it('should handle axios-like error responses', () => {
-    const axiosError = {
-      response: {
-        status: 404,
-        data: {
-          message: 'Resource not found',
-          details: { id: '123' }
-        }
+    const axiosError = new Error('Request failed') as Error & { response?: { status: number; data?: { message?: string; details?: unknown } } };
+    axiosError.response = {
+      status: 404,
+      data: {
+        message: 'Resource not found',
+        details: { id: '123' }
       }
     };
     
@@ -112,10 +111,8 @@ describe('createAppError', () => {
   });
 
   it('should handle network errors', () => {
-    const networkError = {
-      code: 'NETWORK_ERROR',
-      message: 'Network connection failed'
-    };
+    const networkError = new Error('Network connection failed') as Error & { request?: unknown };
+    networkError.request = {};
     
     const appError = createAppError(networkError);
     

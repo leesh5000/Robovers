@@ -26,7 +26,7 @@ export default function RobotFilter({
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleFilterChange = (key: keyof RobotFilterOptions, value: any) => {
+  const handleFilterChange = <K extends keyof RobotFilterOptions>(key: K, value: RobotFilterOptions[K]) => {
     onFiltersChange({
       ...filters,
       [key]: value,

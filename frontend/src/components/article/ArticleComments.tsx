@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Comment } from '@/lib/api/posts';
 import { postsApi } from '@/lib/api/posts';
 import { useAuthStore } from '@/stores/authStore';
@@ -21,19 +22,19 @@ export default function ArticleComments({ postId }: ArticleCommentsProps) {
   const [replyTo, setReplyTo] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const data = await postsApi.getComments(postId);
+        setComments(data);
+      } catch (error) {
+        toast.error('댓글을 불러오는데 실패했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
     fetchComments();
   }, [postId]);
-
-  const fetchComments = async () => {
-    try {
-      const data = await postsApi.getComments(postId);
-      setComments(data);
-    } catch (error) {
-      toast.error('댓글을 불러오는데 실패했습니다.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,9 +89,11 @@ export default function ArticleComments({ postId }: ArticleCommentsProps) {
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
               {comment.author.profileImageUrl ? (
-                <img 
+                <Image 
                   src={comment.author.profileImageUrl} 
                   alt={comment.author.nickname}
+                  width={40}
+                  height={40}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
@@ -193,9 +196,11 @@ export default function ArticleComments({ postId }: ArticleCommentsProps) {
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
               {user?.profileImageUrl ? (
-                <img 
+                <Image 
                   src={user.profileImageUrl} 
                   alt={user.nickname}
+                  width={40}
+                  height={40}
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
