@@ -65,6 +65,10 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: pnpm prisma:generate
           
       - name: Run ESLint
         id: eslint
@@ -125,6 +129,10 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: pnpm prisma:generate
           
       - name: Run TypeScript check
         id: typecheck
@@ -190,6 +198,10 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         run: pnpm install --frozen-lockfile
+        
+      - name: Generate Prisma Client
+        working-directory: backend
+        run: pnpm prisma:generate
         
       - name: Docker environment check
         run: |
