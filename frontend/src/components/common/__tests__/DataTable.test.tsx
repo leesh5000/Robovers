@@ -10,6 +10,7 @@ interface TestItem {
   email: string;
   status: 'active' | 'inactive';
   createdAt: string;
+  [key: string]: unknown;
 }
 
 describe('DataTable', () => {

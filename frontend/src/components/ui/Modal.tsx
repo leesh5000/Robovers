@@ -53,6 +53,7 @@ const Modal = memo(function Modal({
       document.addEventListener('keydown', handleEscapeKey);
       return () => document.removeEventListener('keydown', handleEscapeKey);
     }
+    return;
   }, [isOpen, closeOnEscape, handleEscapeKey]);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ const Modal = memo(function Modal({
         document.body.style.overflow = 'unset';
       };
     }
+    return;
   }, [isOpen]);
 
   if (!isOpen) return null;

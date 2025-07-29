@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import MainFeed from '@/components/feed/MainFeed';
 import Sidebar from '@/components/layout/Sidebar';
-import { Article } from '@/lib/types';
+import { Article, ArticleCategory } from '@/lib/types';
 
 // 현실적인 로봇 관련 데이터 풀
 const robotNewsData = {
@@ -69,8 +69,9 @@ const robotNewsData = {
     news: ['속보', '신제품', '투자', '인수합병', '신기술', '발표'],
     'tech-review': ['리뷰', '성능분석', '비교', '테스트', '벤치마크'],
     'company-update': ['실적발표', '신규사업', '파트너십', '확장', '전략'],
-    research: ['논문', '연구개발', '특허', '학술', '혁신기술']
-  }
+    research: ['논문', '연구개발', '특허', '학술', '혁신기술'],
+    innovation: ['혁신', '미래기술', '신개념', 'AI융합', '특허기술']
+  } as Record<ArticleCategory, string[]>
 };
 
 // 추가 목 데이터 생성 함수

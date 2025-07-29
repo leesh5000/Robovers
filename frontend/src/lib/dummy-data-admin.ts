@@ -1,5 +1,5 @@
 import { getDummyPosts } from './dummy-data';
-import { Comment } from './types';
+import { Comment, User } from './types';
 
 interface AdminComment extends Comment {
   postId: string;
@@ -7,6 +7,50 @@ interface AdminComment extends Comment {
   status: 'visible' | 'hidden' | 'reported';
   reportCount?: number;
 }
+
+// 더미 유저 데이터
+const dummyUsers: User[] = [
+  {
+    id: 'user1',
+    username: '김로봇',
+    email: 'kim@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=kim',
+    isVerified: true,
+    joinedAt: new Date('2023-01-15'),
+  },
+  {
+    id: 'user2',
+    username: '이테크',
+    email: 'lee@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=lee',
+    isVerified: false,
+    joinedAt: new Date('2023-06-20'),
+  },
+  {
+    id: 'user3',
+    username: '박휴먼',
+    email: 'park@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=park',
+    isVerified: true,
+    joinedAt: new Date('2023-09-10'),
+  },
+  {
+    id: 'user4',
+    username: '최AI',
+    email: 'choi@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=choi',
+    isVerified: false,
+    joinedAt: new Date('2023-12-01'),
+  },
+  {
+    id: 'user5',
+    username: '정로보',
+    email: 'jung@example.com',
+    avatar: 'https://i.pravatar.cc/150?u=jung',
+    isVerified: true,
+    joinedAt: new Date('2024-02-14'),
+  },
+];
 
 // 어드민 페이지용 댓글 데이터 생성
 export function getDummyCommentsForAdmin() {
@@ -19,7 +63,7 @@ export function getDummyCommentsForAdmin() {
     
     comments.forEach((comment, _commentIndex) => {
       // 상태 랜덤 배정
-      const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
+      const statuses: ('visible' | 'hidden' | 'reported')[] = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
       
       adminComments.push({
@@ -33,7 +77,7 @@ export function getDummyCommentsForAdmin() {
       // 답글도 추가
       if (comment.replies) {
         comment.replies.forEach(reply => {
-          const replyStatus = statuses[Math.floor(Math.random() * statuses.length)];
+          const replyStatus: ('visible' | 'hidden' | 'reported') = statuses[Math.floor(Math.random() * statuses.length)];
           adminComments.push({
             ...reply,
             postId: post.id,
@@ -77,7 +121,7 @@ export function getDummyCommentsForAdmin() {
     const randomPost = posts[Math.floor(Math.random() * posts.length)];
     const randomUser = dummyUsers[Math.floor(Math.random() * dummyUsers.length)];
     const randomContent = additionalComments[Math.floor(Math.random() * additionalComments.length)];
-    const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
+    const statuses: ('visible' | 'hidden' | 'reported')[] = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
     
     adminComments.push({

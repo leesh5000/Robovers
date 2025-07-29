@@ -18,9 +18,9 @@ export default function Pagination({
   // 표시할 페이지 번호 계산
   const getPageNumbers = () => {
     const delta = 2; // 현재 페이지 좌우로 표시할 페이지 수
-    const range = [];
-    const rangeWithDots = [];
-    let l;
+    const range: number[] = [];
+    const rangeWithDots: (number | string)[] = [];
+    let l: number | undefined;
 
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {

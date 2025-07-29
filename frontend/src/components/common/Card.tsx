@@ -75,8 +75,8 @@ const Card = memo(function Card({
       className={clsx(
         baseStyles,
         variantStyles[variant],
-        roundedStyles[rounded],
-        shadowStyles[shadow],
+        roundedStyles[rounded as keyof typeof roundedStyles],
+        shadowStyles[shadow as keyof typeof shadowStyles],
         interactiveStyles,
         cursorStyles,
         className

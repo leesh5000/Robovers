@@ -223,7 +223,7 @@ export default function RobotFilter({
                 options={getCategoryDropdownOptions()}
                 value={filters.category || ""}
                 onChange={(value) =>
-                  handleFilterChange("category", value || undefined)
+                  handleFilterChange("category", value as RobotCategory | undefined)
                 }
                 placeholder="카테고리 선택"
                 className="w-full"
@@ -239,7 +239,7 @@ export default function RobotFilter({
                 options={getStatusDropdownOptions()}
                 value={filters.status || ""}
                 onChange={(value) =>
-                  handleFilterChange("status", value || undefined)
+                  handleFilterChange("status", value as RobotStatus | undefined)
                 }
                 placeholder="상태 선택"
                 className="w-full"

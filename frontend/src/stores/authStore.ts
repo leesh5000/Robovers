@@ -75,9 +75,9 @@ export const useAuthStore = create<AuthState>()(
           if (error instanceof AppException && error.code === ErrorCode.EMAIL_NOT_VERIFIED) {
             const emailData = error.details;
             if (emailData?.needEmailVerification && emailData?.email) {
-              set({ pendingEmail: emailData.email });
+              set({ pendingEmail: emailData.email as string });
               toast.error('이메일 인증이 필요합니다.');
-              return { needsEmailVerification: true, email: emailData.email };
+              return { needsEmailVerification: true, email: emailData.email as string };
             }
           }
           

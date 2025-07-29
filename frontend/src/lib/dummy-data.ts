@@ -629,7 +629,7 @@ export function getDummyCommentsForAdmin() {
     
     comments.forEach((comment, _commentIndex) => {
       // 상태 랜덤 배정
-      const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
+      const statuses: ('visible' | 'hidden' | 'reported')[] = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
       
       adminComments.push({
@@ -688,7 +688,7 @@ export function getDummyCommentsForAdmin() {
     const users = getDummyUsers();
     const randomUser = users[Math.floor(Math.random() * users.length)];
     const randomContent = additionalComments[Math.floor(Math.random() * additionalComments.length)];
-    const statuses = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
+    const statuses: ('visible' | 'hidden' | 'reported')[] = ['visible', 'visible', 'visible', 'visible', 'hidden', 'reported'];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
     
     adminComments.push({

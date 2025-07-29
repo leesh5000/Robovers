@@ -76,7 +76,11 @@ describe('Auth E2E Tests', () => {
 
       // 토큰이 유효한지 검증
       const verificationResult =
-        await emailVerificationTokenService.verifyToken(storedToken!);
+        await emailVerificationTokenService.verifyCode(
+          testUser.email,
+          storedToken!,
+          storedToken!,
+        );
       expect(verificationResult).toEqual({
         isValid: true,
         email: testUser.email,
@@ -135,9 +139,7 @@ describe('Auth E2E Tests', () => {
         },
       });
 
-      const token = await emailVerificationTokenService.generateToken(
-        user.email,
-      );
+      const token = await emailVerificationTokenService.generateVerificationCode();
       await redis.set(`email_verification:${user.email}`, token, 'EX', 3600);
 
       // When

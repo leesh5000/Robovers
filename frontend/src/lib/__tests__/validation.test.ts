@@ -73,7 +73,7 @@ describe('validateField', () => {
   describe('custom validation', () => {
     it('should use custom validation function', () => {
       const rule: ValidationRule = {
-        custom: (value: string) => {
+        custom: (value: unknown) => {
           if (value === 'forbidden') {
             return '금지된 값입니다.';
           }

@@ -131,17 +131,20 @@ export interface ThemeProps {
   shadow?: boolean | 'sm' | 'md' | 'lg' | 'xl';
 }
 
+// 데이터 테이블 컬럼 타입
+export interface DataTableColumn<T> {
+  key: keyof T;
+  title: string;
+  render?: (value: T[keyof T], item: T, index: number) => React.ReactNode;
+  sortable?: boolean;
+  width?: string | number;
+  align?: 'left' | 'center' | 'right';
+}
+
 // 데이터 테이블 props
 export interface DataTableProps<T> extends BaseComponentProps, StateProps, PaginationProps {
   data: T[];
-  columns: Array<{
-    key: keyof T;
-    title: string;
-    render?: (value: T[keyof T], item: T, index: number) => React.ReactNode;
-    sortable?: boolean;
-    width?: string | number;
-    align?: 'left' | 'center' | 'right';
-  }>;
+  columns: DataTableColumn<T>[];
   selectable?: boolean;
   selectedItems?: T[];
   onSelectionChange?: (selectedItems: T[]) => void;

@@ -34,6 +34,7 @@ export default function VerifyEmailPage() {
     } else {
       setResendDisabled(false);
     }
+    return;
   }, [resendTimer]);
 
   const onSubmit = async (data: VerifyFormData) => {

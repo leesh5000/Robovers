@@ -1,3 +1,10 @@
+export type ArticleCategory = 
+  | 'news'
+  | 'tech-review'
+  | 'company-update'
+  | 'research'
+  | 'innovation';
+
 export interface Article {
   id: string;
   title: string;
@@ -14,6 +21,13 @@ export interface Article {
   commentCount: number;
   isBookmarked?: boolean;
 }
+
+export type CommunityCategory = 
+  | 'general'
+  | 'technical'
+  | 'showcase'
+  | 'question'
+  | 'discussion';
 
 export interface CommunityPost {
   id: string;
@@ -103,19 +117,6 @@ export interface CompanyFilterOptions {
   sortBy: CompanySortOption;
 }
 
-export type ArticleCategory = 
-  | 'news'
-  | 'tech-review'
-  | 'company-update'
-  | 'research'
-  | 'innovation';
-
-export type CommunityCategory =
-  | 'general'
-  | 'technical'
-  | 'showcase'
-  | 'question'
-  | 'discussion';
 
 export type SortOption = 'latest' | 'popular' | 'trending' | 'commented';
 
