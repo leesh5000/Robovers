@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { TestContainersHelper } from './test-containers';
 import { execSync } from 'child_process';
+import Redis from 'ioredis';
 
 export class IntegrationTestHelper {
   private app: INestApplication;
@@ -11,22 +12,33 @@ export class IntegrationTestHelper {
 
   async setupTestModule(imports: any[]): Promise<void> {
     // TestContainers 시작
-    const containers = await TestContainersHelper.startAll();
-    
+    await TestContainersHelper.startAll();
+
     // 환경 변수 설정
     process.env.DATABASE_URL = TestContainersHelper.getPostgresConnectionUrl();
     const redisOptions = TestContainersHelper.getRedisConnectionOptions();
     process.env.REDIS_HOST = redisOptions.host;
     process.env.REDIS_PORT = redisOptions.port.toString();
+    
+    const mailhogOptions = TestContainersHelper.getMailhogConnectionOptions();
+    process.env.MAILHOG_HOST = mailhogOptions.smtpHost;
+    process.env.MAILHOG_PORT = mailhogOptions.smtpPort.toString();
+    
     process.env.JWT_SECRET = 'test-secret';
     process.env.JWT_EXPIRES_IN = '7d';
     process.env.NODE_ENV = 'test';
 
-    // Prisma 마이그레이션 실행
-    console.log('Running Prisma migrations...');
-    execSync('npx prisma migrate deploy', {
+    // Redis 연결 대기
+    console.log(
+      `Waiting for Redis to be ready at ${redisOptions.host}:${redisOptions.port}...`,
+    );
+    await this.waitForRedis(redisOptions.host, redisOptions.port);
+
+    // Prisma 스키마 푸시 (테스트용)
+    console.log('Pushing Prisma schema to test database...');
+    execSync('npx prisma db push --force-reset', {
       env: { ...process.env },
-      stdio: 'inherit'
+      stdio: 'inherit',
     });
 
     // NestJS 테스트 모듈 생성
@@ -65,16 +77,21 @@ export class IntegrationTestHelper {
 
   async clearDatabase(): Promise<void> {
     const prisma = this.app.get(PrismaService);
-    
-    // 트랜잭션으로 모든 데이터 삭제
-    await prisma.$transaction([
-      prisma.comment.deleteMany(),
-      prisma.post.deleteMany(),
-      prisma.stockPrice.deleteMany(),
-      prisma.robot.deleteMany(),
-      prisma.company.deleteMany(),
-      prisma.user.deleteMany(),
-    ]);
+
+    try {
+      // 외래키 순서에 맞춰 삭제 (자식 -> 부모 순서)
+      await prisma.like.deleteMany();
+      await prisma.comment.deleteMany();
+      await prisma.post.deleteMany();
+      await prisma.refreshToken.deleteMany();
+      await prisma.stockPrice.deleteMany();
+      await prisma.robot.deleteMany();
+      await prisma.company.deleteMany();
+      await prisma.user.deleteMany();
+    } catch (error) {
+      console.warn('Database clear warning:', error.message);
+      // 테이블이 존재하지 않는 경우 무시
+    }
   }
 
   async createTestUser(data: {
@@ -84,7 +101,7 @@ export class IntegrationTestHelper {
     emailVerified?: boolean;
   }) {
     const prisma = this.app.get(PrismaService);
-    
+
     return await prisma.user.create({
       data: {
         ...data,
@@ -95,5 +112,32 @@ export class IntegrationTestHelper {
 
   getRedisClient() {
     return this.app.get('REDIS_CLIENT');
+  }
+
+  private async waitForRedis(
+    host: string,
+    port: number,
+    maxRetries = 60,
+  ): Promise<void> {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const redis = new Redis({
+          host,
+          port,
+          lazyConnect: true,
+          retryStrategy: () => null, // 재시도 비활성화
+        });
+
+        await redis.connect();
+        await redis.ping();
+        await redis.disconnect();
+        console.log('Redis is ready!');
+        return;
+      } catch (error) {
+        console.log(`Redis not ready yet, attempt ${i + 1}/${maxRetries}...`);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+    throw new Error('Redis failed to start within timeout');
   }
 }

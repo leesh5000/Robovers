@@ -97,7 +97,7 @@ describe('EmailVerificationTokenService', () => {
 
     it('should use timingSafeEqual for constant-time comparison', async () => {
       // Given
-      const crypto = require('crypto');
+      const crypto = await import('crypto');
       const timingSafeEqualSpy = jest.spyOn(crypto, 'timingSafeEqual');
       const email = 'test@example.com';
       const correctCode = '123456';
@@ -109,7 +109,7 @@ describe('EmailVerificationTokenService', () => {
       // Then
       expect(timingSafeEqualSpy).toHaveBeenCalledWith(
         Buffer.from(wrongCode),
-        Buffer.from(correctCode)
+        Buffer.from(correctCode),
       );
 
       // Cleanup

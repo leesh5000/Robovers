@@ -111,20 +111,20 @@ export class RegisterUserCommand {
     const verificationCode =
       await this.emailVerificationTokenService.generateVerificationCode();
 
-    // Redis에 코드 저장 (1시간 유효)
-    await this.tokenStorageService.saveEmailVerificationToken(
-      email,
-      verificationCode,
-      3600,
-    );
-
-    // 이메일 발송
+    // 이메일 발송 시도
     const sent = await this.emailService.sendVerificationEmail(
       email,
       verificationCode,
     );
 
-    if (!sent) {
+    if (sent) {
+      // 이메일 발송 성공 시에만 Redis에 코드 저장 (1시간 유효)
+      await this.tokenStorageService.saveEmailVerificationToken(
+        email,
+        verificationCode,
+        3600,
+      );
+    } else {
       console.error(`Failed to send verification email to ${email}`);
       // Rate limit 초기화 (실패한 경우)
       await this.emailRateLimiterService.resetRateLimit(email, 'verification');

@@ -75,12 +75,11 @@ describe.skip('Auth E2E Tests (Skipped - Redis and DB required)', () => {
       expect(storedToken).toBeTruthy();
 
       // 토큰이 유효한지 검증
-      const verificationResult =
-        await emailVerificationTokenService.verifyCode(
-          testUser.email,
-          storedToken!,
-          storedToken!,
-        );
+      const verificationResult = await emailVerificationTokenService.verifyCode(
+        testUser.email,
+        storedToken!,
+        storedToken!,
+      );
       expect(verificationResult).toEqual({
         isValid: true,
         email: testUser.email,
@@ -139,7 +138,8 @@ describe.skip('Auth E2E Tests (Skipped - Redis and DB required)', () => {
         },
       });
 
-      const token = await emailVerificationTokenService.generateVerificationCode();
+      const token =
+        await emailVerificationTokenService.generateVerificationCode();
       await redis.set(`email_verification:${user.email}`, token, 'EX', 3600);
 
       // When

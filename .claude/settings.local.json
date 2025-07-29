@@ -61,7 +61,8 @@
       "Bash(pnpm --filter @robovers/backend test)",
       "Bash(cmd.exe /c \"pnpm --filter @robovers/backend test\")",
       "Bash(dir)",
-      "Bash(docker:*)"
+      "Bash(docker:*)",
+      "Bash(pnpm typecheck:*)"
     ],
     "deny": []
   }

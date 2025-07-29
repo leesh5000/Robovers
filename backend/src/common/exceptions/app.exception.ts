@@ -59,14 +59,14 @@ export class EmailNotVerifiedException extends AppException {
   ) {
     super(
       {
-        statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        statusCode: HttpStatus.UNAUTHORIZED,
         message,
         errorCode: 'EMAIL_NOT_VERIFIED',
         email,
         needEmailVerification: true,
         timestamp: new Date().toISOString(),
       },
-      HttpStatus.UNPROCESSABLE_ENTITY,
+      HttpStatus.UNAUTHORIZED,
     );
   }
 }

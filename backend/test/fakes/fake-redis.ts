@@ -3,7 +3,7 @@ export class FakeRedis {
   private ttlStore = new Map<string, number>();
   private shouldFailConnection: boolean;
   private connected = false;
-  private eventHandlers = new Map<string, Function[]>();
+  private eventHandlers = new Map<string, Array<(...args: any[]) => void>>();
 
   constructor(options?: { shouldFailConnection?: boolean }) {
     this.shouldFailConnection = options?.shouldFailConnection || false;
@@ -26,7 +26,12 @@ export class FakeRedis {
     return this.store.get(key) || null;
   }
 
-  async set(key: string, value: string, mode?: string, ttl?: number): Promise<'OK'> {
+  async set(
+    key: string,
+    value: string,
+    mode?: string,
+    ttl?: number,
+  ): Promise<'OK'> {
     this.store.set(key, value);
     if (mode === 'EX' && ttl) {
       this.ttlStore.set(key, Date.now() + ttl * 1000);
@@ -41,7 +46,7 @@ export class FakeRedis {
     return existed ? 1 : 0;
   }
 
-  on(event: string, handler: Function): void {
+  on(event: string, handler: (...args: any[]) => void): void {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, []);
     }

@@ -59,8 +59,7 @@ export class AuthController {
     description: '로그인 성공',
     type: LoginResponseDto,
   })
-  @ApiResponse({ status: 401, description: '인증 실패' })
-  @ApiResponse({ status: 422, description: '이메일 인증 필요' })
+  @ApiResponse({ status: 401, description: '인증 실패 또는 이메일 인증 필요' })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) response: Response,

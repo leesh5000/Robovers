@@ -1,85 +1,99 @@
-// TestContainers imports - uncomment when packages are properly installed
-// import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-// import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
-
-// Mock types for when TestContainers is not available
-interface StartedPostgreSqlContainer {
-  getMappedPort(port: number): number;
-  getHost(): string;
-  getDatabase(): string;
-  getUsername(): string;
-  getPassword(): string;
-  stop(): Promise<void>;
-}
-
-interface StartedRedisContainer {
-  getMappedPort(port: number): number;
-  getHost(): string;
-  stop(): Promise<void>;
-}
+import {
+  PostgreSqlContainer,
+  StartedPostgreSqlContainer,
+} from '@testcontainers/postgresql';
+import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
+import {
+  GenericContainer,
+  StartedTestContainer,
+} from 'testcontainers';
 
 export class TestContainersHelper {
   private static postgresContainer: StartedPostgreSqlContainer;
   private static redisContainer: StartedRedisContainer;
+  private static mailhogContainer: StartedTestContainer;
 
   static async startPostgres(): Promise<StartedPostgreSqlContainer> {
-    console.log('Mock: Starting PostgreSQL container...');
-    
-    // Mock implementation - replace with real TestContainers when installed
-    this.postgresContainer = {
-      getMappedPort: () => 5432,
-      getHost: () => 'localhost',
-      getDatabase: () => 'robovers_test',
-      getUsername: () => 'test_user',
-      getPassword: () => 'test_password',
-      stop: async () => console.log('Mock: PostgreSQL container stopped')
-    };
+    console.log('Starting PostgreSQL container...');
 
-    console.log('Mock: PostgreSQL container started on port:', this.postgresContainer.getMappedPort(5432));
-    
+    this.postgresContainer = await new PostgreSqlContainer('postgres:15-alpine')
+      .withDatabase('robovers_test')
+      .withUsername('test_user')
+      .withPassword('test_password')
+      .withExposedPorts(5432)
+      .start();
+
+    console.log(
+      'PostgreSQL container started on port:',
+      this.postgresContainer.getMappedPort(5432),
+    );
+
     return this.postgresContainer;
   }
 
   static async startRedis(): Promise<StartedRedisContainer> {
-    console.log('Mock: Starting Redis container...');
-    
-    // Mock implementation - replace with real TestContainers when installed
-    this.redisContainer = {
-      getMappedPort: () => 6379,
-      getHost: () => 'localhost',
-      stop: async () => console.log('Mock: Redis container stopped')
-    };
+    console.log('Starting Redis container...');
 
-    console.log('Mock: Redis container started on port:', this.redisContainer.getMappedPort(6379));
-    
+    this.redisContainer = await new RedisContainer('redis:7-alpine')
+      .withExposedPorts(6379)
+      .start();
+
+    console.log(
+      'Redis container started on port:',
+      this.redisContainer.getMappedPort(6379),
+    );
+
     return this.redisContainer;
+  }
+
+  static async startMailhog(): Promise<StartedTestContainer> {
+    console.log('Starting MailHog container...');
+
+    this.mailhogContainer = await new GenericContainer('mailhog/mailhog:latest')
+      .withExposedPorts(1025, 8025)
+      .start();
+
+    console.log(
+      'MailHog container started on SMTP port:',
+      this.mailhogContainer.getMappedPort(1025),
+      'HTTP port:',
+      this.mailhogContainer.getMappedPort(8025),
+    );
+
+    return this.mailhogContainer;
   }
 
   static async startAll(): Promise<{
     postgres: StartedPostgreSqlContainer;
     redis: StartedRedisContainer;
+    mailhog: StartedTestContainer;
   }> {
-    const [postgres, redis] = await Promise.all([
+    const [postgres, redis, mailhog] = await Promise.all([
       this.startPostgres(),
       this.startRedis(),
+      this.startMailhog(),
     ]);
 
-    return { postgres, redis };
+    return { postgres, redis, mailhog };
   }
 
   static async stopAll(): Promise<void> {
     console.log('Stopping containers...');
-    
-    const promises: Promise<void>[] = [];
-    
+
+    const promises: Promise<any>[] = [];
+
     if (this.postgresContainer) {
       promises.push(this.postgresContainer.stop());
     }
-    
+
     if (this.redisContainer) {
       promises.push(this.redisContainer.stop());
     }
-    
+
+    if (this.mailhogContainer) {
+      promises.push(this.mailhogContainer.stop());
+    }
+
     await Promise.all(promises);
     console.log('All containers stopped');
   }
@@ -106,6 +120,19 @@ export class TestContainersHelper {
     return {
       host: this.redisContainer.getHost(),
       port: this.redisContainer.getMappedPort(6379),
+    };
+  }
+
+  static getMailhogConnectionOptions() {
+    if (!this.mailhogContainer) {
+      throw new Error('MailHog container is not started');
+    }
+
+    return {
+      smtpHost: this.mailhogContainer.getHost(),
+      smtpPort: this.mailhogContainer.getMappedPort(1025),
+      httpHost: this.mailhogContainer.getHost(),
+      httpPort: this.mailhogContainer.getMappedPort(8025),
     };
   }
 }
