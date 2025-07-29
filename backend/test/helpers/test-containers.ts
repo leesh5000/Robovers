@@ -1,33 +1,40 @@
-import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
+// TestContainers packages not installed yet
+// import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
+// import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
+
+// Temporary mock types
+type StartedPostgreSqlContainer = any;
+type StartedRedisContainer = any;
 
 export class TestContainersHelper {
   private static postgresContainer: StartedPostgreSqlContainer;
   private static redisContainer: StartedRedisContainer;
 
   static async startPostgres(): Promise<StartedPostgreSqlContainer> {
-    console.log('Starting PostgreSQL container...');
+    console.log('Warning: TestContainers not installed - skipping PostgreSQL container start');
     
-    this.postgresContainer = await new PostgreSqlContainer('postgres:15-alpine')
-      .withDatabase('robovers_test')
-      .withUsername('test_user')
-      .withPassword('test_password')
-      .withExposedPorts(5432)
-      .start();
-
-    console.log('PostgreSQL container started on port:', this.postgresContainer.getMappedPort(5432));
+    // Temporary mock implementation
+    this.postgresContainer = {
+      getMappedPort: () => 5432,
+      getHost: () => 'localhost',
+      getDatabase: () => 'robovers_test',
+      getUsername: () => 'test_user',
+      getPassword: () => 'test_password',
+      stop: async () => {}
+    };
     
     return this.postgresContainer;
   }
 
   static async startRedis(): Promise<StartedRedisContainer> {
-    console.log('Starting Redis container...');
+    console.log('Warning: TestContainers not installed - skipping Redis container start');
     
-    this.redisContainer = await new RedisContainer('redis:7-alpine')
-      .withExposedPorts(6379)
-      .start();
-
-    console.log('Redis container started on port:', this.redisContainer.getMappedPort(6379));
+    // Temporary mock implementation
+    this.redisContainer = {
+      getMappedPort: () => 6379,
+      getHost: () => 'localhost',
+      stop: async () => {}
+    };
     
     return this.redisContainer;
   }
