@@ -5,7 +5,7 @@ import { AppModule } from '@/app.module';
 import { EmailVerificationTokenService } from '@/modules/auth/domain/services/email-verification-token.service';
 import { Redis } from 'ioredis';
 
-describe.skip('Auth Flow Integration Tests (Skipped - TestContainers not installed)', () => {
+describe.skip('Auth Flow Integration Tests (Skipped - TestContainers dependency issues)', () => {
   let testHelper: IntegrationTestHelper;
   let app: INestApplication;
   let emailVerificationService: EmailVerificationTokenService;

@@ -7,7 +7,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { UserEntity } from '@/modules/user/domain/entities/user.entity';
 import { USER_REPOSITORY_TOKEN } from '@/modules/user/infrastructure/di-tokens';
 
-describe.skip('User Management Integration Tests (Skipped - TestContainers not installed)', () => {
+describe.skip('User Management Integration Tests (Skipped - TestContainers dependency issues)', () => {
   let testHelper: IntegrationTestHelper;
   let app: INestApplication;
   let userRepository: PrismaUserRepository;

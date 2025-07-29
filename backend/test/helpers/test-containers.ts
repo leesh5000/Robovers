@@ -1,40 +1,56 @@
-// TestContainers packages not installed yet
+// TestContainers imports - uncomment when packages are properly installed
 // import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 // import { RedisContainer, StartedRedisContainer } from '@testcontainers/redis';
 
-// Temporary mock types
-type StartedPostgreSqlContainer = any;
-type StartedRedisContainer = any;
+// Mock types for when TestContainers is not available
+interface StartedPostgreSqlContainer {
+  getMappedPort(port: number): number;
+  getHost(): string;
+  getDatabase(): string;
+  getUsername(): string;
+  getPassword(): string;
+  stop(): Promise<void>;
+}
+
+interface StartedRedisContainer {
+  getMappedPort(port: number): number;
+  getHost(): string;
+  stop(): Promise<void>;
+}
 
 export class TestContainersHelper {
   private static postgresContainer: StartedPostgreSqlContainer;
   private static redisContainer: StartedRedisContainer;
 
   static async startPostgres(): Promise<StartedPostgreSqlContainer> {
-    console.log('Warning: TestContainers not installed - skipping PostgreSQL container start');
+    console.log('Mock: Starting PostgreSQL container...');
     
-    // Temporary mock implementation
+    // Mock implementation - replace with real TestContainers when installed
     this.postgresContainer = {
       getMappedPort: () => 5432,
       getHost: () => 'localhost',
       getDatabase: () => 'robovers_test',
       getUsername: () => 'test_user',
       getPassword: () => 'test_password',
-      stop: async () => {}
+      stop: async () => console.log('Mock: PostgreSQL container stopped')
     };
+
+    console.log('Mock: PostgreSQL container started on port:', this.postgresContainer.getMappedPort(5432));
     
     return this.postgresContainer;
   }
 
   static async startRedis(): Promise<StartedRedisContainer> {
-    console.log('Warning: TestContainers not installed - skipping Redis container start');
+    console.log('Mock: Starting Redis container...');
     
-    // Temporary mock implementation
+    // Mock implementation - replace with real TestContainers when installed
     this.redisContainer = {
       getMappedPort: () => 6379,
       getHost: () => 'localhost',
-      stop: async () => {}
+      stop: async () => console.log('Mock: Redis container stopped')
     };
+
+    console.log('Mock: Redis container started on port:', this.redisContainer.getMappedPort(6379));
     
     return this.redisContainer;
   }
