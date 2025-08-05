@@ -6,13 +6,22 @@
     "frontend"
   ],
   "scripts": {
-    "dev": "pnpm --filter @robovers/frontend dev",
-    "build": "pnpm --filter @robovers/frontend build",
-    "start": "pnpm --filter @robovers/frontend start",
+    "dev": "pnpm -r --parallel dev",
+    "dev:frontend": "pnpm --filter @robovers/frontend dev",
+    "dev:backend": "pnpm --filter @robovers/backend start:dev",
+    "build": "pnpm -r build",
+    "build:frontend": "pnpm --filter @robovers/frontend build",
+    "build:backend": "pnpm --filter @robovers/backend build",
+    "start": "pnpm -r start",
+    "start:frontend": "pnpm --filter @robovers/frontend start",
+    "start:backend": "pnpm --filter @robovers/backend start:prod",
     "lint": "pnpm -r lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "test": "pnpm -r test",
-    "test:coverage": "pnpm -r test:coverage"
+    "test:coverage": "pnpm -r test:coverage",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
   },
   "devDependencies": {
     "prettier": "^3.2.4"

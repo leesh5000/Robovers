@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: robovers-postgres
+    environment:
+      POSTGRES_USER: robovers
+      POSTGRES_PASSWORD: robovers123
+      POSTGRES_DB: robovers_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - robovers-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U robovers"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: robovers-postgres-test
+    environment:
+      POSTGRES_USER: robovers_test
+      POSTGRES_PASSWORD: robovers_test123
+      POSTGRES_DB: robovers_test_db
+    ports:
+      - "5433:5432"
+    networks:
+      - robovers-network
+    tmpfs:
+      - /var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+networks:
+  robovers-network:
+    driver: bridge
