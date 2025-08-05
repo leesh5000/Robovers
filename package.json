@@ -3,27 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "frontend",
-    "backend"
+    "frontend"
   ],
   "scripts": {
-    "dev": "concurrently \"pnpm dev:backend\" \"pnpm dev:frontend\"",
-    "dev:backend": "pnpm --filter @robovers/backend start:dev",
-    "dev:frontend": "pnpm --filter @robovers/frontend dev",
-    "build": "pnpm build:backend && pnpm build:frontend",
-    "build:backend": "pnpm --filter @robovers/backend build",
-    "build:frontend": "pnpm --filter @robovers/frontend build",
+    "dev": "pnpm --filter @robovers/frontend dev",
+    "build": "pnpm --filter @robovers/frontend build",
     "start": "pnpm --filter @robovers/frontend start",
     "lint": "pnpm -r lint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "test": "pnpm -r test",
-    "test:coverage": "pnpm -r test:coverage",
-    "prisma:generate": "pnpm --filter @robovers/backend prisma:generate",
-    "prisma:migrate:dev": "pnpm --filter @robovers/backend prisma:migrate:dev",
-    "prisma:studio": "pnpm --filter @robovers/backend prisma:studio"
+    "test:coverage": "pnpm -r test:coverage"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
     "prettier": "^3.2.4"
   }
 }
