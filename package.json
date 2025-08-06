@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "frontend"
+    "frontend",
+    "backend"
   ],
   "scripts": {
     "dev": "pnpm -r --parallel dev",
@@ -24,6 +25,6 @@
     "docker:logs": "docker-compose logs -f"
   },
   "devDependencies": {
-    "prettier": "^3.2.4"
+    "prettier": "^3.4.2"
   }
 }
